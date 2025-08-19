@@ -5,22 +5,48 @@ const { upload, uploadFilesToGridFS } = require("../upload");
 const { getBucket } = require("../gridfs");
 const { ObjectId } = require("mongodb");
 
-// Upload route
+// --- Upload route ---
 router.post("/upload", upload.array("files"), uploadFilesToGridFS);
 
-// List all files
+// --- List only import files (not in repository yet) ---
 router.get("/", async (req, res) => {
   try {
     const bucket = getBucket();
-    const files = await bucket.find().toArray();
+    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
+
+    // Fetch files where repository is NOT true
+    const files = await filesCollection.find({
+      $or: [
+        { "metadata.repository": { $exists: false } },
+        { "metadata.repository": false }
+      ]
+    }).toArray();
+
     res.json({ files });
   } catch (err) {
-    console.error("❌ Error fetching files:", err);
-    res.status(500).send("Error fetching files");
+    console.error("❌ Error fetching import files:", err);
+    res.status(500).send("Error fetching import files");
   }
 });
 
-// Stream file for viewing
+// --- List only repository files ---
+router.get("/repository", async (req, res) => {
+  try {
+    const bucket = getBucket();
+    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
+
+    const files = await filesCollection.find({
+      "metadata.repository": true
+    }).toArray();
+
+    res.json({ files });
+  } catch (err) {
+    console.error("❌ Error fetching repository files:", err);
+    res.status(500).send("Error fetching repository files");
+  }
+});
+
+// --- Stream file for viewing ---
 router.get("/view/:id", async (req, res) => {
   try {
     const fileId = req.params.id;
@@ -71,7 +97,10 @@ router.post("/send-to-repository", async (req, res) => {
       fileIds.map(async (id) => {
         if (!ObjectId.isValid(id)) return;
         const _id = new ObjectId(id);
-        await filesCollection.updateOne({ _id }, { $set: { "metadata.repository": true } });
+        await filesCollection.updateOne(
+          { _id },
+          { $set: { "metadata.repository": true } }
+        );
       })
     );
 
