@@ -5,48 +5,40 @@ const { upload, uploadFilesToGridFS } = require("../upload");
 const { getBucket } = require("../gridfs");
 const { ObjectId } = require("mongodb");
 
-// --- Upload route ---
+// Upload route
 router.post("/upload", upload.array("files"), uploadFilesToGridFS);
 
-// --- List only import files (not in repository yet) ---
+// List all import files (not in repository)
 router.get("/", async (req, res) => {
   try {
     const bucket = getBucket();
-    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
-
-    // Fetch files where repository is NOT true
-    const files = await filesCollection.find({
-      $or: [
-        { "metadata.repository": { $exists: false } },
-        { "metadata.repository": false }
-      ]
-    }).toArray();
-
+    const files = await bucket
+      .find({ "metadata.repository": { $ne: true } })
+      .sort({ uploadDate: -1 })
+      .toArray();
     res.json({ files });
   } catch (err) {
     console.error("❌ Error fetching import files:", err);
-    res.status(500).send("Error fetching import files");
+    res.status(500).send("Error fetching files");
   }
 });
 
-// --- List only repository files ---
+// List all repository files
 router.get("/repository", async (req, res) => {
   try {
     const bucket = getBucket();
-    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
-
-    const files = await filesCollection.find({
-      "metadata.repository": true
-    }).toArray();
-
+    const files = await bucket
+      .find({ "metadata.repository": true })
+      .sort({ uploadDate: -1 })
+      .toArray();
     res.json({ files });
   } catch (err) {
     console.error("❌ Error fetching repository files:", err);
-    res.status(500).send("Error fetching repository files");
+    res.status(500).send("Error fetching files");
   }
 });
 
-// --- Stream file for viewing ---
+// Stream file for viewing
 router.get("/view/:id", async (req, res) => {
   try {
     const fileId = req.params.id;
@@ -82,7 +74,7 @@ router.get("/view/:id", async (req, res) => {
   }
 });
 
-// --- Send selected files to repository ---
+// Send selected files to repository
 router.post("/send-to-repository", async (req, res) => {
   try {
     const { fileIds } = req.body;
@@ -97,10 +89,7 @@ router.post("/send-to-repository", async (req, res) => {
       fileIds.map(async (id) => {
         if (!ObjectId.isValid(id)) return;
         const _id = new ObjectId(id);
-        await filesCollection.updateOne(
-          { _id },
-          { $set: { "metadata.repository": true } }
-        );
+        await filesCollection.updateOne({ _id }, { $set: { "metadata.repository": true } });
       })
     );
 

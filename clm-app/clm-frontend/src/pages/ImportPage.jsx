@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import DashboardHeader from "../components/DashboardHeader";
 import "./ImportPage.css";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
@@ -13,7 +13,7 @@ export default function ImportPage() {
   const [files, setFiles] = useState([]);
   const { t } = useTranslation();
 
-  // Helper: normalize a GridFS/Mongo file doc into safe strings
+  // Normalize GridFS files
   const normalizeFiles = (raw = []) =>
     raw.map((f, idx) => {
       let id = "";
@@ -35,28 +35,24 @@ export default function ImportPage() {
       };
     });
 
-  // Fetch banner image
+  // Fetch import files from backend
+  const fetchFiles = useCallback(async () => {
+    try {
+      const res = await fetch(`http://localhost:4000/api/documents?_=${Date.now()}`);
+      const data = await res.json();
+      const normalized = normalizeFiles(data?.files || []);
+      setFiles(normalized);
+      setRows(Array.from({ length: normalized.length }, () => false));
+      setAllChecked(false);
+    } catch (err) {
+      console.error("Error fetching files:", err);
+    }
+  }, []);
+
   useEffect(() => {
     setBannerImage("/images/banner-placeholder.jpg");
-  }, []);
-
-  // Fetch uploaded files from backend and normalize them
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const res = await fetch("http://localhost:4000/api/documents");
-        const data = await res.json();
-
-        const normalized = normalizeFiles(data?.files || []);
-        setFiles(normalized);
-        setRows(Array.from({ length: normalized.length }, () => false));
-        setAllChecked(false);
-      } catch (err) {
-        console.error("Error fetching files:", err);
-      }
-    };
     fetchFiles();
-  }, []);
+  }, [fetchFiles]);
 
   // Toggle all checkboxes
   const toggleAll = () => {
@@ -65,7 +61,7 @@ export default function ImportPage() {
     setRows((prev) => prev.map(() => newValue));
   };
 
-  // Toggle single row checkbox
+  // Toggle single row
   const toggleRow = (index) => {
     setRows((prev) => {
       const next = [...prev];
@@ -75,7 +71,7 @@ export default function ImportPage() {
     });
   };
 
-  // ✅ Send selected files to repository
+  // Send selected files to repository
   const sendToRepository = async () => {
     const selectedIds = files.filter((_, idx) => rows[idx]).map(f => f.id);
     if (selectedIds.length === 0) return alert("Please select at least one file");
@@ -89,13 +85,10 @@ export default function ImportPage() {
 
       if (!res.ok) throw new Error("Failed to send files");
 
-      // Remove sent files from import page list
-      const remainingFiles = files.filter((_, idx) => !rows[idx]);
-      setFiles(remainingFiles);
-      setRows(Array.from({ length: remainingFiles.length }, () => false));
-      setAllChecked(false);
-
       alert("Selected files sent to repository successfully!");
+
+      // Refetch files after sending to repository
+      await fetchFiles();
     } catch (err) {
       console.error("Send to repository error:", err);
       alert("Error sending files to repository");
@@ -138,10 +131,7 @@ export default function ImportPage() {
               <button className="banner-send-btn" onClick={sendToRepository}>
                 {t("importpage.send to repository")}
               </button>
-              <button className="banner-delete-btn">
-                {/* You can implement delete functionality later */}
-                {t("importpage.delete")}
-              </button>
+              <button className="banner-delete-btn">{t("importpage.delete")}</button>
             </div>
           </div>
         </div>
@@ -151,11 +141,7 @@ export default function ImportPage() {
             <thead>
               <tr>
                 <th className="sticky-col checkbox-col">
-                  <input
-                    type="checkbox"
-                    checked={allChecked}
-                    onChange={toggleAll}
-                  />
+                  <input type="checkbox" checked={allChecked} onChange={toggleAll} />
                 </th>
                 <th className="sticky-col view-col">{t("importpage.view")}</th>
                 <th>{t("importpage.folder")}</th>
@@ -206,7 +192,13 @@ export default function ImportPage() {
         <div className="import-content"></div>
       </div>
 
-      <UploadPopup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)} />
+      <UploadPopup
+        isOpen={isPopupOpen}
+        onClose={() => {
+          setIsPopupOpen(false);
+          fetchFiles(); // Refetch after closing popup in case of new uploads
+        }}
+      />
     </>
   );
 }
