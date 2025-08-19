@@ -1,0 +1,80 @@
+{
+  "signIn": "შესვლა",
+  "signUp": "რეგისტრაცია",
+  "mainTitle": "კონტრაქტების მართვა შეუფერხებლად",
+  "mainSubtitle": "შექმენით, შეამოწმეთ, დაამტკიცეთ და მართეთ თქვენი კონტრაქტები ერთ ადგილას. ავტომატურად მიიღეთ შეხსენებები, მართეთ ვერსიები და შეინარჩუნეთ თანამშრომლების შეთანხმება.",
+  "createAccount": "ახალი ანგარიში",
+  "learnMore": "გაიგე მეტი",
+  "builtWithLove": "მშვენივრად შექმნილი ❤️",
+  "customers": "მომხმარებლები",
+  "company": "კომპანია",
+  "price": "ფასი",
+  "solutions": "გადაწყვეტები",
+  
+  "registration": {
+    "title": "ანგარიშის შექმნა",
+    "firstName": "სახელი",
+    "lastName": "გვარი",
+    "userType": {
+      "label": "აირჩიეთ მომხმარებლის ტიპი",
+      "individual": "ფიზიკური პირი",
+      "business": "იურიდიული პირი"
+    },
+    "businessName": "ორგანიზაციის დასახელება",
+    "idNumber": "საიდენტიფიკაციო კოდი",
+    "password": "პაროლი",
+    "confirmPassword": "გაიმეორეთ პაროლი",
+    "submit": "რეგისტრაცია",
+    "email": "ელ. ფოსტა",
+    "forgotPassword": "დაგავიწყდათ პაროლი?"
+  },
+
+  "success": {
+    "title": "რეგისტრაცია წარმატებულია!",
+    "messageBefore": "თქვენი ანგარიში წარმატებით შეიქმნა. შეგიძლიათ",
+    "messageLink": "შეხვიდეთ სისტემაში"
+
+  },
+
+  "dashboardheader": {
+    "dashboard": "მთავარი",
+    "import": "იმპორტი",
+    "folders": "საქაღალდეები",
+    "repository": "რეესტრი",
+    "archive": "არქივი",
+    "user name": "მომხმარებლის სახელი"
+
+  },
+
+  "importpage": {
+    "import": "იმპორტი",
+    "upload document": "დოკუმენტის ატვირთვა",
+    "send to repository": "რეესტრში გადატანა",
+    "delete": "წაშლა",
+    "folder": "საქაღალდე",
+    "document title": "დოკუმენტის სათაური",
+    "counterparty": "კონტრაგენტი",
+    "document type": "დოკუმენტის ტიპი",
+    "agreement date": "გაფორმების თარიღი",
+    "expiry date": "ვადის გასვლის თარიღი",
+    "signature name": "ხელმომწერის სახელი",
+    "search documents...": "დოკუმენტების ძებნა...",
+    "view": "ნახვა"
+  },
+
+  
+  "repositorypage": {
+    "repository": "რეესტრი",
+    "upload document": "დოკუმენტის ატვირთვა",
+    "search documents...": "დოკუმენტების ძიება...",
+    "folder": "საქაღალდე",
+    "document title": "დოკუმენტის სათაური",
+    "counterparty": "კონტრაგენტი",
+    "document type": "დოკუმენტის ტიპი",
+    "agreement date": "გაფორმების თარიღი",
+    "expiry date": "ვადის გასვლის თარიღი",
+    "signature name": "ხელმომწერის სახელი",
+    "view": "ნახვა"
+  }
+}
+

@@ -1,0 +1,105 @@
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 200px;
+  background-color: #F9F9F7;
+  border-bottom: 1px solid #e1dfdf;
+  height: 35px; /* use variable if needed */
+  padding: 4px 20px;
+  position: fixed;
+  width: 100vw;
+  overflow-x: hidden;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 50px; /* ლოგოსა და მთავარს შორის დაშორება */
+}
+
+/* Brand logo image */
+.brand-logo {
+  height: 30px; /* fits header height */
+  width: 100px;
+  object-fit: contain;
+}
+
+/* Logo upload button (small pencil icon) */
+.logo-upload-btn {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  background: #3dd799;
+  color: #fff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.logo-upload-btn:hover {
+  background: #47f0ad;
+}
+
+.nav {
+  display: flex;
+}
+
+/* Base link style */
+.navLink {
+  position: relative;
+  text-decoration: none;
+  color: #4b3f40; /* Always black */
+  padding: 10px 0;
+  margin: 0 1px; /* ჰედერის კომპონენტებს შორის დაშორება */
+  font-weight: bold;
+  display: inline-block;
+
+  font-size: 0.8rem;
+}
+
+/* Hover effect: bold + underline */
+.navLink:hover {
+  font-weight: bold;
+  color: #000;
+}
+
+/* Active link: stays bold + underline */
+.navLink.active {
+  font-weight: bold;
+}
+
+.navLink.active::after {
+  content: "";
+  position: absolute;
+  left: -9px;  /* ქვედა მწვანე ზოლის მარცხნივ/მარჯვნივ გაწევა */
+  bottom: 1px;
+  width: 130%;  /* ქვედა მწვანე ზოლის სიდიდე */
+  height: 4px;  /* ქვედა მწვანე ზოლის სისქე */
+  background-color: #3aba87;
+  color: #000
+}
+
+.dashboard-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile img {
+  border-radius: 50%;
+}

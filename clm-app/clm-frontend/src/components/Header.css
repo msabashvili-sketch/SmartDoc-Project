@@ -1,0 +1,86 @@
+/* Freeze header - make fixed at top */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #F9F9F7;
+  box-shadow: none; /* Remove shadow if you want */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 200px;
+  box-sizing: border-box;
+}
+
+/* Logo styling */
+.logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+/* Navigation styling */
+nav {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  font-weight: 600;
+  font-size: 15px;
+  color: #374151;
+}
+
+/* Nav links */
+.navLink {
+  text-decoration: none;
+  color: #374151;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 15px;
+  font-weight: 550;
+}
+
+.navLink:hover {
+  color: #2da977;
+}
+
+/* Actions container */
+.actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Sign In button */
+.buttonSignIn {
+  padding: 15px 25px;
+  border-radius: 3px;
+  background: transparent;
+  color: #374151;
+  border: 1px solid #3e7d7aff;
+  cursor: pointer;
+  font-weight: 580;
+  font-size: 15px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.buttonSignIn:hover {
+  color: #3e7d7aff;
+  border-color: #3e7d7aff;
+}
+
+/* Sign Up button */
+.buttonPrimary {
+  padding: 16px 20px;
+  border-radius: 3px;
+  background: #3e7d7aff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 15px;
+  /* No hover effect */
+}

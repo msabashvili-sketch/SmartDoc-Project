@@ -1,0 +1,141 @@
+/* RegistrationForm.css */
+
+.reg-container {
+  min-height: 105vh;
+  background-color: #F9F9F7; /* light gray background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.reg-box {
+  background: #F9F9F7;
+  max-width: 550px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 3px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.reg-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #3d485a;
+}
+
+.reg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reg-grid-two-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .reg-grid-two-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.reg-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  font-size: 0.7rem;
+}
+
+.reg-label-small {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.reg-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  color: #111827;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.reg-input:focus {
+  outline: none;
+  border-color: #3DD799; /* Indigo */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+.reg-btn-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.reg-btn {
+  flex: 1;
+  padding: 0.5rem 0;
+  border-radius: 3px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #4b5563;
+  font-weight: 550;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.reg-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.reg-btn.active {
+  background-color: #3DD799; /* Indigo */
+  color: #2e3643;
+  border-color: #3DD799;
+  font-weight: 550;
+  font-size: 0.9rem;
+
+}
+
+.reg-submit-btn {
+  width: 100%;
+  background-color: #3DD799; /* Indigo */
+  color: #2e3643;
+  padding: 0.75rem;
+  border-radius: 3px;
+  border: none;
+  font-weight: 550;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.reg-submit-btn:hover {
+  background-color: #67dcad; /* darker Indigo */
+}
+
+/* Email field style */
+.full-width {
+  width: 100%;              /* Match button width */
+  padding: 8px 15px;       /* Comfortable padding */
+  font-size: 15px;          /* Same font size as button */
+  border: 1px solid #ccc;   /* Light border */
+  border-radius: 3px;       /* Match button's corner radius */
+  box-sizing: border-box;   /* Prevent extra width from padding */
+}
+
+.user-type-label {
+  font-size: 0.8rem; /* or whatever size you want */
+  font-weight: 550;  /* optional, keep consistent */
+  margin-bottom: 0.5rem; /* spacing */
+  color: #374151; /* match other labels */
+}

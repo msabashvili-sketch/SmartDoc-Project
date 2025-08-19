@@ -1,0 +1,171 @@
+/* Variables */
+:root {
+  --header-height: 60px;
+  --top-space-height: 60px;
+  --line-color: #e7e7e7;
+  --line-thickness: 2px;
+  --title-color: #374151;
+  --button-bg: #1f6e77;
+  --button-color: #ffffff;
+  --button-padding: 8px 12px;
+  --button-radius: 3px;
+  --button-font-size: 0.8rem;
+  --search-width: 1200px;
+  --search-height: 28px;
+  --search-font-size: 0.8rem;
+  --search-border-color: #dad8d8;
+  --search-bg: #fff;
+  --search-text-color: #000;
+  --search-padding: 0 10px;
+  --banner-width: 98%;
+}
+
+html {
+  overflow-y: scroll;
+}
+
+.repository-page {
+  padding-top: 60px; /* adjust to header height */
+  overflow-x: hidden;
+}
+
+/* Top space under header */
+.repository-top-space {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--line-thickness) solid var(--line-color);
+  padding: 0 10px;
+}
+
+/* Title */
+.repository-title {
+  font-size: 20px;
+  color: var(--title-color);
+  margin: 0;
+  position: relative;
+  left: 20px;
+  top: -14px;
+}
+
+/* Upload button */
+.upload-button {
+  display: inline-block;
+  background-color: var(--button-bg);
+  color: var(--button-color);
+  padding: var(--button-padding);
+  border-radius: var(--button-radius);
+  border: 1px solid #1f6e77;
+  font-size: var(--button-font-size);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  top: -12px;
+  right: 15px;
+}
+
+.upload-button:hover {
+  background-color: #26858f;
+  color: #fff;
+  border-color: #26858f;
+}
+
+/* Search bar */
+.search-bar-container {
+  margin: 20px 0;
+  position: relative;
+  top: -10px;
+  left: 16px;
+}
+
+.search-bar {
+  width: var(--search-width);
+  height: var(--search-height);
+  font-size: var(--search-font-size);
+  background-color: var(--search-bg);
+  color: var(--search-text-color);
+  border: 1px solid #e1dfdf;
+  border-radius: 3px;
+  padding: 8px 12px;
+  outline: none;
+}
+
+.search-bar:focus {
+  border-color: #37C193;
+  box-shadow: 0 0 0px rgba(110, 202, 114, 0.5);
+}
+
+.search-bar::placeholder {
+  color: #a3a3a3;
+}
+
+/* Table container */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-left: 14px;
+  margin-top: -10px;
+}
+
+/* Table */
+.repository-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 800px; /* same as ImportPage */
+  width: max-content; /* allow horizontal scroll if needed */
+  margin: 0;
+}
+
+/* Table headers and cells */
+.repository-table th,
+.repository-table td {
+  border: 1px solid #e7e7e7;
+  padding: 5px;
+  height: 35px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* First column sticky */
+.repository-table th.sticky-col,
+.repository-table td.sticky-col {
+  position: sticky;
+  left: 0;
+  background-color: #ffffff;
+  z-index: 2;
+  border-right: 1px solid #ddd;
+  width: 340px;  /* match ImportPage first column */
+  min-width: 340px;
+  max-width: 340px;
+}
+
+/* Other columns width same as ImportPage */
+.repository-table th:not(.sticky-col),
+.repository-table td:not(.sticky-col) {
+  min-width: 250px;
+  width: 340px;
+}
+
+/* Header style */
+.repository-table thead th {
+  background-color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  padding: 4px 8px;
+  color: #4b3f40;
+  border-bottom: 2px solid #eae9e9; /* same thickness as ImportPage */
+}
+
+/* Alternate row colors */
+.repository-table tbody tr:nth-child(odd) {
+  background-color: #fcfcfc;
+}
+
+.repository-table tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}

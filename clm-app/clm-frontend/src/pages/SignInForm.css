@@ -1,0 +1,87 @@
+.signin-container {
+  min-height: 90vh;
+  background-color: #F9F9F7; /* light gray background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+  font-family: Arial, sans-serif;
+}
+
+.signin-box {
+  background: #F9F9F7;
+  max-width: 550px;
+  width: 100%;
+  padding: 2rem;
+  border-radius: 3px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.signin-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: #3d485a;
+}
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.signin-group {
+  width: 100%;
+}
+
+.signin-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  color: #111827;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signin-input:focus {
+  outline: none;
+  border-color: #3DD799; /* Indigo */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+.forgot-password {
+  text-align: right;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.forgot-password a {
+  color: #323a46;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+  color: #31b07d;
+}
+
+.signin-submit-btn {
+  width: 100%;
+  background-color: #3DD799; /* Indigo */
+  color: #2e3643;
+  padding: 0.75rem;
+  border-radius: 3px;
+  border: none;
+  font-weight: 550;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signin-submit-btn:hover {
+  background-color: #67dcad; /* darker Indigo */
+}

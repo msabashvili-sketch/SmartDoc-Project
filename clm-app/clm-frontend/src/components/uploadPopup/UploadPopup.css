@@ -1,0 +1,230 @@
+/* Overlay background */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Main popup window */
+.popup-window {
+  background: #fff;
+  width: 70%;
+  max-width: 720px;  /* ensures it doesn’t overflow on smaller screens */
+  height: 70%;
+  max-height: 580px; /* prevents it from exceeding viewport height */
+  padding: 20px;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  overflow-y: auto; /* allows scrolling if content is too tall */
+}
+
+/* Title */
+.popup-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  word-break: break-word;
+}
+
+/* Upload options */
+.upload-option {
+  border: 2px solid #ededed;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-option:hover {
+  border-color: #cacaca;
+}
+
+/* Large vs Small option */
+.upload-option.large {
+  height: 500px;
+}
+
+.upload-option.small {
+  height: 170px;
+}
+
+/* Media Queries for Responsiveness */
+
+/* Medium screens */
+@media (max-width: 1024px) {
+  .popup-window {
+    width: 600px;
+    height: 600px;
+    padding: 30px;
+  }
+
+  .upload-option.large {
+    height: 350px;
+  }
+
+  .upload-option.small {
+    height: 130px;
+  }
+
+  .popup-title {
+    font-size: 18px;
+  }
+}
+
+/* Small screens */
+@media (max-width: 768px) {
+  .popup-window {
+    width: 90%;
+    height: 90%;
+    padding: 20px;
+  }
+
+  .upload-option.large {
+    height: 300px;
+  }
+
+  .upload-option.small {
+    height: 120px;
+  }
+
+  .popup-title {
+    font-size: 16px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .popup-window {
+    width: 85%;
+    height: 85%;
+    padding: 15px;
+  }
+
+  .upload-option.large {
+    height: 250px;
+  }
+
+  .upload-option.small {
+    height: 100px;
+  }
+
+  .popup-title {
+    font-size: 14px;
+  }
+}
+
+
+/* Active (selected) state */
+.upload-option.active {
+  border-color: #37c193;
+  background: #ffffff;
+}
+
+/* Option header (circle + text) */
+.option-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Toggle circle */
+.toggle-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #dddbdb;
+  background: white;
+  transition: background 0.2s;
+}
+
+.upload-option.active .toggle-circle {
+  background: #1f6e77;
+}
+
+/* Option description under Smart Import */
+.option-description {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Banner upload box */
+.banner-upload {
+  margin-top: auto;
+}
+
+.banner-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  border: 2px dashed #ccc;
+  border-radius: 6px;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.3s, color 0.3s;
+}
+
+.banner-placeholder:hover {
+  border-color: #1f6e77;
+  color: #1f6e77;
+}
+
+.banner-preview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Footer buttons */
+.popup-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.cancel-btn,
+.select-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  background: #dcdcdc;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #e4e4e4;
+}
+
+.select-btn {
+  background: #1f6e77;
+  color: white;
+}
+
+.select-btn:hover {
+  background: #267b85;
+}
