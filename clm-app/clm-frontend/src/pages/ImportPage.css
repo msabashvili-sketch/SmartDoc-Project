@@ -5,7 +5,7 @@
  --line-color: #e7e7e7; /* color of the bottom line */
  --line-thickness: 2px; /* thickness of the line */
  --title-font-size: 2rem;
- --title-color: #374151;
+ --title-color: #4b3f40;
  --title-shift-right: 20px;   /* move title to right */
  --title-shift-up: 0px;       /* move title up */
  --button-bg: #1f6e77;           /* Upload button background */
@@ -33,14 +33,14 @@ html {
 }
 
 .import-page {
-  padding-top: 60px; /* adjust to header height */
+  padding-top: 35px; /* adjust to header height */
   overflow-x: hidden; /* prevent horizontal scroll on page */
 }
 
 
 /* Top space under header */
 .import-top-space {
- height: 32px;
+ height: 60px;
  display: flex;
  align-items: center; /* vertically center title */
  justify-content: space-between; /* for future upload button on right */
@@ -57,7 +57,7 @@ html {
  margin: 0;
  position: relative;
  left: var(--title-shift-right);
- top: -14px;
+ top: 0px;
  
 }
 
@@ -72,13 +72,10 @@ html {
  border: 1px solid #1f6e77;
  font-size: var(--button-font-size);
  font-weight: 600;
-
-
  cursor: pointer;
  user-select: none;
  position: relative;
- top: -12px;   /* move up */
- right: 15px; /* move left */
+ 
 }
 
 
@@ -250,7 +247,7 @@ border-bottom: 2px solid #eae9e9; /* change px to your desired thickness and col
  padding: 5px;
  height: 35px;
  font-size: 13px;
- font-weight: 600;
+ font-weight: 450;
  text-align: left;
  white-space: nowrap; /* prevent wrapping */
 }

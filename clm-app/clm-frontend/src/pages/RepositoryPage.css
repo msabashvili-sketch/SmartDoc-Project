@@ -1,10 +1,10 @@
 /* Variables */
 :root {
-  --header-height: 60px;
+  --header-height: 35px;
   --top-space-height: 60px;
   --line-color: #e7e7e7;
   --line-thickness: 2px;
-  --title-color: #374151;
+  --title-color: #4b3f40;
   --button-bg: #1f6e77;
   --button-color: #ffffff;
   --button-padding: 8px 12px;
@@ -25,28 +25,33 @@ html {
 }
 
 .repository-page {
-  padding-top: 60px; /* adjust to header height */
+  padding-top: var(--header-height);
   overflow-x: hidden;
+  background-color: #F9F9F7;
 }
 
 /* Top space under header */
 .repository-top-space {
-  height: 32px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: var(--line-thickness) solid var(--line-color);
   padding: 0 10px;
+  background-color: #d9edff;
+  position: relative; /* keeps it in flow */
+  z-index: 0;
 }
 
 /* Title */
 .repository-title {
   font-size: 20px;
+  width: 600px;
   color: var(--title-color);
   margin: 0;
   position: relative;
   left: 20px;
-  top: -14px;
+  top: 0px;
 }
 
 /* Upload button */
@@ -62,7 +67,7 @@ html {
   cursor: pointer;
   user-select: none;
   position: relative;
-  top: -12px;
+  top: 0px;
   right: 15px;
 }
 
@@ -125,7 +130,7 @@ html {
   padding: 5px;
   height: 35px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 450;
   text-align: left;
   white-space: nowrap;
 }
@@ -168,4 +173,50 @@ html {
 
 .repository-table tbody tr:nth-child(even) {
   background-color: #ffffff;
+}
+
+/* Search + filter row */
+.search-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.filter-button {
+  height: 28px;  /* same as search bar */
+  background-color: #3aba87;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.filter-button:hover {
+  background-color: #37c193;
+}
+
+/* Repository content flex */
+.repository-content {
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+/* Filter panel hidden by default */
+.filter-panel {
+  width: 250px;
+  transition: margin-left 0.3s ease;
+  margin-left: -250px; /* hidden to the left */
+}
+
+/* When open, margin-left becomes 0, pushing the table */
+.repository-content.filter-open .filter-panel {
+  margin-left: 0;
+}
+
+.table-wrapper {
+  flex: 1; /* take all remaining space */
+  transition: margin-left 0.3s ease;
 }

@@ -86,12 +86,34 @@ export default function ImportPage() {
       if (!res.ok) throw new Error("Failed to send files");
 
       alert("Selected files sent to repository successfully!");
-
-      // Refetch files after sending to repository
       await fetchFiles();
     } catch (err) {
       console.error("Send to repository error:", err);
       alert("Error sending files to repository");
+    }
+  };
+
+  // Delete selected files
+  const deleteFiles = async () => {
+    const selectedIds = files.filter((_, idx) => rows[idx]).map(f => f.id);
+    if (selectedIds.length === 0) return alert("Please select at least one file");
+
+    if (!window.confirm("Are you sure you want to delete the selected files?")) return;
+
+    try {
+      const res = await fetch("http://localhost:4000/api/documents/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileIds: selectedIds }),
+      });
+
+      if (!res.ok) throw new Error("Failed to delete files");
+
+      alert("Selected files deleted successfully!");
+      await fetchFiles(); // Refresh file list after deletion
+    } catch (err) {
+      console.error("Delete files error:", err);
+      alert("Error deleting files");
     }
   };
 
@@ -131,7 +153,9 @@ export default function ImportPage() {
               <button className="banner-send-btn" onClick={sendToRepository}>
                 {t("importpage.send to repository")}
               </button>
-              <button className="banner-delete-btn">{t("importpage.delete")}</button>
+              <button className="banner-delete-btn" onClick={deleteFiles}>
+                {t("importpage.delete")}
+              </button>
             </div>
           </div>
         </div>
@@ -154,38 +178,53 @@ export default function ImportPage() {
               </tr>
             </thead>
             <tbody>
-              {files.map((file, index) => (
-                <tr key={file.id || index}>
-                  <td className="sticky-col checkbox-col">
-                    <input
-                      type="checkbox"
-                      checked={rows[index] || false}
-                      onChange={() => toggleRow(index)}
-                    />
-                  </td>
-                  <td className="sticky-col view-col">
-                    <button
-                      className="view-btn"
-                      onClick={() =>
-                        window.open(
-                          `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
-                          "_blank"
-                        )
-                      }
-                    >
-                      <AiOutlineEye size={18} />
-                    </button>
-                  </td>
-                  <td></td>
-                  <td>{file.filename}</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              ))}
-            </tbody>
+  {files.map((file, index) => (
+    <tr key={file.id || index}>
+      <td className="sticky-col checkbox-col">
+        <input
+          type="checkbox"
+          checked={rows[index] || false}
+          onChange={() => toggleRow(index)}
+        />
+      </td>
+      <td className="sticky-col view-col">
+        <button
+          className="view-btn"
+          onClick={() =>
+            window.open(
+              `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
+              "_blank"
+            )
+          }
+        >
+          <AiOutlineEye size={18} />
+        </button>
+      </td>
+      <td></td>
+      <td>{file.filename}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  ))}
+
+  {/* Add empty rows to reach 25 if files are less */}
+  {Array.from({ length: Math.max(0, 25 - files.length) }).map((_, idx) => (
+    <tr key={`empty-${idx}`} className="empty-row">
+      <td className="sticky-col checkbox-col"></td>
+      <td className="sticky-col view-col"></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
 

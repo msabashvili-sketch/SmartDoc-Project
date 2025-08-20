@@ -100,4 +100,33 @@ router.post("/send-to-repository", async (req, res) => {
   }
 });
 
+// --- Delete selected files ---
+router.post("/delete", async (req, res) => {
+  try {
+    const { fileIds } = req.body;
+    if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+      return res.status(400).json({ message: "No file IDs provided" });
+    }
+
+    const bucket = getBucket();
+
+    await Promise.all(
+      fileIds.map(async (id) => {
+        if (!ObjectId.isValid(id)) return;
+        const _id = new ObjectId(id);
+        try {
+          await bucket.delete(_id);
+        } catch (err) {
+          console.error(`Failed to delete file ${id}:`, err);
+        }
+      })
+    );
+
+    res.json({ message: "Files deleted successfully!" });
+  } catch (err) {
+    console.error("❌ Delete files error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
