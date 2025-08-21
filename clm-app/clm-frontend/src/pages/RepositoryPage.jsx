@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DashboardHeader from "../components/DashboardHeader";
 import FilterPanel from "../components/FilterPanel";
+import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
 import "./RepositoryPage.css";
 import { useTranslation } from "react-i18next";
@@ -11,6 +12,8 @@ export default function RepositoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const rowsPerPage = 25;
   const { t } = useTranslation();
 
@@ -45,10 +48,16 @@ export default function RepositoryPage() {
     setCurrentPage(pageNumber);
   };
 
-  // Apply filters handler (currently just closes panel)
+  // Apply filters handler
   const handleApplyFilters = () => {
     console.log("Filters applied");
     setIsFilterOpen(false);
+  };
+
+  // Row click to open details
+  const handleRowClick = (file) => {
+    setSelectedFile(file);
+    setIsDetailsOpen(true);
   };
 
   return (
@@ -87,7 +96,7 @@ export default function RepositoryPage() {
         {/* Main content */}
         <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
           <FilterPanel isOpen={isFilterOpen} onApply={handleApplyFilters} />
-          
+
           <div className="table-container">
             <table className="repository-table">
               <thead>
@@ -103,7 +112,7 @@ export default function RepositoryPage() {
               </thead>
               <tbody>
                 {currentRows.map((file) => (
-                  <tr key={file._id}>
+                  <tr key={file._id} onClick={() => handleRowClick(file)}>
                     <td className="sticky-col title-col">{file.filename}</td>
                     <td>{file.metadata?.folder}</td>
                     <td>{file.metadata?.counterparty}</td>
@@ -150,8 +159,15 @@ export default function RepositoryPage() {
           isOpen={isPopupOpen}
           onClose={() => {
             setIsPopupOpen(false);
-            fetchFiles(); // refresh after upload
+            fetchFiles();
           }}
+        />
+
+        {/* Repository Details Panel */}
+        <RepositoryDetailsPanel
+          isOpen={isDetailsOpen}
+          file={selectedFile}
+          onClose={() => setIsDetailsOpen(false)}
         />
       </div>
     </>

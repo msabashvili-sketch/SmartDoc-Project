@@ -1,0 +1,140 @@
+import React, { useState } from "react";
+import "./RepositoryDetailsPanel.css";
+
+export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
+  const [selectedSection, setSelectedSection] = useState(null);
+  const [showTextPopup, setShowTextPopup] = useState(false);
+
+  if (!file) return null; // don't render without data
+
+  // Build scanned document URL using ID if url not present
+  const getScannedDocUrl = () => {
+    // If backend provides direct URL, use it
+    if (file.metadata?.scannedDocUrl) return file.metadata.scannedDocUrl;
+
+    // Otherwise, if backend provides scannedDocId, construct URL
+    if (file.metadata?.scannedDocId) {
+      return `http://localhost:4000/api/documents/view/${file.metadata.scannedDocId}`;
+    }
+
+    return null;
+  };
+
+  return (
+    <div className={`details-panel ${isOpen ? "open" : ""}`}>
+      {/* Header */}
+      <div className="details-panel-header">
+        <div className="details-title-container">
+          <h2 className="details-title">{file.filename}</h2>
+          <div className="repository-details-subtitle">Dates</div>
+        </div>
+
+        <button className="repository-details-cancel" onClick={onClose}>
+          ×
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="details-panel-content">
+        {/* Agreement Date field */}
+        <div className="details-field">
+          <span className="details-field-label">Agreement Date</span>
+          <div className="details-field-divider"></div>
+          <span className="details-field-value">
+            {file.metadata?.agreementDate || "-"}
+          </span>
+        </div>
+
+        {/* Expiry Date field */}
+        <div className="details-field">
+          <span className="details-field-label">Expiry Date</span>
+          <div className="details-field-divider"></div>
+          <span className="details-field-value">
+            {file.metadata?.expiryDate || "-"}
+          </span>
+        </div>
+
+        {/* Second section subtitle */}
+        <div className="repository-details-secondsubtitle">Document</div>
+
+        {/* Stacked document field with common border */}
+        <div className="stacked-documents">
+          {/* Text Version - Popup */}
+          <div
+            className={`details-field-section ${
+              selectedSection === "text" ? "selected" : ""
+            }`}
+            onClick={() => {
+              setSelectedSection("text");
+              setShowTextPopup(true);
+            }}
+          >
+            <span className="details-field-section-label">Text Version</span>
+            <span className="details-field-section-value">
+              {file.metadata?.textDocName || "Not available"}
+            </span>
+          </div>
+
+          {/* Scanned Document - New Tab */}
+          <div
+            className={`details-field-section ${
+              selectedSection === "scanned" ? "selected" : ""
+            }`}
+            onClick={() => {
+              setSelectedSection("scanned");
+              const url = getScannedDocUrl();
+              if (url) {
+                window.open(url, "_blank");
+              } else {
+                alert("No scanned document uploaded");
+              }
+            }}
+          >
+            <span className="details-field-section-label">Scanned Document</span>
+            <span className="details-field-section-value">
+              {file.metadata?.scannedDocName || "Not available"}
+            </span>
+          </div>
+        </div>
+
+        {/* Other metadata */}
+        <p>
+          <strong>Counterparty:</strong> {file.metadata?.counterparty || "-"}
+        </p>
+        <p>
+          <strong>Document Type:</strong> {file.metadata?.documentType || "-"}
+        </p>
+        <p>
+          <strong>Signature Name:</strong> {file.metadata?.signatureName || "-"}
+        </p>
+      </div>
+
+      {/* Text Version Popup */}
+      {showTextPopup && (
+        <div
+          className="text-popup-overlay"
+          onClick={() => setShowTextPopup(false)}
+        >
+          <div
+            className="text-popup-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="popup-close"
+              onClick={() => setShowTextPopup(false)}
+            >
+              ×
+            </button>
+            <iframe
+              src={file.metadata?.textDocUrl}
+              title="Text Document"
+              width="100%"
+              height="100%"
+              style={{ border: "none" }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

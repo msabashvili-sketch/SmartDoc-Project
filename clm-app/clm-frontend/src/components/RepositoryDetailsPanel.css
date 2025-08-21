@@ -1,0 +1,184 @@
+.details-panel {
+  position: absolute;
+  top: 95px; /* start below header/top space */
+  right: 0;
+  height: calc(100% - 100px);
+  width: 450px; /* bigger than filter panel */
+  background: #f6faf9;
+  border-left: 1px solid #ddd;
+  box-shadow: -6px 0 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.details-panel.open {
+  transform: translateX(0);
+}
+
+/* Header: contains title/subtitle stack and cancel button */
+.details-panel-header {
+  display: flex;
+  justify-content: space-between; /* button to the right */
+  align-items: flex-start; /* top align */
+  padding: 16px;
+  background: #f6faf9;
+  border-bottom: 0px solid #ddd;
+  position: relative;
+}
+
+/* Container for title + subtitle */
+.details-title-container {
+  display: flex;
+  flex-direction: column; /* stack title and subtitle vertically */
+}
+
+/* Main title */
+.details-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px 0; /* space below title */
+  color: #2b2b2b;
+}
+
+/* Subtitle below title */
+.repository-details-subtitle {
+  font-size: 14px; /* adjustable */
+  font-weight: 600;
+  margin: 0;
+  color: #2b2b2b;
+}
+
+/* Cancel button at top-right */
+.repository-details-cancel {
+  position: relative;
+  top: 0;
+  right: 0;
+  background: transparent;
+  border: none;
+  font-size: 19px;
+  cursor: pointer;
+  color: #4f4f4f;
+}
+
+/* Alternative close button if you want bigger icon */
+.close-button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #333;
+}
+
+/* Content area */
+.details-panel-content {
+  padding: 0px 16px 16px 16px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Dates fields */
+.details-field {
+  background: #fff;
+  border: 1px solid #e7e7e7;
+  border-radius: 7px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  margin-top: 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  height: 30px;
+}
+
+.details-field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+  padding: 10px;
+}
+
+.details-field-divider {
+  width: 1px;
+  background: #e7e7e7;
+}
+
+.details-field-value {
+  font-size: 14px;
+  font-weight: 400;
+  color: #555;
+  flex: 1;
+  padding: 10px;
+}
+
+.repository-details-secondsubtitle {
+  font-size: 14px; /* adjustable */
+  font-weight: 600;
+  margin-top: 20px; /* space from previous section */
+  margin-bottom: 10px;
+  color: #2b2b2b;
+}
+
+.stacked-documents {
+  display: flex;
+  flex-direction: column;
+  border-radius: 7px; /* this is the container rounding */
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #e7e7e7;
+}
+
+/* Sections */
+.stacked-documents .details-field-section {
+  padding: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Middle divider */
+.stacked-documents .details-field-divider {
+  height: 1px;
+  background-color: #e7e7e7;
+  z-index: 0;
+}
+
+/* Hover effect */
+.stacked-documents .details-field-section:hover {
+  z-index: 2;
+}
+
+.stacked-documents .details-field-section:hover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 3px solid #64c6ed;
+  pointer-events: none;
+
+  /* Round corners only for outside edges */
+  border-radius: 7px; /* will be adjusted per section */
+}
+
+/* Adjust border radius for top section */
+.stacked-documents .details-field-section:first-child:hover::before {
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Adjust border radius for bottom section */
+.stacked-documents .details-field-section:last-child:hover::before {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+}
+
