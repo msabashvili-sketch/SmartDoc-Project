@@ -56,7 +56,7 @@
     "counterparty": "კონტრაგენტი",
     "document type": "დოკუმენტის ტიპი",
     "agreement date": "გაფორმების თარიღი",
-    "expiry date": "ვადის გასვლის თარიღი",
+    "expiry date": "დასრულების თარიღი",
     "signature name": "ხელმომწერის სახელი",
     "search documents...": "დოკუმენტების ძებნა...",
     "view": "ნახვა"
@@ -71,11 +71,25 @@
     "document title": "დოკუმენტის სათაური",
     "counterparty": "კონტრაგენტი",
     "document type": "დოკუმენტის ტიპი",
-    "agreement date": "გაფორმების თარიღი",
+    "agreement date": "დაწყების თარიღი",
     "expiry date": "ვადის გასვლის თარიღი",
     "signature name": "ხელმომწერის სახელი",
     "view": "ნახვა",
     "filters": "ფილტრი"
-  }
+  },
+
+
+"detailspanel": {
+  "dates": "თარიღები",
+  "document": "დოკუმენტი",
+  "agreementDate": "დაწყების თარიღი",
+  "expiryDate": "დასრულების თარიღი",
+  "phone": "ტელეფონი",
+  "email": "ელ. ფოსტა",
+  "contactInfo": "საკონტაქტო ინფორმაცია",
+  "scannedDocument": "დასკანერებული დოკუმენტი",
+  "notAvailable": " არ არის ხელმისაწვდომი",
+  "textVersion": "ტექსტური ვერსია"
 }
 
+}

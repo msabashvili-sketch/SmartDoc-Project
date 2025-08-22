@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import "./RepositoryDetailsPanel.css";
+import { useTranslation } from "react-i18next";
 
 export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
+  const { t } = useTranslation();
   const [selectedSection, setSelectedSection] = useState(null);
   const [showTextPopup, setShowTextPopup] = useState(false);
 
@@ -9,14 +11,10 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
 
   // Build scanned document URL using ID if url not present
   const getScannedDocUrl = () => {
-    // If backend provides direct URL, use it
     if (file.metadata?.scannedDocUrl) return file.metadata.scannedDocUrl;
-
-    // Otherwise, if backend provides scannedDocId, construct URL
     if (file.metadata?.scannedDocId) {
       return `http://localhost:4000/api/documents/view/${file.metadata.scannedDocId}`;
     }
-
     return null;
   };
 
@@ -26,7 +24,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
       <div className="details-panel-header">
         <div className="details-title-container">
           <h2 className="details-title">{file.filename}</h2>
-          <div className="repository-details-subtitle">Dates</div>
+          <div className="repository-details-subtitle">{t("detailspanel.dates")}</div>
         </div>
 
         <button className="repository-details-cancel" onClick={onClose}>
@@ -38,7 +36,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
       <div className="details-panel-content">
         {/* Agreement Date field */}
         <div className="details-field">
-          <span className="details-field-label">Agreement Date</span>
+          <span className="details-field-label">{t("detailspanel.agreementDate")}</span>
           <div className="details-field-divider"></div>
           <span className="details-field-value">
             {file.metadata?.agreementDate || "-"}
@@ -47,7 +45,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
 
         {/* Expiry Date field */}
         <div className="details-field">
-          <span className="details-field-label">Expiry Date</span>
+          <span className="details-field-label">{t("detailspanel.expiryDate")}</span>
           <div className="details-field-divider"></div>
           <span className="details-field-value">
             {file.metadata?.expiryDate || "-"}
@@ -55,7 +53,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
         </div>
 
         {/* Second section subtitle */}
-        <div className="repository-details-secondsubtitle">Document</div>
+        <div className="repository-details-secondsubtitle">{t("detailspanel.document")}</div>
 
         {/* Stacked document field with common border */}
         <div className="stacked-documents">
@@ -69,9 +67,9 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
               setShowTextPopup(true);
             }}
           >
-            <span className="details-field-section-label">Text Version</span>
+            <span className="details-field-section-label">{t("detailspanel.textVersion")}</span>
             <span className="details-field-section-value">
-              {file.metadata?.textDocName || "Not available"}
+              {file.metadata?.textDocName || t("detailspanel.notAvailable")}
             </span>
           </div>
 
@@ -86,27 +84,37 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
               if (url) {
                 window.open(url, "_blank");
               } else {
-                alert("No scanned document uploaded");
+                alert(t("detailspanel.noScannedDoc"));
               }
             }}
           >
-            <span className="details-field-section-label">Scanned Document</span>
+            <span className="details-field-section-label">{t("detailspanel.scannedDocument")}</span>
             <span className="details-field-section-value">
-              {file.metadata?.scannedDocName || "Not available"}
+              {file.metadata?.scannedDocName || t("detailspanel.notAvailable")}
             </span>
           </div>
         </div>
 
-        {/* Other metadata */}
-        <p>
-          <strong>Counterparty:</strong> {file.metadata?.counterparty || "-"}
-        </p>
-        <p>
-          <strong>Document Type:</strong> {file.metadata?.documentType || "-"}
-        </p>
-        <p>
-          <strong>Signature Name:</strong> {file.metadata?.signatureName || "-"}
-        </p>
+        {/* Third subtitle */}
+        <div className="repository-details-secondsubtitle">{t("detailspanel.contactInfo")}</div>
+
+        {/* Contact info field (styled like dates) */}
+        <div className="details-field">
+          <span className="details-field-label">{t("detailspanel.email")}</span>
+          <div className="details-field-divider"></div>
+          <span className="details-field-value">
+            {file.metadata?.email || "-"}
+          </span>
+        </div>
+
+        {/* Phone field */}
+        <div className="details-field">
+          <span className="details-field-label">{t("detailspanel.phone")}</span>
+          <div className="details-field-divider"></div>
+          <span className="details-field-value">
+            {file.metadata?.phone || "-"}
+          </span>
+        </div>
       </div>
 
       {/* Text Version Popup */}
