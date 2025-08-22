@@ -24,7 +24,6 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
       <div className="details-panel-header">
         <div className="details-title-container">
           <h2 className="details-title">{file.filename}</h2>
-          <div className="repository-details-subtitle">{t("detailspanel.dates")}</div>
         </div>
 
         <button className="repository-details-cancel" onClick={onClose}>
@@ -34,6 +33,12 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
 
       {/* Content */}
       <div className="details-panel-content">
+        
+         {/* First subtitle */}
+  <div className="repository-details-subtitle">
+    {t("detailspanel.dates")}
+  </div>
+
         {/* Agreement Date field */}
         <div className="details-field">
           <span className="details-field-label">{t("detailspanel.agreementDate")}</span>
@@ -115,6 +120,12 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
             {file.metadata?.phone || "-"}
           </span>
         </div>
+      </div>
+
+      {/* Footer with buttons */}
+      <div className="details-panel-footer">
+        <button className="archive-btn">{t("detailspanel.Send to Archive")}</button>
+        <button className="delete-btn">{t("detailspanel.Delete")}</button>
       </div>
 
       {/* Text Version Popup */}

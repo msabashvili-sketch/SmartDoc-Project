@@ -89,7 +89,9 @@
   "contactInfo": "საკონტაქტო ინფორმაცია",
   "scannedDocument": "დასკანერებული დოკუმენტი",
   "notAvailable": " არ არის ხელმისაწვდომი",
-  "textVersion": "ტექსტური ვერსია"
+  "textVersion": "ტექსტური ვერსია",
+  "Delete": "წაშლა",
+  "Send to Archive": "არქივში გადატანა"
 }
 
 }
