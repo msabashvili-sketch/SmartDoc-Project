@@ -51,8 +51,6 @@ router.get("/view/:id", async (req, res) => {
     if (!files || files.length === 0) return res.status(404).send("File not found");
 
     const file = files[0];
-
-    // Encode filename for non-ASCII characters
     const encodedFilename = encodeURIComponent(file.filename);
 
     res.setHeader(
@@ -74,7 +72,7 @@ router.get("/view/:id", async (req, res) => {
   }
 });
 
-// Send selected files to repository
+// --- Send selected files to repository ---
 router.post("/send-to-repository", async (req, res) => {
   try {
     const { fileIds } = req.body;
@@ -89,7 +87,12 @@ router.post("/send-to-repository", async (req, res) => {
       fileIds.map(async (id) => {
         if (!ObjectId.isValid(id)) return;
         const _id = new ObjectId(id);
-        await filesCollection.updateOne({ _id }, { $set: { "metadata.repository": true } });
+
+        // Mark file as repository
+        await filesCollection.updateOne(
+          { _id },
+          { $set: { "metadata.repository": true } }
+        );
       })
     );
 

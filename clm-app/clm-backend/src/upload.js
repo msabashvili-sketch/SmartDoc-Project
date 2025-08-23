@@ -16,23 +16,41 @@ const uploadFilesToGridFS = async (req, res) => {
     const uploadedFiles = await Promise.all(
       req.files.map(file => {
         return new Promise((resolve, reject) => {
-          // Keep original filename in metadata for React to display
           const utf8Filename = Buffer.from(file.originalname, "utf8").toString();
 
           const uploadStream = bucket.openUploadStream(utf8Filename, {
             contentType: file.mimetype,
-            metadata: { filename: file.originalname } // ✅ store original name
+            metadata: {
+              filename: file.originalname,       // original filename
+              scannedDocId: null,                // placeholder, will set after upload
+              scannedDocName: file.originalname, // original name for frontend
+            },
           });
 
           uploadStream.end(file.buffer);
 
-          uploadStream.on("finish", () => {
-            resolve({
-              id: uploadStream.id,
-              filename: file.originalname, // original UTF-8 filename
-              uploadDate: new Date(),
-              metadata: { filename: file.originalname } // include for frontend
-            });
+          uploadStream.on("finish", async () => {
+            try {
+              // After upload, set scannedDocId in metadata
+              const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
+              await filesCollection.updateOne(
+                { _id: uploadStream.id },
+                { $set: { "metadata.scannedDocId": uploadStream.id } }
+              );
+
+              resolve({
+                id: uploadStream.id,
+                filename: file.originalname,
+                uploadDate: new Date(),
+                metadata: {
+                  filename: file.originalname,
+                  scannedDocId: uploadStream.id,
+                  scannedDocName: file.originalname,
+                },
+              });
+            } catch (err) {
+              reject(err);
+            }
           });
 
           uploadStream.on("error", reject);

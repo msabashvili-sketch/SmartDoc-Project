@@ -15,7 +15,7 @@
   --search-font-size: 0.8rem;
   --search-border-color: #dad8d8;
   --search-bg: #fff;
-  --search-text-color: #000;
+  --search-text-color: #222222;
   --search-padding: 0 10px;
   --banner-width: 98%;
 }
@@ -111,7 +111,7 @@ html {
   width: 100%;
   overflow-x: auto;
   padding-left: 14px;
-  margin-top: -10px;
+  margin-top: -3px;
 }
 
 /* Table */
