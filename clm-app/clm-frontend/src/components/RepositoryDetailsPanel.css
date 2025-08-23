@@ -88,7 +88,7 @@
   border-radius: 7px;
   padding: 12px 16px;
   margin-bottom: 10px;
-  margin-top: 0px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -399,4 +399,51 @@
 @keyframes zoomIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+.text-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-popup-content {
+  position: relative;
+  width: 90%;
+  height: 90%;
+  background: white;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 13px;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 3px; /* rounded box */
+  cursor: pointer;
+  z-index: 2100;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.popup-close:hover {
+  background: #ececec;
+  border-color: #999;
 }
