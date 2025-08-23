@@ -60,30 +60,46 @@ export default function RepositoryPage() {
     setIsDetailsOpen(true);
   };
 
+  // Delete repository document
+  const handleDeleteDocument = async (docId) => {
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/documents/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileIds: [docId] }),
+      });
+
+      if (!res.ok) throw new Error("Failed to delete document");
+
+      // Remove from local state
+      setFiles((prevFiles) => prevFiles.filter((file) => file._id !== docId));
+
+      // Close details panel
+      setIsDetailsOpen(false);
+      setSelectedFile(null);
+
+    } catch (err) {
+      console.error("Delete document error:", err);
+      alert(t("detailspanel.deleteError"));
+    }
+  };
+
   return (
     <>
       <DashboardHeader />
       <div className="repository-page">
         {/* Top space */}
-        <div
-          className="repository-top-space"
-          style={{ backgroundColor: "#f0f0f0" }}
-        >
+        <div className="repository-top-space" style={{ backgroundColor: "#f0f0f0" }}>
           <h1 className="repository-title">{t("repositorypage.repository")}</h1>
-          <label
-            className="upload-button"
-            onClick={() => setIsPopupOpen(true)}
-          >
+          <label className="upload-button" onClick={() => setIsPopupOpen(true)}>
             {t("repositorypage.upload document")}
           </label>
         </div>
 
         {/* Search bar + Filter button */}
         <div className="search-filter-bar">
-          <button
-            className="filter-button"
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-          >
+          <button className="filter-button" onClick={() => setIsFilterOpen(!isFilterOpen)}>
             {t("repositorypage.filters")}
           </button>
           <input
@@ -168,6 +184,7 @@ export default function RepositoryPage() {
           isOpen={isDetailsOpen}
           file={selectedFile}
           onClose={() => setIsDetailsOpen(false)}
+          onDelete={handleDeleteDocument} // ✅ pass delete function
         />
       </div>
     </>

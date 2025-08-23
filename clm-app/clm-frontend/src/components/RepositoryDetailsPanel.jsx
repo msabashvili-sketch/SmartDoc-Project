@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import "./RepositoryDetailsPanel.css";
 import { useTranslation } from "react-i18next";
 
-export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
+export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete }) {
   const { t } = useTranslation();
   const [selectedSection, setSelectedSection] = useState(null);
   const [showTextPopup, setShowTextPopup] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!file) return null; // don't render without data
 
@@ -33,11 +34,10 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
 
       {/* Content */}
       <div className="details-panel-content">
-        
-         {/* First subtitle */}
-  <div className="repository-details-subtitle">
-    {t("detailspanel.dates")}
-  </div>
+        {/* First subtitle */}
+        <div className="repository-details-subtitle">
+          {t("detailspanel.dates")}
+        </div>
 
         {/* Agreement Date field */}
         <div className="details-field">
@@ -60,7 +60,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
         {/* Second section subtitle */}
         <div className="repository-details-secondsubtitle">{t("detailspanel.document")}</div>
 
-        {/* Stacked document field with common border */}
+        {/* Stacked document field */}
         <div className="stacked-documents">
           {/* Text Version - Popup */}
           <div
@@ -103,7 +103,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
         {/* Third subtitle */}
         <div className="repository-details-secondsubtitle">{t("detailspanel.contactInfo")}</div>
 
-        {/* Contact info field (styled like dates) */}
+        {/* Contact info fields */}
         <div className="details-field">
           <span className="details-field-label">{t("detailspanel.email")}</span>
           <div className="details-field-divider"></div>
@@ -112,7 +112,6 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
           </span>
         </div>
 
-        {/* Phone field */}
         <div className="details-field">
           <span className="details-field-label">{t("detailspanel.phone")}</span>
           <div className="details-field-divider"></div>
@@ -125,7 +124,9 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
       {/* Footer with buttons */}
       <div className="details-panel-footer">
         <button className="archive-btn">{t("detailspanel.Send to Archive")}</button>
-        <button className="delete-btn">{t("detailspanel.Delete")}</button>
+        <button className="delete-btn" onClick={() => setShowDeleteConfirm(true)}>
+          {t("detailspanel.Delete")}
+        </button>
       </div>
 
       {/* Text Version Popup */}
@@ -151,6 +152,33 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose }) {
               height="100%"
               style={{ border: "none" }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirm && (
+        <div className="confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="confirm-box" onClick={(e) => e.stopPropagation()}>
+            <p>{t("detailspanel.confirmDelete")}</p>
+            <div className="confirm-actions">
+              <button
+                className="confirm-cancel"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                {t("detailspanel.cancel")}
+              </button>
+              <button
+                className="confirm-delete"
+                onClick={() => {
+                  onDelete(file._id);
+                  setShowDeleteConfirm(false);
+                  onClose();
+                }}
+              >
+                {t("detailspanel.Delete")}
+              </button>
+            </div>
           </div>
         </div>
       )}

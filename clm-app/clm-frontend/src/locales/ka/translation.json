@@ -91,7 +91,9 @@
   "notAvailable": " არ არის ხელმისაწვდომი",
   "textVersion": "ტექსტური ვერსია",
   "Delete": "წაშლა",
-  "Send to Archive": "არქივში გადატანა"
+  "Send to Archive": "არქივში გადატანა",
+  "confirmDelete": "ნამდვილად გსურს წაშლა?",
+  "cancel": "უკან დაბრუნება"
 }
 
 }
