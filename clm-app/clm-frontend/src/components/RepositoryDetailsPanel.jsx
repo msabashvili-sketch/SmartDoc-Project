@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// RepositoryDetailsPanel.jsx
+import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import "./RepositoryDetailsPanel.css";
 import { useTranslation } from "react-i18next";
@@ -8,6 +9,8 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
   const [selectedSection, setSelectedSection] = useState(null);
   const [showTextPopup, setShowTextPopup] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const textContainerRef = useRef(null);
 
   if (!file) return null;
 
@@ -54,7 +57,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
           {/* Document Section */}
           <div className="repository-details-secondsubtitle">{t("detailspanel.document")}</div>
           <div className="stacked-documents">
-            {/* Text Version (open popup fullscreen) */}
+            {/* Text Version */}
             <div
               className={`details-field-section ${selectedSection === "text" ? "selected" : ""}`}
               onClick={() => {
@@ -74,11 +77,8 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
               onClick={() => {
                 setSelectedSection("scanned");
                 const url = getScannedDocUrl();
-                if (url) {
-                  window.open(url, "_blank");
-                } else {
-                  alert(t("detailspanel.noScannedDoc"));
-                }
+                if (url) window.open(url, "_blank");
+                else alert(t("detailspanel.noScannedDoc"));
               }}
             >
               <span className="details-field-section-label">{t("detailspanel.scannedDocument")}</span>
@@ -110,16 +110,13 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
           </button>
         </div>
 
-        {/* Delete Confirmation Popup (INSIDE panel) */}
+        {/* Delete Confirmation Popup */}
         {showDeleteConfirm && (
           <div className="confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
             <div className="confirm-box" onClick={(e) => e.stopPropagation()}>
               <p>{t("detailspanel.confirmDelete")}</p>
               <div className="confirm-actions">
-                <button
-                  className="confirm-cancel"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
+                <button className="confirm-cancel" onClick={() => setShowDeleteConfirm(false)}>
                   {t("detailspanel.cancel")}
                 </button>
                 <button
@@ -138,21 +135,36 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
         )}
       </div>
 
-      {/* Text Version Popup (FULLSCREEN via Portal) */}
+      {/* Text Popup with two vertical panels */}
       {showTextPopup &&
         ReactDOM.createPortal(
           <div className="text-popup-overlay" onClick={() => setShowTextPopup(false)}>
             <div className="text-popup-content" onClick={(e) => e.stopPropagation()}>
-              <button className="popup-close" onClick={() => setShowTextPopup(false)}>
-                X
-              </button>
-              <iframe
-                src={file.metadata?.textDocUrl}
-                title="Text Document"
-                width="100%"
-                height="100%"
-                style={{ border: "none" }}
-              />
+              <button className="popup-close" onClick={() => setShowTextPopup(false)}>X</button>
+
+              {/* Split layout */}
+              <div className="split-layout">
+                {/* Left: Text content */}
+                <div ref={textContainerRef} className="popup-left">
+                  <iframe
+                    src={file.metadata?.textDocUrl}
+                    title="Text Document"
+                    width="100%"
+                    height="100%"
+                    style={{ border: "none" }}
+                  />
+                </div>
+
+                {/* Right: AI tags */}
+                <div className="popup-right">
+                  <h3>{t("detailspanel.tags")}</h3>
+                  <ul>
+                    {(file.metadata?.aiTags || []).map((tag, idx) => (
+                      <li key={idx}>{tag.tag}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>,
           document.body
