@@ -10,12 +10,14 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
   const [showTextPopup, setShowTextPopup] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [textContent, setTextContent] = useState("");
+  const [loadingText, setLoadingText] = useState(false);
 
-  // Fetch text content for left panel
+  // Fetch text content
   useEffect(() => {
     if (showTextPopup && file?.metadata?.textDocId) {
       const textId = file.metadata.textDocId;
       console.log("Fetching text content for textDocId:", textId);
+      setLoadingText(true);
 
       fetch(`http://localhost:4000/api/documents/view/${textId}`)
         .then(res => {
@@ -30,22 +32,37 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
         .catch(err => {
           console.error("Error fetching text content:", err);
           setTextContent(t("detailspanel.notAvailable"));
-        });
+        })
+        .finally(() => setLoadingText(false));
     } else {
-      console.log("Text popup not open or no textDocId");
       setTextContent("");
     }
   }, [showTextPopup, file, t]);
 
   if (!file) return null;
 
-  // Get PDF URL
   const getScannedDocUrl = () => {
     if (file.metadata?.scannedDocUrl) return file.metadata.scannedDocUrl;
-    if (file.metadata?.scannedDocId) {
-      return `http://localhost:4000/api/documents/view/${file.metadata.scannedDocId}`;
-    }
+    if (file.metadata?.scannedDocId) return `http://localhost:4000/api/documents/view/${file.metadata.scannedDocId}`;
     return null;
+  };
+
+  // Split text into pages (~50 lines per page)
+  const renderPages = () => {
+    if (!textContent) return null;
+    const lines = textContent.split("\n");
+    const pageSize = 55;
+    const pages = [];
+    for (let i = 0; i < lines.length; i += pageSize) {
+      pages.push(lines.slice(i, i + pageSize));
+    }
+    return pages.map((pageLines, idx) => (
+      <div key={idx} className="page">
+        {pageLines.map((line, i) => (
+          <p key={i}>{line}</p>
+        ))}
+      </div>
+    ));
   };
 
   return (
@@ -155,18 +172,22 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
         )}
       </div>
 
-      {/* Text Popup with two vertical panels */}
+      {/* Text Popup with pages */}
       {showTextPopup &&
         ReactDOM.createPortal(
           <div className="text-popup-overlay" onClick={() => setShowTextPopup(false)}>
             <div className="text-popup-content" onClick={(e) => e.stopPropagation()}>
               <button className="popup-close" onClick={() => setShowTextPopup(false)}>X</button>
 
-              {/* Split layout 2:1 */}
+              {/* Split layout */}
               <div className="split-layout">
                 {/* Left: Text content */}
                 <div className="popup-left">
-                  <pre>{textContent || t("detailspanel.notAvailable")}</pre>
+                  {loadingText ? (
+                    <div className="loading">{t("detailspanel.loading") || "Loading..."}</div>
+                  ) : (
+                    renderPages()
+                  )}
                 </div>
 
                 {/* Right: AI tags */}
