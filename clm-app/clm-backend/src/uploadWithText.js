@@ -1,50 +1,77 @@
-// src/uploadWithText.js
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
+const Tesseract = require("tesseract.js");
 const { getBucket } = require("./gridfs");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Placeholder AI function: replace with your AI logic
+// Placeholder AI function
 const generateAITags = async (text) => {
-  console.log("Generating AI tags (placeholder)"); // 🔹 debug
+  console.log("Generating AI tags (placeholder)");
   return [];
 };
 
+// OCR with Tesseract, supporting Georgian
+const runOCR = async (buffer) => {
+  console.log("Running OCR...");
+  try {
+    const { data: { text } } = await Tesseract.recognize(buffer, "eng+kat");
+    console.log("OCR completed (first 100 chars):", text.substring(0, 100));
+    return text;
+  } catch (err) {
+    console.error("OCR failed:", err);
+    return "";
+  }
+};
+
 const uploadAndParseFiles = async (req, res) => {
-  console.log("uploadAndParseFiles called"); // 🔹 confirm route is triggered
+  console.log("uploadAndParseFiles called");
 
   if (!req.files || req.files.length === 0) {
-    console.log("No files uploaded"); // 🔹
     return res.status(400).send("No files uploaded");
   }
 
   const bucket = getBucket();
-  if (!bucket) return res.status(500).send("MongoDB not connected yet. Try again later.");
+  if (!bucket) return res.status(500).send("MongoDB not connected yet.");
 
-  const db = bucket.s.db; // access raw MongoDB db
+  const db = bucket.s.db;
   const filesCollection = db.collection(`${bucket.s.options.bucketName}.files`);
-  const textCollection = db.collection("TextDocuments"); // separate collection for text files
+  const textCollection = db.collection("TextDocuments");
 
   try {
     const uploadedFiles = [];
 
     for (const file of req.files) {
-      console.log(`Processing file: ${file.originalname}`); // 🔹
+      console.log(`Processing: ${file.originalname}`);
 
-      // 1️⃣ Parse PDF text
-      let pdfText = "";
-      try {
-        const pdfData = await pdfParse(file.buffer);
-        pdfText = pdfData.text;
-        console.log(`Parsed text (first 100 chars):`, pdfText.substring(0, 100)); // 🔹
-      } catch (err) {
-        console.error(`Failed to parse PDF text for ${file.originalname}:`, err);
+      let extractedText = "";
+
+      // PDF files
+      if (file.mimetype === "application/pdf") {
+        try {
+          const pdfData = await pdfParse(file.buffer);
+          extractedText = pdfData.text.trim();
+          console.log(`Parsed PDF text length: ${extractedText.length}`);
+        } catch (err) {
+          console.error(`PDF parsing failed for ${file.originalname}:`, err);
+        }
+
+        if (!extractedText || extractedText.length < 20) {
+          console.log("Fallback to OCR for scanned PDF...");
+          extractedText = await runOCR(file.buffer);
+        }
+      }
+      // Image files
+      else if (file.mimetype.startsWith("image/")) {
+        console.log("Image detected. Running OCR...");
+        extractedText = await runOCR(file.buffer);
+      } else {
+        console.log(`Unsupported file type: ${file.mimetype}`);
       }
 
-      // 2️⃣ Upload PDF file into GridFS
-      const pdfUploadStream = bucket.openUploadStream(file.originalname, {
+      // Upload original file to GridFS
+      const uploadStream = bucket.openUploadStream(file.originalname, {
         contentType: file.mimetype,
         metadata: {
           scannedDocName: file.originalname,
@@ -52,45 +79,44 @@ const uploadAndParseFiles = async (req, res) => {
       });
 
       await new Promise((resolve, reject) => {
-        pdfUploadStream.end(file.buffer);
-        pdfUploadStream.on("finish", resolve);
-        pdfUploadStream.on("error", reject);
+        uploadStream.end(file.buffer);
+        uploadStream.on("finish", resolve);
+        uploadStream.on("error", reject);
       });
 
-      const pdfId = pdfUploadStream.id;
-      console.log(`Uploaded PDF with ID: ${pdfId}`); // 🔹
+      const fileId = uploadStream.id;
+      console.log(`Uploaded file ID: ${fileId}`);
 
-      // 3️⃣ Generate AI tags
-      const aiTags = await generateAITags(pdfText);
+      // AI tags
+      const aiTags = await generateAITags(extractedText);
 
-      // 4️⃣ Save text version in separate collection
+      // Save OCR/text version
       const textDoc = {
-        pdfId,
+        fileId,
         filename: file.originalname.replace(/\.[^/.]+$/, "") + ".txt",
-        text: pdfText,
+        text: extractedText,
         aiTags,
         createdAt: new Date(),
       };
 
       const { insertedId: textId } = await textCollection.insertOne(textDoc);
-      console.log(`Inserted text document with ID: ${textId}`); // 🔹
+      console.log(`Inserted text document ID: ${textId}`);
 
-      // 5️⃣ Update PDF metadata to link text document
+      // Update GridFS metadata
       await filesCollection.updateOne(
-        { _id: pdfId },
+        { _id: fileId },
         {
           $set: {
-            "metadata.scannedDocId": pdfId,
+            "metadata.scannedDocId": fileId,
             "metadata.scannedDocName": file.originalname,
             "metadata.textDocId": textId,
             "metadata.textDocName": textDoc.filename,
           },
         }
       );
-      console.log(`Updated PDF metadata with textDocId: ${textId}`); // 🔹
 
       uploadedFiles.push({
-        pdfId,
+        fileId,
         textId,
         filename: file.originalname,
         textFilename: textDoc.filename,
@@ -98,11 +124,10 @@ const uploadAndParseFiles = async (req, res) => {
       });
     }
 
-    console.log("All files processed:", uploadedFiles); // 🔹
-    res.json({ message: "Files uploaded and parsed successfully!", files: uploadedFiles });
+    res.json({ message: "Files uploaded and processed successfully!", files: uploadedFiles });
   } catch (err) {
     console.error("Upload and parse error:", err);
-    res.status(500).send("Error uploading and parsing files");
+    res.status(500).send("Error uploading files");
   }
 };
 
