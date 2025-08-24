@@ -1,12 +1,12 @@
 // src/routes/documents.js
 const express = require("express");
 const router = express.Router();
-const { upload, uploadFilesToGridFS } = require("../upload");
+const { upload, uploadAndParseFiles } = require("../uploadWithText");
 const { getBucket } = require("../gridfs");
 const { ObjectId } = require("mongodb");
 
 // Upload route
-router.post("/upload", upload.array("files"), uploadFilesToGridFS);
+router.post("/upload", upload.array("files"), uploadAndParseFiles);
 
 // List all import files (not in repository)
 router.get("/", async (req, res) => {
@@ -38,7 +38,7 @@ router.get("/repository", async (req, res) => {
   }
 });
 
-// Stream file for viewing
+// Stream file for viewing (PDFs and text)
 router.get("/view/:id", async (req, res) => {
   try {
     const fileId = req.params.id;
@@ -57,10 +57,18 @@ router.get("/view/:id", async (req, res) => {
       "Content-Disposition",
       `inline; filename="${file.filename}"; filename*=UTF-8''${encodedFilename}`
     );
-    res.setHeader("Content-Type", file.contentType || "application/pdf");
+
+    // Set correct content type
+    if (file.contentType) {
+      res.setHeader("Content-Type", file.contentType);
+    } else if (file.metadata?.isTextVersion) {
+      res.setHeader("Content-Type", "text/plain");
+    } else {
+      res.setHeader("Content-Type", "application/pdf");
+    }
 
     const downloadStream = bucket.openDownloadStream(_id);
-    downloadStream.on("error", err => {
+    downloadStream.on("error", (err) => {
       console.error("❌ Stream error:", err);
       res.status(500).send("Error streaming file");
     });

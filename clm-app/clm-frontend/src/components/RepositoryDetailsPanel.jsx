@@ -1,5 +1,5 @@
-// RepositoryDetailsPanel.jsx
-import React, { useState, useRef } from "react";
+// src/components/RepositoryDetailsPanel.jsx
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import "./RepositoryDetailsPanel.css";
 import { useTranslation } from "react-i18next";
@@ -9,11 +9,37 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
   const [selectedSection, setSelectedSection] = useState(null);
   const [showTextPopup, setShowTextPopup] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [textContent, setTextContent] = useState("");
 
-  const textContainerRef = useRef(null);
+  // Fetch text content for left panel
+  useEffect(() => {
+    if (showTextPopup && file?.metadata?.textDocId) {
+      const textId = file.metadata.textDocId;
+      console.log("Fetching text content for textDocId:", textId);
+
+      fetch(`http://localhost:4000/api/documents/view/${textId}`)
+        .then(res => {
+          console.log("Fetch response status:", res.status);
+          if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+          return res.text();
+        })
+        .then(data => {
+          console.log("Fetched text length:", data.length);
+          setTextContent(data);
+        })
+        .catch(err => {
+          console.error("Error fetching text content:", err);
+          setTextContent(t("detailspanel.notAvailable"));
+        });
+    } else {
+      console.log("Text popup not open or no textDocId");
+      setTextContent("");
+    }
+  }, [showTextPopup, file, t]);
 
   if (!file) return null;
 
+  // Get PDF URL
   const getScannedDocUrl = () => {
     if (file.metadata?.scannedDocUrl) return file.metadata.scannedDocUrl;
     if (file.metadata?.scannedDocId) {
@@ -30,9 +56,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
           <div className="details-title-container">
             <h2 className="details-title">{file.filename}</h2>
           </div>
-          <button className="repository-details-cancel" onClick={onClose}>
-            ×
-          </button>
+          <button className="repository-details-cancel" onClick={onClose}>×</button>
         </div>
 
         {/* Content */}
@@ -42,16 +66,12 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
           <div className="details-field">
             <span className="details-field-label">{t("detailspanel.agreementDate")}</span>
             <div className="details-field-divider"></div>
-            <span className="details-field-value">
-              {file.metadata?.agreementDate || "-"}
-            </span>
+            <span className="details-field-value">{file.metadata?.agreementDate || "-"}</span>
           </div>
           <div className="details-field">
             <span className="details-field-label">{t("detailspanel.expiryDate")}</span>
             <div className="details-field-divider"></div>
-            <span className="details-field-value">
-              {file.metadata?.expiryDate || "-"}
-            </span>
+            <span className="details-field-value">{file.metadata?.expiryDate || "-"}</span>
           </div>
 
           {/* Document Section */}
@@ -142,17 +162,11 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
             <div className="text-popup-content" onClick={(e) => e.stopPropagation()}>
               <button className="popup-close" onClick={() => setShowTextPopup(false)}>X</button>
 
-              {/* Split layout */}
+              {/* Split layout 2:1 */}
               <div className="split-layout">
                 {/* Left: Text content */}
-                <div ref={textContainerRef} className="popup-left">
-                  <iframe
-                    src={file.metadata?.textDocUrl}
-                    title="Text Document"
-                    width="100%"
-                    height="100%"
-                    style={{ border: "none" }}
-                  />
+                <div className="popup-left">
+                  <pre>{textContent || t("detailspanel.notAvailable")}</pre>
                 </div>
 
                 {/* Right: AI tags */}

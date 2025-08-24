@@ -80,13 +80,13 @@
 
 
 "detailspanel": {
-  "dates": "თარიღები",
+  "dates": "თარიღი",
   "document": "დოკუმენტი",
   "agreementDate": "დაწყების თარიღი",
   "expiryDate": "დასრულების თარიღი",
   "phone": "ტელეფონი",
   "email": "ელ. ფოსტა",
-  "contactInfo": "საკონტაქტო ინფორმაცია",
+  "contactInfo": "კონტაქტი",
   "scannedDocument": "დასკანერებული დოკუმენტი",
   "notAvailable": " არ არის ხელმისაწვდომი",
   "textVersion": "ტექსტური ვერსია",
