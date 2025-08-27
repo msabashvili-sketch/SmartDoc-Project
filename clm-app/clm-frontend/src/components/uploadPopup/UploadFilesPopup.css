@@ -75,20 +75,15 @@
 
 /* Drop area */
 .drop-area {
-  flex: 1;
-  border: var(--drop-area-border);
-  border-radius: var(--drop-area-border-radius);
+  width: 100%;
+  height: 100%; /* flexible height from parent */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 0.3s, background-color 0.3s;
-  position: relative;
-  font-size: 16px;
-  font-weight: 500;
-  padding: 10px;
+  border: 2px dashed #ccc;
+  box-sizing: border-box;
+  background-color: #fcfcfc;
+  border-radius: 5px;
+  border-color: #dcdcdc;
 }
 
 .drop-area:hover {
@@ -100,10 +95,51 @@
   display: none;
 }
 
+.drop-area-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  font-size: 16px;
+  color: #555;
+}
+
 .browse-link {
   color: var(--browse-link-color);
   text-decoration: underline;
   cursor: pointer;
+  margin-left: 4px; /* adds space after "or" */
+}
+
+.drop-area-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* keep "+ Add more" on the right */
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(156, 156, 156, 0.1);
+  padding: 8px 12px;
+  height: 45px; /* fixed height */
+  position: relative;
+}
+
+.file-count {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  color:#555
+}
+
+.add-more-label {
+  color: #2085cc;
+  cursor: pointer;
+  margin-left: 10px;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: bold; 
 }
 
 /* File icons container */

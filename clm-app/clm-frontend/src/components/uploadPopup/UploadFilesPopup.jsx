@@ -100,15 +100,31 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
+
+          {/* Drop area header */}
+          <div className="drop-area-header">
+            <span className="file-count">
+              {files.length} file{files.length !== 1 ? "s" : ""} selected
+            </span>
+            <label className="add-more-label">
+              + Add more
+              <input type="file" multiple onChange={handleBrowse} style={{ display: "none" }} />
+            </label>
+          </div>  
+
+          {/* Drop area content */}
           {files.length === 0 ? (
-            <p>
+            <div className="drop-area-placeholder">
               Drag and drop files here or{" "}
-              <span className="browse-link">browse files</span>
-            </p>
+              <label className="browse-link">
+                browse files
+                <input type="file" multiple onChange={handleBrowse} style={{ display: "none" }} />    
+              </label>
+            </div>
           ) : (
             <div className="file-icons-container">
               {files.map((file, idx) => {
-                const size = Math.max(300 - files.length * 35, 75);
+                const size = Math.max(300 - files.length * 35, 95);
 
                 let maxNameLength;
                 if (size >= 250) maxNameLength = 40;
