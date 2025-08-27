@@ -1,6 +1,8 @@
+// src/uploadWithText.js
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const Tesseract = require("tesseract.js");
+const sharp = require("sharp");
 const { getBucket } = require("./gridfs");
 
 const storage = multer.memoryStorage();
@@ -12,13 +14,70 @@ const generateAITags = async (text) => {
   return [];
 };
 
-// OCR with Tesseract, supporting Georgian
+// Convert buffer to PNG (normalize input)
+async function bufferToPng(buffer) {
+  try {
+    return await sharp(buffer).png().toBuffer();
+  } catch (err) {
+    console.error("Sharp conversion failed:", err);
+    return buffer;
+  }
+}
+
+// OCR with Tesseract + multi-column support
 const runOCR = async (buffer) => {
   console.log("Running OCR...");
   try {
-    const { data: { text } } = await Tesseract.recognize(buffer, "eng+kat");
-    console.log("OCR completed (first 100 chars):", text.substring(0, 100));
-    return text;
+    const pngBuffer = await bufferToPng(buffer);
+    const image = sharp(pngBuffer);
+    const metadata = await image.metadata();
+
+    console.log("Image metadata:", metadata);
+
+    // If image is wide → try splitting into 2 columns
+    if (metadata.width > 1000 && metadata.height > 0) {
+      console.log("Wide image detected → splitting into 2 columns...");
+
+      const midX = Math.floor(metadata.width / 2);
+      const leftWidth = Math.max(midX, 1);
+      const rightWidth = Math.max(metadata.width - midX, 1);
+
+      try {
+        const leftBuffer = await image
+          .extract({ left: 0, top: 0, width: leftWidth, height: metadata.height })
+          .toBuffer();
+
+        const rightBuffer = await image
+          .extract({ left: midX, top: 0, width: rightWidth, height: metadata.height })
+          .toBuffer();
+
+        const leftResult = await Tesseract.recognize(leftBuffer, "eng+kat", {
+          tessedit_pageseg_mode: 6,
+        });
+        const rightResult = await Tesseract.recognize(rightBuffer, "eng+kat", {
+          tessedit_pageseg_mode: 6,
+        });
+
+        const combined =
+          (leftResult.data.text || "").trim() + "\n\n" + (rightResult.data.text || "").trim();
+
+        console.log("OCR (columns) length:", combined.length);
+        return combined;
+      } catch (splitErr) {
+        console.error("Column split OCR failed, falling back:", splitErr);
+        const result = await Tesseract.recognize(pngBuffer, "eng+kat", {
+          tessedit_pageseg_mode: 4,
+        });
+        return result.data.text;
+      }
+    }
+
+    // Single column OCR
+    const result = await Tesseract.recognize(pngBuffer, "eng+kat", {
+      tessedit_pageseg_mode: 4,
+    });
+    console.log("OCR (single column) length:", result.data.text.length);
+    return result.data.text;
   } catch (err) {
     console.error("OCR failed:", err);
     return "";
@@ -44,10 +103,9 @@ const uploadAndParseFiles = async (req, res) => {
 
     for (const file of req.files) {
       console.log(`Processing: ${file.originalname}`);
-
       let extractedText = "";
 
-      // PDF files
+      // PDF parsing
       if (file.mimetype === "application/pdf") {
         try {
           const pdfData = await pdfParse(file.buffer);
@@ -58,13 +116,13 @@ const uploadAndParseFiles = async (req, res) => {
         }
 
         if (!extractedText || extractedText.length < 20) {
-          console.log("Fallback to OCR for scanned PDF...");
+          console.log("Fallback → OCR for scanned PDF...");
           extractedText = await runOCR(file.buffer);
         }
       }
       // Image files
       else if (file.mimetype.startsWith("image/")) {
-        console.log("Image detected. Running OCR...");
+        console.log("Image detected → running OCR...");
         extractedText = await runOCR(file.buffer);
       } else {
         console.log(`Unsupported file type: ${file.mimetype}`);
@@ -73,9 +131,7 @@ const uploadAndParseFiles = async (req, res) => {
       // Upload original file to GridFS
       const uploadStream = bucket.openUploadStream(file.originalname, {
         contentType: file.mimetype,
-        metadata: {
-          scannedDocName: file.originalname,
-        },
+        metadata: { scannedDocName: file.originalname },
       });
 
       await new Promise((resolve, reject) => {
@@ -124,7 +180,10 @@ const uploadAndParseFiles = async (req, res) => {
       });
     }
 
-    res.json({ message: "Files uploaded and processed successfully!", files: uploadedFiles });
+    res.json({
+      message: "Files uploaded and processed successfully!",
+      files: uploadedFiles,
+    });
   } catch (err) {
     console.error("Upload and parse error:", err);
     res.status(500).send("Error uploading files");

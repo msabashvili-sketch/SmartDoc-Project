@@ -67,6 +67,10 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
                 <div className="toggle-circle"></div>
                 <span>Import</span>
               </div>
+
+              <p className="option-description-2">
+                Upload files without AI to tag data. AI will be used to OCR documents to allow for advenced search, and you may manually tag data after upload.
+              </p>
             </div>
 
             <div className="popup-footer">
