@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import "./UploadFilesPopup.css";
 
@@ -38,9 +39,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
     setIsUploading(true);
     setUploadProgress(0);
-    let progress = 0;
 
-    // Start smooth progress interval
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
         const next = prev + Math.random() * 5;
@@ -59,7 +58,6 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
       const data = await res.json();
       console.log("Uploaded files:", data.files);
 
-      // Complete progress to 100% and clear interval
       clearInterval(interval);
       setUploadProgress(100);
 
@@ -127,8 +125,9 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                 const size = Math.max(300 - files.length * 35, 95);
 
                 let maxNameLength;
-                if (size >= 250) maxNameLength = 40;
-                else if (size >= 150) maxNameLength = 23;
+                if (size >= 250) maxNameLength = 36;
+                else if (size >= 200) maxNameLength = 31;
+                else if (size >= 150) maxNameLength = 25;
                 else if (size >= 80) maxNameLength = 17;
                 else maxNameLength = 8;
 
@@ -137,14 +136,47 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                     ? file.name.slice(0, maxNameLength) + "..."
                     : file.name;
 
+                // Remove file handler
+                const handleRemoveFile = () => {
+                  setFiles((prev) => prev.filter((_, i) => i !== idx));      
+                };
+
                 return (
                   <div key={idx} className="file-item">
-                    <img
-                      src={getFileIcon(file)}
-                      alt={file.name}
-                      className="file-icon"
-                      style={{ width: `${size}px`, height: `${size}px` }}
-                    />
+                    <div
+                      className="file-icon-wrapper"
+                      style={{ width: `${size}px`, height: `${size}px`, position: "relative" }}
+                    >
+                      <img
+                        src={getFileIcon(file)}
+                        alt={file.name}
+                        className="file-icon"
+                        style={{ width: `${size}px`, height: `${size}px` }}
+                      />
+                      {/* Cancel button */}
+                      <button
+                        className="remove-file-btn"
+                        onClick={handleRemoveFile}
+                        style={{
+                          position: "absolute",
+                          top: "-2px",
+                          right: "-2px",
+                          width: `${size * 0.1}px`,
+                          height: `${size * 0.1}px`,
+                          border: "none",
+                          borderRadius: "50%",
+                          background: "transparent",
+                          padding: 0,
+                          cursor: "pointer"
+                        }}
+                      >
+                        <img
+                          src="/assets/cancel-icon.png"
+                          alt="Remove"
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </button>
+                    </div> 
                     <p className="file-name" title={file.name} style={{ maxWidth: `${size}px` }}>
                       {displayName}
                     </p>
