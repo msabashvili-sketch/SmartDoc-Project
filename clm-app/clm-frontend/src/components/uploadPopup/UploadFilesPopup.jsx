@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "./UploadFilesPopup.css";
 
@@ -6,6 +5,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]); // New state
 
   if (!isOpen) return null;
 
@@ -61,13 +61,18 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
       clearInterval(interval);
       setUploadProgress(100);
 
+      // Mark all files as uploaded
+      setUploadedFiles(files);
+
+      // Close popup automatically after 2 second
       setTimeout(() => {
-        alert("Files uploaded successfully!");
         setFiles([]);
+        setUploadedFiles([]);
         setIsUploading(false);
         setUploadProgress(0);
         onCancel();
-      }, 500);
+      }, 2000);
+
     } catch (err) {
       clearInterval(interval);
       console.error("Upload error:", err);
@@ -153,14 +158,14 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                         className="file-icon"
                         style={{ width: `${size}px`, height: `${size}px` }}
                       />
-                      {/* Cancel button */}
+                      {/* Cancel / Check button */}
                       <button
                         className="remove-file-btn"
                         onClick={handleRemoveFile}
                         style={{
                           position: "absolute",
-                          top: "-2px",
-                          right: "-2px",
+                          top: "-0px",
+                          right: "-0px",
                           width: `${size * 0.1}px`,
                           height: `${size * 0.1}px`,
                           border: "none",
@@ -171,8 +176,8 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                         }}
                       >
                         <img
-                          src="/assets/cancel-icon.png"
-                          alt="Remove"
+                          src={uploadedFiles.includes(file) ? "/assets/check-icon.png" : "/assets/cancel-icon.png"}
+                          alt={uploadedFiles.includes(file) ? "Uploaded" : "Remove"}
                           style={{ width: "100%", height: "100%" }}
                         />
                       </button>
