@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next"; // <-- import useTranslation
 import "./UploadPopup.css";
 import UploadFilesPopup from "./UploadFilesPopup";
 
 export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedImage }) {
+  const { t } = useTranslation(); // <-- initialize translation
   const [selectedOption, setSelectedOption] = useState(null);
   const [isFilesPopupOpen, setIsFilesPopupOpen] = useState(false);
 
@@ -23,7 +25,7 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
       {!isFilesPopupOpen && (
         <div className="popup-overlay">
           <div className="popup-window">
-            <h2 className="popup-title">Upload documents</h2>
+            <h2 className="popup-title">{t("uploadpopup.upload_documents")}</h2>
 
             {/* Smart Import option */}
             <div
@@ -34,23 +36,23 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
             >
               <div className="option-header">
                 <div className="toggle-circle"></div>
-                <span>Smart import</span>
+                <span>{t("uploadpopup.smart_import")}</span>
               </div>
 
               <p className="option-description">
-                Save time by using smart import AI models to scan text and automatically detect and tag key pieces of data during upload. Records will be instantly searchable and filterable.
+                {t("uploadpopup.smart_import_description")}
               </p>
 
               <div className="logo-upload" onClick={handleUpload}>
                 {uploadedImage ? (
                   <img
                     src={uploadedImage}
-                    alt="Brand Logo Preview"
+                    alt={t("uploadpopup.brand_logo_preview")}
                     className="logo-preview"
                   />
                 ) : (
                   <div className="logo-placeholder">
-                    Click to upload brand logo
+                    {t("uploadpopup.click_upload_brand_logo")}
                   </div>
                 )}
               </div>
@@ -65,23 +67,23 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
             >
               <div className="option-header">
                 <div className="toggle-circle"></div>
-                <span>Import</span>
+                <span>{t("uploadpopup.import")}</span>
               </div>
 
               <p className="option-description-2">
-                Upload files without AI to tag data. AI will be used to OCR documents to allow for advenced search, and you may manually tag data after upload.
+                {t("uploadpopup.import_description")}
               </p>
             </div>
 
             <div className="popup-footer">
               <button className="cancel-btn" onClick={onClose}>
-                Cancel
+                {t("uploadpopup.cancel")}
               </button>
               <button
                 className="select-btn"
                 onClick={() => setIsFilesPopupOpen(true)}
               >
-                Select files
+                {t("uploadpopup.select_files")}
               </button>
             </div>
           </div>

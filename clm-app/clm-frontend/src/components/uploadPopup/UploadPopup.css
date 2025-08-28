@@ -31,11 +31,12 @@
 
 /* Title */
 .popup-title {
-  font-size: 20px !important;
+  font-size: 19px !important;
   font-weight: bold;
   margin-bottom: 0.5vh;
   word-break: break-word;
-  flex-shrink: 0;        /* don’t shrink */
+  flex-shrink: 0;     /* don’t shrink */
+  color: #333;
 }
 
 /* Upload options container */
@@ -85,14 +86,15 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  color: #383838;
 }
 
 /* Toggle circle */
 .toggle-circle {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   border: 2px solid #dddbdb;
   background: white;
@@ -105,17 +107,17 @@
 
 /* Option description under Smart Import */
 .option-description {
-  margin: 5px 28px;
-  font-size: 14px;
-  color: #555;
+  margin: 3px 28px;
+  font-size: 13px;
+  color: #6c6c6c;
   line-height: 1.4;
   flex-shrink: 0;
 }
 
 .option-description-2 {
-  margin: 5px 28px;
-  font-size: 14px;
-  color: #555;
+  margin: 2px 28px;
+  font-size: 13px;
+  color: #6c6c6c;
   line-height: 1.4;
   flex-shrink: 0;
 }

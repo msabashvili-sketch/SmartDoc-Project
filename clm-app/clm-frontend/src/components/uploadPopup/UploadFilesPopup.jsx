@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./UploadFilesPopup.css";
 
 export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
+  const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -35,7 +37,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
   // Upload with smooth 0-95% progress, then 100%
   const handleUploadFiles = async () => {
-    if (!files.length) return alert("Please select files first.");
+    if (!files.length) return alert(t("uploadfilespopup.select_files_first"));
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -64,7 +66,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
       // Mark all files as uploaded
       setUploadedFiles(files);
 
-      // Close popup automatically after 2 second
+      // Close popup automatically after 2 seconds
       setTimeout(() => {
         setFiles([]);
         setUploadedFiles([]);
@@ -72,11 +74,10 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
         setUploadProgress(0);
         onCancel();
       }, 2000);
-
     } catch (err) {
       clearInterval(interval);
       console.error("Upload error:", err);
-      alert("Error uploading files.");
+      alert(t("uploadfilespopup.upload_error"));
       setIsUploading(false);
       setUploadProgress(0);
     }
@@ -85,7 +86,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
   return (
     <div className="popup-overlay">
       <div className="popup-window">
-        <h2 className="popup-title">Upload documents</h2>
+        <h2 className="popup-title">{t("uploadfilespopup.upload_documents")}</h2>
 
         {/* Progress bar */}
         {isUploading && (
@@ -103,31 +104,42 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
-
           {/* Drop area header */}
           <div className="drop-area-header">
             <span className="file-count">
-              {files.length} file{files.length !== 1 ? "s" : ""} selected
+              {files.length === 0
+              ? t("uploadfilespopup.no_files")
+              : t("uploadfilespopup.files_selected", { count: files.length })}
             </span>
             <label className="add-more-label">
-              + Add more
-              <input type="file" multiple onChange={handleBrowse} style={{ display: "none" }} />
+              + {t("uploadfilespopup.add_more")}
+              <input
+                type="file"
+                multiple
+                onChange={handleBrowse}
+                style={{ display: "none" }}
+              />
             </label>
-          </div>  
+          </div>
 
           {/* Drop area content */}
           {files.length === 0 ? (
             <div className="drop-area-placeholder">
-              Drag and drop files here or{" "}
+              {t("uploadfilespopup.drag_drop_or")}{" "}
               <label className="browse-link">
-                browse files
-                <input type="file" multiple onChange={handleBrowse} style={{ display: "none" }} />    
+                {t("uploadfilespopup.browse_files")}
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleBrowse}
+                  style={{ display: "none" }}
+                />
               </label>
             </div>
           ) : (
             <div className="file-icons-container">
               {files.map((file, idx) => {
-                const size = Math.max(300 - files.length * 35, 95);
+                const size = Math.max(260 - files.length * 27, 90);
 
                 let maxNameLength;
                 if (size >= 250) maxNameLength = 36;
@@ -143,14 +155,20 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
                 // Remove file handler
                 const handleRemoveFile = () => {
-                  setFiles((prev) => prev.filter((_, i) => i !== idx));      
+                  setFiles((prev) => prev.filter((_, i) => i !== idx));
                 };
+
+                const isDone = uploadedFiles.includes(file);
 
                 return (
                   <div key={idx} className="file-item">
                     <div
                       className="file-icon-wrapper"
-                      style={{ width: `${size}px`, height: `${size}px`, position: "relative" }}
+                      style={{
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        position: "relative",
+                      }}
                     >
                       <img
                         src={getFileIcon(file)}
@@ -158,6 +176,14 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                         className="file-icon"
                         style={{ width: `${size}px`, height: `${size}px` }}
                       />
+
+                      {/* Dark overlay + white spinner while uploading */}
+                      {isUploading && !isDone && (
+                        <div className="upload-overlay">
+                          <div className="upload-spinner"></div>
+                        </div>
+                      )}
+
                       {/* Cancel / Check button */}
                       <button
                         className="remove-file-btn"
@@ -166,23 +192,42 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                           position: "absolute",
                           top: "-0px",
                           right: "-0px",
+                          transform: "translate(35%, -35%)",
                           width: `${size * 0.1}px`,
                           height: `${size * 0.1}px`,
                           border: "none",
                           borderRadius: "50%",
                           background: "transparent",
                           padding: 0,
-                          cursor: "pointer"
+                          cursor: "pointer",
                         }}
+                        disabled={isUploading && !isDone}
+                        title={
+                          isDone
+                            ? t("uploadfilespopup.uploaded")
+                            : t("uploadfilespopup.remove")
+                        }
                       >
                         <img
-                          src={uploadedFiles.includes(file) ? "/assets/check-icon.png" : "/assets/cancel-icon.png"}
-                          alt={uploadedFiles.includes(file) ? "Uploaded" : "Remove"}
+                          src={
+                            isDone
+                              ? "/assets/check-icon.png"
+                              : "/assets/cancel-icon.png"
+                          }
+                          alt={
+                            isDone
+                              ? t("uploadfilespopup.uploaded")
+                              : t("uploadfilespopup.remove")
+                          }
                           style={{ width: "100%", height: "100%" }}
                         />
                       </button>
-                    </div> 
-                    <p className="file-name" title={file.name} style={{ maxWidth: `${size}px` }}>
+                    </div>
+                    <p
+                      className="file-name"
+                      title={file.name}
+                      style={{ maxWidth: `${size}px` }}
+                    >
                       {displayName}
                     </p>
                   </div>
@@ -196,13 +241,13 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
         {/* Footer buttons */}
         <div className="popup-footer">
           <button className="cancel-btn" onClick={onCancel}>
-            Cancel
+            {t("uploadfilespopup.cancel")}
           </button>
           <button className="back-btn" onClick={onBack}>
-            Back
+            {t("uploadfilespopup.back")}
           </button>
           <button className="import-btn" onClick={handleUploadFiles}>
-            Import
+            {t("uploadfilespopup.import")}
           </button>
         </div>
       </div>

@@ -148,8 +148,12 @@
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
+  align-content: center;
+  align-items: center;
+  flex-grow: 1;  
   max-height: 100%;
   overflow-y: auto;
+  padding-top: 10px; 
 }
 
 .file-item {
@@ -163,6 +167,9 @@
 .file-icon {
   object-fit: contain;
   display: block;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .file-name {
@@ -172,6 +179,46 @@
   white-space: nowrap;
   margin-top: 0px;
   text-align: center;
+}
+
+/* Full-cover dark overlay on a file while uploading */
+.upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45); /* darken the icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  border-radius: 6px; /* matches your icon wrapper rounding if any */
+  pointer-events: none;
+  mix-blend-mode: multiply; /* only darkens icon pixels */
+}
+
+.file-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  background-color: #fcfcfc;
+  isolation: isolate; /* prevents overlay blending with background */
+}
+
+/* White circular spinner centered */
+.upload-spinner {
+  width: 36%;
+  height: 36%;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: upload-spin 0.8s linear infinite;
+}
+
+@keyframes upload-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Optional: cursor blocked on the icon while uploading */
+.file-icon-wrapper:has(.upload-overlay) {
+  cursor: progress;
 }
 
 /* Footer buttons */
