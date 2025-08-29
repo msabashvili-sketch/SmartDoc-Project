@@ -1,27 +1,35 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next"; // <-- import useTranslation
+import { useTranslation } from "react-i18next"; 
 import "./UploadPopup.css";
 import UploadFilesPopup from "./UploadFilesPopup";
 
 export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedImage }) {
-  const { t } = useTranslation(); // <-- initialize translation
+  const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState(null);
   const [isFilesPopupOpen, setIsFilesPopupOpen] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleCancelBoth = () => {
-    setIsFilesPopupOpen(false);
-    onClose(); // closes main UploadPopup
+  // Cancel main popup and reset selected option
+  const handleMainCancel = () => {
+    setSelectedOption(null); // reset selected option
+    onClose(); // close main popup
   };
 
+  // Cancel both popups
+  const handleCancelBoth = () => {
+    setSelectedOption(null); // reset selected option
+    setIsFilesPopupOpen(false);
+    onClose(); // close main popup
+  };
+
+  // Close only files popup
   const handleBack = () => {
-    setIsFilesPopupOpen(false); // closes only files popup
+    setIsFilesPopupOpen(false);
   };
 
   return (
     <>
-      {/* Only show overlay for main popup if files popup is not open */}
       {!isFilesPopupOpen && (
         <div className="popup-overlay">
           <div className="popup-window">
@@ -29,9 +37,7 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
 
             {/* Smart Import option */}
             <div
-              className={`upload-option large ${
-                selectedOption === "smart" ? "active" : ""
-              }`}
+              className={`upload-option large ${selectedOption === "smart" ? "active" : ""}`}
               onClick={() => setSelectedOption("smart")}
             >
               <div className="option-header">
@@ -60,9 +66,7 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
 
             {/* Import option */}
             <div
-              className={`upload-option small ${
-                selectedOption === "import" ? "active" : ""
-              }`}
+              className={`upload-option small ${selectedOption === "import" ? "active" : ""}`}
               onClick={() => setSelectedOption("import")}
             >
               <div className="option-header">
@@ -75,13 +79,16 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
               </p>
             </div>
 
+            {/* Footer buttons */}
             <div className="popup-footer">
-              <button className="cancel-btn" onClick={onClose}>
+              <button className="cancel-btn" onClick={handleMainCancel}>
                 {t("uploadpopup.cancel")}
               </button>
+
               <button
-                className="select-btn"
+                className={`select-btn ${!selectedOption ? "disabled" : ""}`}
                 onClick={() => setIsFilesPopupOpen(true)}
+                disabled={!selectedOption}
               >
                 {t("uploadpopup.select_files")}
               </button>

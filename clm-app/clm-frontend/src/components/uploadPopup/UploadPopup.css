@@ -122,6 +122,12 @@
   flex-shrink: 0;
 }
 
+.select-btn.disabled {
+  opacity: 0.8;           /* lighter appearance */
+  cursor: not-allowed;    /* not clickable */
+  pointer-events: none;   /* prevent clicks */
+}
+
 /* Banner upload box */
 .logo-upload {
   width: 100%;
