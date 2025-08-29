@@ -93,7 +93,14 @@ export default function RepositoryPage() {
         <div className="repository-top-space" style={{ backgroundColor: "#f0f0f0" }}>
           <h1 className="repository-title">{t("repositorypage.repository")}</h1>
           <label className="upload-button" onClick={() => setIsPopupOpen(true)}>
+            <img
+              src="/assets/upload-button-icon.png"
+              alt="Upload Icon"
+              className="upload-button-icon"
+            />
+            <span style={{ marginLeft: "6px" }}>
             {t("repositorypage.upload document")}
+            </span>
           </label>
         </div>
 

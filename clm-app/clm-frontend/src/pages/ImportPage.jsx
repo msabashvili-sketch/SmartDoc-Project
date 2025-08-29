@@ -125,7 +125,14 @@ export default function ImportPage() {
         <div className="import-top-space">
           <h1 className="import-title">{t("importpage.import")}</h1>
           <label className="upload-button" onClick={() => setIsPopupOpen(true)}>
+            <img
+              src="/assets/upload-button-icon.png"
+              alt="Upload Icon"
+              className="upload-button-icon"
+            />
+            <span style={{ marginLeft: "6px" }}>
             {t("importpage.upload document")}
+            </span>
           </label>
         </div>
 

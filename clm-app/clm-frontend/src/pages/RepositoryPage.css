@@ -71,6 +71,11 @@ html {
   right: 15px;
 }
 
+.upload-button-icon {
+  width: 13px;   /* adjust size */
+  height: 13px;  /* adjust size */
+}
+
 .upload-button:hover {
   background-color: #26858f;
   color: #fff;

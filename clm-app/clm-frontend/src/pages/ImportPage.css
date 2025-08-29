@@ -12,7 +12,7 @@
  --button-color: #ffffff;         /* Upload button text color */
  --button-padding: 8px 12px;  /* Upload button padding */
  --button-radius: 3px;         /* Upload button corner radius */
- --button-font-size: 0.8rem;     /* Upload button font size */
+ --button-font-size: 12px;     /* Upload button font size */
 
 
  --search-width: 1200px;       /* search bar width */
@@ -64,7 +64,7 @@ html {
 
 /* Upload button */
 .upload-button {
- display: inline-block;
+ display: inline-flex;
  background-color: var(--button-bg);
  color: var(--button-color);
  padding: var(--button-padding);
@@ -75,9 +75,14 @@ html {
  cursor: pointer;
  user-select: none;
  position: relative;
+ align-items: center; 
  
 }
 
+.upload-button-icon {
+  width: 13px;   /* adjust size */
+  height: 13px;  /* adjust size */
+}
 
 .upload-button input {
  display: none; /* hide file input */
