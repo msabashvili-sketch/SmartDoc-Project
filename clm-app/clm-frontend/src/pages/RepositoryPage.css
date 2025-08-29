@@ -12,7 +12,7 @@
   --button-font-size: 0.8rem;
   --search-width: 1200px;
   --search-height: 28px;
-  --search-font-size: 0.8rem;
+  --search-font-size: 13px;
   --search-border-color: #dad8d8;
   --search-bg: #fff;
   --search-text-color: #222222;
@@ -63,7 +63,7 @@ html {
   border-radius: var(--button-radius);
   border: 1px solid #1f6e77;
   font-size: var(--button-font-size);
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   user-select: none;
   position: relative;
@@ -72,8 +72,8 @@ html {
 }
 
 .upload-button-icon {
-  width: 13px;   /* adjust size */
-  height: 13px;  /* adjust size */
+  width: 14px;   /* adjust size */
+  height: 14px;  /* adjust size */
 }
 
 .upload-button:hover {
