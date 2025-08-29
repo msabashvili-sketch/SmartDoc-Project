@@ -164,6 +164,16 @@
   position: relative;
 }
 
+/* while dragging */
+.drop-area.dragging {
+  border-color: var(--drop-area-hover-border);
+  background-color: #ebfff7;
+}
+
+.upload-icon img {
+  transition: transform 0.2s;
+}
+
 .file-icon {
   object-fit: contain;
   display: block;

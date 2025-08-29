@@ -7,7 +7,8 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState([]); // New state
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isDragging, setIsDragging] = useState(false); // Drag state for upload effect
 
   if (!isOpen) return null;
 
@@ -24,6 +25,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
     event.preventDefault();
     const droppedFiles = Array.from(event.dataTransfer.files);
     setFiles((prev) => [...prev, ...droppedFiles]);
+    setIsDragging(false); // reset dragging state
   };
 
   const handleBrowse = (event) => {
@@ -33,9 +35,15 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
   const handleDragOver = (event) => {
     event.preventDefault();
+    setIsDragging(true); // show upload effect
   };
 
-  // Upload with smooth 0-95% progress, then 100%
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragging(false); // hide upload effect
+  };
+
+  // Upload function
   const handleUploadFiles = async () => {
     if (!files.length) return alert(t("uploadfilespopup.select_files_first"));
 
@@ -62,11 +70,8 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
       clearInterval(interval);
       setUploadProgress(100);
-
-      // Mark all files as uploaded
       setUploadedFiles(files);
 
-      // Close popup automatically after 2 seconds
       setTimeout(() => {
         setFiles([]);
         setUploadedFiles([]);
@@ -100,16 +105,17 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
         {/* Drop area */}
         <div
-          className="drop-area"
+          className={`drop-area ${isDragging ? "dragging" : ""}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
         >
           {/* Drop area header */}
           <div className="drop-area-header">
             <span className="file-count">
               {files.length === 0
-              ? t("uploadfilespopup.no_files")
-              : t("uploadfilespopup.files_selected", { count: files.length })}
+                ? t("uploadfilespopup.no_files")
+                : t("uploadfilespopup.files_selected", { count: files.length })}
             </span>
             <label className="add-more-label">
               + {t("uploadfilespopup.add_more")}
@@ -125,16 +131,29 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
           {/* Drop area content */}
           {files.length === 0 ? (
             <div className="drop-area-placeholder">
-              {t("uploadfilespopup.drag_drop_or")}{" "}
-              <label className="browse-link">
-                {t("uploadfilespopup.browse_files")}
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleBrowse}
-                  style={{ display: "none" }}
-                />
-              </label>
+              {isDragging ? (
+                <div className="upload-icon-wrapper">
+                  <img
+                    src="/assets/upload-icon.png"
+                    alt="Upload"
+                    style={{ width: "200px", height: "200px" }}
+                    className="upload-icon"
+                  />
+                </div>
+              ) : (
+                <>
+                  {t("uploadfilespopup.drag_drop_or")}{" "}
+                  <label className="browse-link">
+                    {t("uploadfilespopup.browse_files")}
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleBrowse}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                </>
+              )}
             </div>
           ) : (
             <div className="file-icons-container">
@@ -153,7 +172,6 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                     ? file.name.slice(0, maxNameLength) + "..."
                     : file.name;
 
-                // Remove file handler
                 const handleRemoveFile = () => {
                   setFiles((prev) => prev.filter((_, i) => i !== idx));
                 };
@@ -177,14 +195,12 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
                         style={{ width: `${size}px`, height: `${size}px` }}
                       />
 
-                      {/* Dark overlay + white spinner while uploading */}
                       {isUploading && !isDone && (
                         <div className="upload-overlay">
                           <div className="upload-spinner"></div>
                         </div>
                       )}
 
-                      {/* Cancel / Check button */}
                       <button
                         className="remove-file-btn"
                         onClick={handleRemoveFile}
