@@ -115,8 +115,8 @@ html {
 .table-container {
   width: 100%;
   overflow-x: auto;
-  padding-left: 14px;
-  margin-top: -3px;
+  padding-left: 0px;
+  margin-top: -20px;
 }
 
 /* Table */
@@ -140,15 +140,60 @@ html {
   white-space: nowrap;
 }
 
-/* First column sticky */
-.repository-table th.sticky-col,
-.repository-table td.sticky-col {
+/* Sticky checkbox column */
+.repository-table th.sticky-col.checkbox-col,
+.repository-table td.sticky-col.checkbox-col {
   position: sticky;
   left: 0;
   background-color: #ffffff;
+  z-index: 3; /* higher than other cells */
+  border-right: 1px solid #ddd;
+  width: 35px; /* adjust width for checkbox */
+  min-width: 35px;
+  max-width: 35px;
+  text-align: center;
+}
+
+/* Checkbox input style (same as ImportPage) */
+.repository-table input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+}
+
+.repository-table input[type="checkbox"]:checked {
+  background-color: #1f6e77;
+  border-color: #1f6e77;
+}
+
+.repository-table input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Sticky document title column */
+.repository-table th.sticky-col.title-col,
+.repository-table td.sticky-col.title-col {
+  position: sticky;
+  left: 35px; /* width of checkbox column */
+  background-color: #ffffff;
   z-index: 2;
   border-right: 1px solid #ddd;
-  width: 340px;  /* match ImportPage first column */
+  width: 340px; /* original width */
   min-width: 340px;
   max-width: 340px;
 }

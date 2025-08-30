@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DashboardHeader from "./DashboardHeader";
 import "./PageLayout.css";
 import { useTranslation } from "react-i18next";
+import SendModal from "./SendModal"; // Import your new modal
 
 export default function PageLayout({
   title,
@@ -11,12 +12,20 @@ export default function PageLayout({
   onUploadClick = () => {},
   onFilterClick = () => {},
   onColumnsClick = () => {},
-  onSendClick = () => {},
-  onExportClick = () => {},   // new handler for export
+  onSendClick = () => {}, // still keeping external handler if needed
+  onExportClick = () => {}, // export handler
   children,
+  selectedDocuments = [], // pass selected docs from parent table
 }) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+
+  // handle open/close
+  const handleSendClick = () => {
+    if (onSendClick) onSendClick(); // optional external handler
+    setIsSendModalOpen(true);
+  };
 
   return (
     <>
@@ -84,7 +93,7 @@ export default function PageLayout({
                 />
                 {t("repositorypage.columns")}
               </button>
-              <button className="send-button" onClick={onSendClick}>
+              <button className="send-button" onClick={handleSendClick}>
                 <img
                   src="/assets/email-icon.png"
                   alt="Send"
@@ -107,6 +116,15 @@ export default function PageLayout({
         {/* Main Content */}
         <div className="page-content">{children}</div>
       </div>
+
+      {/* Send Modal */}
+      {isSendModalOpen && (
+        <SendModal
+          isOpen={isSendModalOpen}
+          onClose={() => setIsSendModalOpen(false)}
+          selectedDocuments={selectedDocuments}
+        />
+      )}
     </>
   );
 }

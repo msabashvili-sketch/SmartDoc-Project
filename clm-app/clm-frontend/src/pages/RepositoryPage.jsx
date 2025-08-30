@@ -14,6 +14,7 @@ export default function RepositoryPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [selectedRows, setSelectedRows] = useState([]);
 
   const rowsPerPage = 25;
   const { t } = useTranslation();
@@ -75,6 +76,21 @@ export default function RepositoryPage() {
     }
   };
 
+  // Handle checkbox changes
+  const toggleRowSelection = (fileId) => {
+    setSelectedRows((prev) =>
+      prev.includes(fileId) ? prev.filter((id) => id !== fileId) : [...prev, fileId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedRows.length === currentRows.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(currentRows.map((file) => file._id));
+    }
+  };
+
   return (
     <>
       <PageLayout
@@ -92,6 +108,13 @@ export default function RepositoryPage() {
             <table className="repository-table">
               <thead>
                 <tr>
+                  <th className="sticky-col checkbox-col">
+                    <input
+                      type="checkbox"
+                      onChange={toggleSelectAll}
+                      checked={selectedRows.length === currentRows.length && currentRows.length > 0}
+                    />
+                  </th>
                   <th className="sticky-col title-col">{t("repositorypage.document title")}</th>
                   <th>{t("repositorypage.folder")}</th>
                   <th>{t("repositorypage.counterparty")}</th>
@@ -104,6 +127,16 @@ export default function RepositoryPage() {
               <tbody>
                 {currentRows.map((file) => (
                   <tr key={file._id} onClick={() => handleRowClick(file)}>
+                    <td className="sticky-col checkbox-col">
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(file._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRowSelection(file._id);
+                        }}
+                      />
+                    </td>
                     <td className="sticky-col title-col">{file.filename}</td>
                     <td>{file.metadata?.folder}</td>
                     <td>{file.metadata?.counterparty}</td>
@@ -116,6 +149,7 @@ export default function RepositoryPage() {
                 {currentRows.length < rowsPerPage &&
                   Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
                     <tr key={`empty-${i}`}>
+                      <td className="sticky-col checkbox-col">&nbsp;</td>
                       <td className="sticky-col title-col">&nbsp;</td>
                       <td>&nbsp;</td>
                       <td>&nbsp;</td>
