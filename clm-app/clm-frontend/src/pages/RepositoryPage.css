@@ -41,6 +41,7 @@ html {
   background-color: #d9edff;
   position: relative; /* keeps it in flow */
   z-index: 0;
+  overflow: hidden;
 }
 
 /* Title */
@@ -56,19 +57,18 @@ html {
 
 /* Upload button */
 .upload-button {
-  display: inline-block;
+  display: inline-flex;
   background-color: var(--button-bg);
   color: var(--button-color);
   padding: var(--button-padding);
   border-radius: var(--button-radius);
   border: 1px solid #1f6e77;
   font-size: var(--button-font-size);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   user-select: none;
   position: relative;
-  top: 0px;
-  right: 15px;
+ 
 }
 
 .upload-button-icon {

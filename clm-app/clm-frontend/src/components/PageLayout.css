@@ -1,0 +1,245 @@
+:root {
+  --header-height: 60px;
+  --top-space-height: 60px;
+  --top-space-bg: #ffffff;  /* color of top space */
+  --top-space-title-color: #534a4b;
+  --top-space-title-size: 19px;
+  --upload-btn-bg: #1f6e77;
+  --upload-btn-color: #fff;
+  --upload-btn-padding: 8px 12px;
+  --upload-btn-radius: 3px;
+  --upload-btn-font-size: 0.8rem;
+
+  --banner-height: 150px;
+  --banner-bg-size: cover;
+  --banner-bg-position: center;
+  --banner-radius: 3px;
+  --banner-text-color: #211e1e;
+}
+
+.page-layout {
+  background-color: #fff; /* ensures top space background is consistent */
+  min-height: 100vh;
+  overflow-x: hidden;
+
+ /* push content below fixed header */
+  padding-top: calc(var(--header-height) + var(--top-space-height));
+}
+
+/* Top space */
+.top-space {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--top-space-height);
+  background-color: var(--top-space-bg);
+  padding: 0 20px;
+  border-bottom: 2px solid #e7e7e7;
+  position: absolute;
+  top: var(--header-height); /* place exactly below header */
+  width: 100%;
+  z-index: 1;
+}
+
+.top-space-title {
+  color: var(--top-space-title-color);
+  font-size: var(--top-space-title-size);
+  margin: 0;
+  font-weight: 600;
+  position: relative;
+  left: 20px; 
+}
+
+/* Upload button */
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--upload-btn-bg);
+  color: var(--upload-btn-color);
+  padding: var(--upload-btn-padding);
+  border-radius: var(--upload-btn-radius);
+  font-size: var(--upload-btn-font-size);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--upload-btn-bg);
+}
+
+.upload-button:hover {
+  background-color: #26858f;
+  border-color: #26858f;
+  color: #fff;
+}
+
+.upload-button-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Optional Banner */
+.page-banner {
+  width: 98%;
+  height: var(--banner-height);
+  background-size: var(--banner-bg-size);
+  background-position: var(--banner-bg-position);
+  border-radius: var(--banner-radius);
+  margin: 15px auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.banner-text {
+  padding: 20px;
+  color: var(--banner-text-color);
+}
+
+.banner-text h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.banner-text p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Main content area */
+.page-content {
+  padding: 20px;
+}
+
+/* Wrapper to provide horizontal margins */
+.search-filter-bar-wrapper {
+  padding: 0 20px; /* horizontal space on left & right */
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+/* Search bar flex layout */
+.search-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  transform: translateY(-5px); /* shifts entire area 5px up */
+}
+
+/* Filter button */
+.filter-button {
+  background-color: #ffffff !important;
+  color: #656565 !important;
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 3px;
+  padding: 0 12px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.filter-button:hover {
+  background-color: #ffffff !important;
+  border-color: #3dd799 !important;
+}
+
+/* Search bar */
+.search-bar {
+  flex: 1; /* expand to available space */
+  height: 36px;
+  border-radius: 3px;
+  border: 1px solid #dad8d8;
+  padding: 0 10px;
+  font-size: 14px;
+  outline: none;
+}
+.search-bar:focus {
+  border-color: #37c193;
+  box-shadow: 0 0 2px rgba(55,193,147,0.5);
+}
+
+/* Buttons container on right */
+.search-buttons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Columns button */
+.columns-button {
+  background-color: #fdfdfd;
+  color: #656565;
+  border: 1px solid #d9d9d9; 
+  border-radius: 3px;
+  padding: 0 12px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.columns-button:hover {
+  background-color: #ffffff;
+  border-color: #3dd799;
+}
+
+/* Send button */
+.send-button {
+  background-color: #ffffff;
+  color: #656565;
+  border: 1px solid #d9d9d9; 
+  border-radius: 3px;
+  padding: 0 12px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.send-button:hover {
+  background-color: #ffffff;
+  border-color: #3dd799;
+}
+
+/* General button icon */
+.button-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  object-fit: contain;
+}
+
+/* Filter button icon only */
+.filter-button .button-icon {
+  width: 17px;   /* make it larger */
+  height: 17px;
+  margin-right: 0; /* no text, so no spacing needed */
+}
+
+/* Make buttons with icon + text align horizontally */
+.columns-button,
+.send-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px; /* space between icon and text */
+}
+
+/* Filter stays icon only */
+.filter-button .button-icon {
+  margin-right: 0;
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d9d9d9;
+  background-color: white;
+  color: #656565;
+  padding: 0px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.export-button:hover {
+  background-color: #ffffff;
+  border-color: #3dd799;
+}

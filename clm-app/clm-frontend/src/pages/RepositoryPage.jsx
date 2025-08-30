@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DashboardHeader from "../components/DashboardHeader";
+import PageLayout from "../components/PageLayout";
 import FilterPanel from "../components/FilterPanel";
 import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
@@ -8,19 +8,15 @@ import { useTranslation } from "react-i18next";
 
 export default function RepositoryPage() {
   const [files, setFiles] = useState([]);
-  const [bannerImage, setBannerImage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
   const rowsPerPage = 25;
   const { t } = useTranslation();
-
-  // Fetch banner
-  useEffect(() => {
-    setBannerImage("/images/banner-placeholder.jpg");
-  }, []);
 
   // Fetch repository files
   const fetchFiles = async () => {
@@ -37,7 +33,7 @@ export default function RepositoryPage() {
     fetchFiles();
   }, []);
 
-  // Pagination calculation
+  // Pagination
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = files.slice(indexOfFirstRow, indexOfLastRow);
@@ -48,9 +44,8 @@ export default function RepositoryPage() {
     setCurrentPage(pageNumber);
   };
 
-  // Apply filters handler
+  // Apply filters
   const handleApplyFilters = () => {
-    console.log("Filters applied");
     setIsFilterOpen(false);
   };
 
@@ -62,7 +57,6 @@ export default function RepositoryPage() {
 
   // Delete repository document
   const handleDeleteDocument = async (docId) => {
-
     try {
       const res = await fetch(`http://localhost:4000/api/documents/delete`, {
         method: "POST",
@@ -72,13 +66,9 @@ export default function RepositoryPage() {
 
       if (!res.ok) throw new Error("Failed to delete document");
 
-      // Remove from local state
-      setFiles((prevFiles) => prevFiles.filter((file) => file._id !== docId));
-
-      // Close details panel
+      setFiles((prev) => prev.filter((file) => file._id !== docId));
       setIsDetailsOpen(false);
       setSelectedFile(null);
-
     } catch (err) {
       console.error("Delete document error:", err);
       alert(t("detailspanel.deleteError"));
@@ -87,35 +77,13 @@ export default function RepositoryPage() {
 
   return (
     <>
-      <DashboardHeader />
-      <div className="repository-page">
-        {/* Top space */}
-        <div className="repository-top-space" style={{ backgroundColor: "#f0f0f0" }}>
-          <h1 className="repository-title">{t("repositorypage.repository")}</h1>
-          <label className="upload-button" onClick={() => setIsPopupOpen(true)}>
-            <img
-              src="/assets/upload-button-icon.png"
-              alt="Upload Icon"
-              className="upload-button-icon"
-            />
-            <span style={{ marginLeft: "6px" }}>
-            {t("repositorypage.upload document")}
-            </span>
-          </label>
-        </div>
-
-        {/* Search bar + Filter button */}
-        <div className="search-filter-bar">
-          <button className="filter-button" onClick={() => setIsFilterOpen(!isFilterOpen)}>
-            {t("repositorypage.filters")}
-          </button>
-          <input
-            type="text"
-            className="search-bar"
-            placeholder={t("repositorypage.search documents...")}
-          />
-        </div>
-
+      <PageLayout
+        title={t("repositorypage.repository")}
+        showUploadButton={true}
+        showBanner={false}
+        onUploadClick={() => setIsPopupOpen(true)}
+        onFilterClick={() => setIsFilterOpen(!isFilterOpen)}
+      >
         {/* Main content */}
         <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
           <FilterPanel isOpen={isFilterOpen} onApply={handleApplyFilters} />
@@ -145,8 +113,6 @@ export default function RepositoryPage() {
                     <td>{file.metadata?.signatureName}</td>
                   </tr>
                 ))}
-
-                {/* Fill empty rows */}
                 {currentRows.length < rowsPerPage &&
                   Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
                     <tr key={`empty-${i}`}>
@@ -191,9 +157,9 @@ export default function RepositoryPage() {
           isOpen={isDetailsOpen}
           file={selectedFile}
           onClose={() => setIsDetailsOpen(false)}
-          onDelete={handleDeleteDocument} // ✅ pass delete function
+          onDelete={handleDeleteDocument}
         />
-      </div>
+      </PageLayout>
     </>
   );
 }
