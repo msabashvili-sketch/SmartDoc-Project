@@ -20,39 +20,38 @@
   --banner-width: 98%;
 }
 
-html {
-  overflow-y: scroll;
+html, body {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 
 .repository-page {
   padding-top: var(--header-height);
-  overflow-x: hidden;
   background-color: #F9F9F7;
 }
 
 /* Top space under header */
 .repository-top-space {
-  height: 60px;
+  height: var(--top-space-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: var(--line-thickness) solid var(--line-color);
   padding: 0 10px;
   background-color: #d9edff;
-  position: relative; /* keeps it in flow */
-  z-index: 0;
-  overflow: hidden;
+  position: relative;
+  z-index: 10;
 }
 
 /* Title */
 .repository-title {
   font-size: 20px;
-  width: 600px;
   color: var(--title-color);
   margin: 0;
   position: relative;
   left: 20px;
-  top: 0px;
 }
 
 /* Upload button */
@@ -67,18 +66,10 @@ html {
   font-weight: 600;
   cursor: pointer;
   user-select: none;
-  position: relative;
- 
-}
-
-.upload-button-icon {
-  width: 14px;   /* adjust size */
-  height: 14px;  /* adjust size */
 }
 
 .upload-button:hover {
   background-color: #26858f;
-  color: #fff;
   border-color: #26858f;
 }
 
@@ -86,7 +77,6 @@ html {
 .search-bar-container {
   margin: 20px 0;
   position: relative;
-  top: -10px;
   left: 16px;
 }
 
@@ -111,24 +101,60 @@ html {
   color: #a3a3a3;
 }
 
-/* Table container */
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  padding-left: 0px;
-  margin-top: -20px;
+/* Repository content wrapper */
+.repository-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-height));
+}
+
+/* Filter + table content */
+.repository-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Filter panel */
+.filter-panel {
+  width: 250px;
+  margin-left: -250px;
+  transition: margin-left 0.3s ease;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #ddd;
+  z-index: 2;
+}
+
+.repository-content.filter-open .filter-panel {
+  margin-left: 0;
+}
+
+/* Table wrapper */
+.table-wrapper {
+  flex: 1;
+  overflow: hidden;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollable table area */
+.table-scroll-wrapper {
+  flex: 1;
+  overflow: auto; /* vertical + horizontal scroll */
 }
 
 /* Table */
 .repository-table {
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 800px; /* same as ImportPage */
-  width: max-content; /* allow horizontal scroll if needed */
+  min-width: 900px;
+  width: max-content;
   margin: 0;
 }
 
-/* Table headers and cells */
 .repository-table th,
 .repository-table td {
   border: 1px solid #e7e7e7;
@@ -140,32 +166,67 @@ html {
   white-space: nowrap;
 }
 
-/* Sticky checkbox column */
-.repository-table th.sticky-col.checkbox-col,
-.repository-table td.sticky-col.checkbox-col {
+/* Sticky header (all columns) */
+.repository-table thead th {
   position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+  font-weight: 600;
+  border-bottom: 2px solid #eae9e9;
+}
+
+/* ===== Sticky columns — HEADER ONLY ===== */
+.repository-table thead th.sticky-col.checkbox-col {
+  position: sticky;
+  top: 0;
   left: 0;
-  background-color: #ffffff;
-  z-index: 3; /* higher than other cells */
+  background-color: #fff;
+  z-index: 40; /* must be higher than body cells */
   border-right: 1px solid #ddd;
-  width: 35px; /* adjust width for checkbox */
-  min-width: 35px;
-  max-width: 35px;
+  width: 35px;
   text-align: center;
 }
 
-/* Checkbox input style (same as ImportPage) */
+.repository-table thead th.sticky-col.title-col {
+  position: sticky;
+  top: 0;
+  left: 35px;
+  background-color: #fff;
+  z-index: 39; /* just under checkbox header */
+  border-right: 1px solid #ddd;
+  width: 340px;
+}
+
+/* ===== Sticky columns — BODY ONLY ===== */
+.repository-table tbody td.sticky-col.checkbox-col {
+  position: sticky;
+  left: 0;
+  background-color: #fff;
+  z-index: 20; /* higher than normal cells */
+  border-right: 1px solid #ddd;
+  width: 35px;
+  text-align: center;
+}
+
+.repository-table tbody td.sticky-col.title-col {
+  position: sticky;
+  left: 35px;
+  background-color: #fff;
+  z-index: 19; /* just under checkbox sticky */
+  border-right: 1px solid #ddd;
+  width: 340px;
+}
+
+/* Checkbox styles */
 .repository-table input[type="checkbox"] {
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   width: 14px;
   height: 14px;
   border: 1px solid #d0d0d0;
   border-radius: 3px;
   cursor: pointer;
   position: relative;
-  vertical-align: middle;
 }
 
 .repository-table input[type="checkbox"]:checked {
@@ -185,35 +246,11 @@ html {
   transform: rotate(45deg);
 }
 
-/* Sticky document title column */
-.repository-table th.sticky-col.title-col,
-.repository-table td.sticky-col.title-col {
-  position: sticky;
-  left: 35px; /* width of checkbox column */
-  background-color: #ffffff;
-  z-index: 2;
-  border-right: 1px solid #ddd;
-  width: 340px; /* original width */
-  min-width: 340px;
-  max-width: 340px;
-}
-
-/* Other columns width same as ImportPage */
+/* Other columns */
 .repository-table th:not(.sticky-col),
 .repository-table td:not(.sticky-col) {
   min-width: 250px;
   width: 340px;
-}
-
-/* Header style */
-.repository-table thead th {
-  background-color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  text-align: left;
-  padding: 4px 8px;
-  color: #4b3f40;
-  border-bottom: 2px solid #eae9e9; /* same thickness as ImportPage */
 }
 
 /* Alternate row colors */
@@ -234,7 +271,7 @@ html {
 }
 
 .filter-button {
-  height: 28px;  /* same as search bar */
+  height: 28px;
   background-color: #3aba87;
   color: white;
   border: none;
@@ -248,25 +285,33 @@ html {
   background-color: #37c193;
 }
 
-/* Repository content flex */
-.repository-content {
+/* Footer */
+.repository-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-color: #F6FAF9;
+  border-top: 1px solid #ddd;
   display: flex;
-  transition: all 0.3s ease;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 100;
 }
 
-/* Filter panel hidden by default */
-.filter-panel {
-  width: 250px;
-  transition: margin-left 0.3s ease;
-  margin-left: -250px; /* hidden to the left */
+/* Center pagination */
+.repository-footer .pagination-controls {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  font-size: 13px; /* smaller font */
 }
 
-/* When open, margin-left becomes 0, pushing the table */
-.repository-content.filter-open .filter-panel {
-  margin-left: 0;
-}
-
-.table-wrapper {
-  flex: 1; /* take all remaining space */
-  transition: margin-left 0.3s ease;
+/* Right side rows-per-page */
+.repository-footer .rows-per-page {
+  font-size: 13px;
 }

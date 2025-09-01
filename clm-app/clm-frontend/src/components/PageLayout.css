@@ -17,16 +17,19 @@
   --banner-text-color: #211e1e;
 }
 
+/* Page container: reserve space for header + top-space so content never sits under them */
 .page-layout {
   background-color: #fff; /* ensures top space background is consistent */
   min-height: 100vh;
   overflow-x: hidden;
 
- /* push content below fixed header */
+  /* push content below fixed header + top-space */
   padding-top: calc(var(--header-height) + var(--top-space-height));
+  position: relative;
 }
 
-/* Top space */
+/* Top space (title + upload button) */
+/* Keep this positioned at exact place under the Header */
 .top-space {
   display: flex;
   align-items: center;
@@ -35,10 +38,14 @@
   background-color: var(--top-space-bg);
   padding: 0 20px;
   border-bottom: 2px solid #e7e7e7;
+
+  /* place exactly below header — header is assumed fixed at top */
   position: absolute;
-  top: var(--header-height); /* place exactly below header */
+  top: var(--header-height);
   width: 100%;
-  z-index: 1;
+
+  /* make sure it sits above other content (tables, banners, etc.) */
+  z-index: 200;
 }
 
 .top-space-title {
@@ -47,7 +54,7 @@
   margin: 0;
   font-weight: 600;
   position: relative;
-  left: 20px; 
+  left: 20px;
 }
 
 /* Upload button */
@@ -59,7 +66,7 @@
   padding: var(--upload-btn-padding);
   border-radius: var(--upload-btn-radius);
   font-size: var(--upload-btn-font-size);
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   border: 1px solid var(--upload-btn-bg);
 }
@@ -107,22 +114,28 @@
 /* Main content area */
 .page-content {
   padding: 20px;
+  /* ensure content is below the top-space (top-space already reserved by page-layout padding-top),
+     but give a tiny gap so table header doesn't butt directly under the top-space */
+  padding-top: 8px;
 }
 
-/* Wrapper to provide horizontal margins */
+/* Wrapper to provide horizontal margins for the search/filter row.
+   Reduced bottom margin so table doesn't get overlapped. */
 .search-filter-bar-wrapper {
   padding: 0 20px; /* horizontal space on left & right */
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin-top: 12px;
+  margin-bottom: 8px; /* reduced bottom margin to avoid overlap with table */
 }
 
-/* Search bar flex layout */
+/* Search bar flex layout
+   Removed transform: translateY(-5px) so this area no longer pulls up and covers content.
+*/
 .search-filter-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  transform: translateY(-5px); /* shifts entire area 5px up */
+  /* no translateY here — removing overlap */
 }
 
 /* Filter button */
@@ -168,7 +181,7 @@
 .columns-button {
   background-color: #fdfdfd;
   color: #656565;
-  border: 1px solid #d9d9d9; 
+  border: 1px solid #d9d9d9;
   border-radius: 3px;
   padding: 0 12px;
   height: 28px;
@@ -185,7 +198,7 @@
 .send-button {
   background-color: #ffffff;
   color: #656565;
-  border: 1px solid #d9d9d9; 
+  border: 1px solid #d9d9d9;
   border-radius: 3px;
   padding: 0 12px;
   height: 28px;
@@ -221,11 +234,7 @@
   gap: 1px; /* space between icon and text */
 }
 
-/* Filter stays icon only */
-.filter-button .button-icon {
-  margin-right: 0;
-}
-
+/* Export button */
 .export-button {
   display: flex;
   align-items: center;
@@ -238,7 +247,6 @@
   font-size: 0.85rem;
   font-weight: 500;
 }
-
 .export-button:hover {
   background-color: #ffffff;
   border-color: #3dd799;
