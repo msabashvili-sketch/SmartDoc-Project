@@ -135,7 +135,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  /* no translateY here — removing overlap */
+   margin: 8px 0;
 }
 
 /* Filter button */

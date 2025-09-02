@@ -138,6 +138,7 @@ html, body {
   transition: margin-left 0.3s ease;
   display: flex;
   flex-direction: column;
+  padding-bottom: 155px;
 }
 
 /* Scrollable table area */
@@ -260,29 +261,6 @@ html, body {
 
 .repository-table tbody tr:nth-child(even) {
   background-color: #ffffff;
-}
-
-/* Search + filter row */
-.search-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 16px 0;
-}
-
-.filter-button {
-  height: 28px;
-  background-color: #3aba87;
-  color: white;
-  border: none;
-  border-radius: 3px;
-  padding: 0 12px;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-
-.filter-button:hover {
-  background-color: #37c193;
 }
 
 /* Footer */
