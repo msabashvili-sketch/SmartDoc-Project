@@ -6,6 +6,16 @@ import UploadPopup from "../components/uploadPopup/UploadPopup";
 import "./RepositoryPage.css";
 import { useTranslation } from "react-i18next";
 
+// Tooltip cell component
+const TooltipCell = ({ text, className }) => (
+  <td className={className}>
+    <div className="cell-content">
+      {text}
+      <span className="cell-tooltip">{text}</span>
+    </div>
+  </td>
+);
+
 export default function RepositoryPage() {
   const [files, setFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,6 +66,7 @@ export default function RepositoryPage() {
         body: JSON.stringify({ fileIds: [docId] }),
       });
       if (!res.ok) throw new Error("Failed to delete document");
+
       setFiles((prev) => {
         const updated = prev.filter((file) => file._id !== docId);
         const totalPages = Math.ceil(updated.length / rowsPerPage);
@@ -135,15 +146,19 @@ export default function RepositoryPage() {
                           onChange={() => toggleRowSelection(file._id)}
                         />
                       </td>
-                      <td className="sticky-col title-col">{file.filename}</td>
-                      <td>{file.metadata?.folder}</td>
-                      <td>{file.metadata?.counterparty}</td>
-                      <td>{file.metadata?.documentType}</td>
-                      <td>{file.metadata?.agreementDate}</td>
-                      <td>{file.metadata?.expiryDate}</td>
-                      <td>{file.metadata?.signatureName}</td>
+
+                      {/* Tooltip cells */}
+                      <TooltipCell className="sticky-col title-col" text={file.filename} />
+                      <TooltipCell text={file.metadata?.folder} />
+                      <TooltipCell text={file.metadata?.counterparty} />
+                      <TooltipCell text={file.metadata?.documentType} />
+                      <TooltipCell text={file.metadata?.agreementDate} />
+                      <TooltipCell text={file.metadata?.expiryDate} />
+                      <TooltipCell text={file.metadata?.signatureName} />
                     </tr>
                   ))}
+
+                  {/* Empty rows for consistent height */}
                   {currentRows.length < rowsPerPage &&
                     Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
                       <tr key={`empty-${i}`}>

@@ -31,55 +31,6 @@ html, body {
   padding-top: var(--header-height);
   background-color: #F9F9F7;
 }
-
-/* Top space under header */
-.repository-top-space {
-  height: var(--top-space-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: var(--line-thickness) solid var(--line-color);
-  padding: 0 10px;
-  background-color: #d9edff;
-  position: relative;
-  z-index: 10;
-}
-
-/* Title */
-.repository-title {
-  font-size: 20px;
-  color: var(--title-color);
-  margin: 0;
-  position: relative;
-  left: 20px;
-}
-
-/* Upload button */
-.upload-button {
-  display: inline-flex;
-  background-color: var(--button-bg);
-  color: var(--button-color);
-  padding: var(--button-padding);
-  border-radius: var(--button-radius);
-  border: 1px solid #1f6e77;
-  font-size: var(--button-font-size);
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-}
-
-.upload-button:hover {
-  background-color: #26858f;
-  border-color: #26858f;
-}
-
-/* Search bar */
-.search-bar-container {
-  margin: 20px 0;
-  position: relative;
-  left: 16px;
-}
-
 .search-bar {
   width: var(--search-width);
   height: var(--search-height);
@@ -151,8 +102,7 @@ html, body {
 .repository-table {
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 900px;
-  width: max-content;
+  width: 100%;
   margin: 0;
 }
 
@@ -161,10 +111,56 @@ html, body {
   border: 1px solid #e7e7e7;
   padding: 5px;
   height: 35px;
+  max-width: 150px;
   font-size: 13px;
   font-weight: 450;
   text-align: left;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  vertical-align: middle;
+  position: relative;
+}
+
+.cell-content {
+  display: block;              /* allows width + ellipsis */
+  width: 100%;                 /* match parent td */
+  white-space: nowrap;         /* keep text on one line */
+  overflow: hidden;            /* hide extra text */
+  text-overflow: ellipsis;     /* show "..." */
+  position: relative;          /* keep your tooltip positioning */
+}
+
+/* Tooltip popup */
+.cell-tooltip {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  text-align: left;
+  padding: 5px 10px;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 1000;
+  white-space: normal;
+  width: max-content;
+  max-width: 300px;
+  top: 100%;      /* below the cell */
+  left: 0;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+td:hover .cell-tooltip {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.repository-table td:hover .cell-tooltip {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* Sticky header (all columns) */
@@ -200,8 +196,9 @@ html, body {
   background-color: #fff;
   z-index: 39; /* just under checkbox header */
   border: none;
-  width: 340px;
+  width: 400px;
   border-bottom: 2px solid #eae9e9;
+  max-width: none;
 }
 
 /* ===== Sticky columns — BODY ONLY ===== */
@@ -221,7 +218,12 @@ html, body {
   background-color: #fff;
   z-index: 19; /* just under checkbox sticky */
   border-right: 1px solid #ddd;
-  width: 340px;
+  width: 400px;
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
 }
 
 /* Checkbox styles */
