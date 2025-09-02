@@ -174,6 +174,7 @@ html, body {
   background-color: #fff;
   z-index: 10;
   font-weight: 600;
+  border: none;
   border-bottom: 2px solid #eae9e9;
 }
 
@@ -185,6 +186,9 @@ html, body {
   background-color: #fff;
   z-index: 40; /* must be higher than body cells */
   border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  border-bottom: 2px solid #eae9e9;
   width: 35px;
   text-align: center;
 }
@@ -195,8 +199,9 @@ html, body {
   left: 35px;
   background-color: #fff;
   z-index: 39; /* just under checkbox header */
-  border-right: 1px solid #ddd;
+  border: none;
   width: 340px;
+  border-bottom: 2px solid #eae9e9;
 }
 
 /* ===== Sticky columns — BODY ONLY ===== */
@@ -261,6 +266,12 @@ html, body {
 
 .repository-table tbody tr:nth-child(even) {
   background-color: #ffffff;
+}
+
+/* Change font color for all cells in the second column */
+.repository-table td:nth-child(2) {
+  color: #37a1cb; /* your desired color */
+  font-weight: 580; /* optional: make it bold */
 }
 
 /* Footer */
