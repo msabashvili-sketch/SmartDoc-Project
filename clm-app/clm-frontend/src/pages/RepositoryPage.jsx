@@ -45,14 +45,18 @@ export default function RepositoryPage() {
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
   const currentRows = files.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.ceil(files.length / rowsPerPage);
+  const totalPages = Math.max(1, Math.ceil(files.length / rowsPerPage));
 
   const goToPage = (pageNumber) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
   };
 
-  const handleApplyFilters = () => setIsFilterOpen(false);
+  const handleApplyFilters = () => {
+    // TODO: apply your filter logic here
+    setIsFilterOpen(false);
+  };
+
   const handleRowClick = (file) => {
     setSelectedFile(file);
     setIsDetailsOpen(true);
@@ -69,10 +73,8 @@ export default function RepositoryPage() {
 
       setFiles((prev) => {
         const updated = prev.filter((file) => file._id !== docId);
-        const totalPages = Math.ceil(updated.length / rowsPerPage);
-        if (currentPage > totalPages) {
-          setCurrentPage(totalPages);
-        }
+        const pages = Math.ceil(updated.length / rowsPerPage) || 1;
+        if (currentPage > pages) setCurrentPage(pages);
         return updated;
       });
 
@@ -104,76 +106,81 @@ export default function RepositoryPage() {
       showUploadButton
       showBanner={false}
       onUploadClick={() => setIsPopupOpen(true)}
-      onFilterClick={() => setIsFilterOpen(!isFilterOpen)}
+      onFilterClick={() => setIsFilterOpen((prev) => !prev)} // toggle filter panel
+      isFilterOpen={isFilterOpen}
     >
       <div className="repository-page-wrapper">
         <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
-          {/* Filter panel */}
-          <FilterPanel isOpen={isFilterOpen} onApply={handleApplyFilters} />
+          {/* Filter Panel */}
+          <FilterPanel
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            onApply={handleApplyFilters}
+          />
 
-          {/* Scrollable table wrapper */}
-          <div className="table-wrapper">
-            <div className="table-scroll-wrapper">
-              <table className="repository-table">
-                <thead>
-                  <tr>
-                    <th className="sticky-col checkbox-col">
-                      <input
-                        type="checkbox"
-                        onChange={toggleSelectAll}
-                        checked={selectedRows.length === currentRows.length && currentRows.length > 0}
-                      />
-                    </th>
-                    <th className="sticky-col title-col">{t("repositorypage.document title")}</th>
-                    <th>{t("repositorypage.folder")}</th>
-                    <th>{t("repositorypage.counterparty")}</th>
-                    <th>{t("repositorypage.document type")}</th>
-                    <th>{t("repositorypage.agreement date")}</th>
-                    <th>{t("repositorypage.expiry date")}</th>
-                    <th>{t("repositorypage.signature name")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentRows.map((file) => (
-                    <tr key={file._id} onClick={() => handleRowClick(file)}>
-                      <td
-                        className="sticky-col checkbox-col"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+          {/* Table + content wrapper (will be pushed by filter panel) */}
+          <div className="content-wrapper">
+            <div className="table-wrapper">
+              <div className="table-scroll-wrapper">
+                <table className="repository-table">
+                  <thead>
+                    <tr>
+                      <th className="sticky-col checkbox-col">
                         <input
                           type="checkbox"
-                          checked={selectedRows.includes(file._id)}
-                          onChange={() => toggleRowSelection(file._id)}
+                          onChange={toggleSelectAll}
+                          checked={
+                            selectedRows.length === currentRows.length &&
+                            currentRows.length > 0
+                          }
                         />
-                      </td>
-
-                      {/* Tooltip cells */}
-                      <TooltipCell className="sticky-col title-col" text={file.filename} />
-                      <TooltipCell text={file.metadata?.folder} />
-                      <TooltipCell text={file.metadata?.counterparty} />
-                      <TooltipCell text={file.metadata?.documentType} />
-                      <TooltipCell text={file.metadata?.agreementDate} />
-                      <TooltipCell text={file.metadata?.expiryDate} />
-                      <TooltipCell text={file.metadata?.signatureName} />
+                      </th>
+                      <th className="sticky-col title-col">{t("repositorypage.document title")}</th>
+                      <th>{t("repositorypage.folder")}</th>
+                      <th>{t("repositorypage.counterparty")}</th>
+                      <th>{t("repositorypage.document type")}</th>
+                      <th>{t("repositorypage.agreement date")}</th>
+                      <th>{t("repositorypage.expiry date")}</th>
+                      <th>{t("repositorypage.signature name")}</th>
                     </tr>
-                  ))}
-
-                  {/* Empty rows for consistent height */}
-                  {currentRows.length < rowsPerPage &&
-                    Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
-                      <tr key={`empty-${i}`}>
-                        <td className="sticky-col checkbox-col">&nbsp;</td>
-                        <td className="sticky-col title-col">&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
+                  </thead>
+                  <tbody>
+                    {currentRows.map((file) => (
+                      <tr key={file._id} onClick={() => handleRowClick(file)}>
+                        <td className="sticky-col checkbox-col" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedRows.includes(file._id)}
+                            onChange={() => toggleRowSelection(file._id)}
+                          />
+                        </td>
+                        <TooltipCell className="sticky-col title-col" text={file.filename} />
+                        <TooltipCell text={file.metadata?.folder} />
+                        <TooltipCell text={file.metadata?.counterparty} />
+                        <TooltipCell text={file.metadata?.documentType} />
+                        <TooltipCell text={file.metadata?.agreementDate} />
+                        <TooltipCell text={file.metadata?.expiryDate} />
+                        <TooltipCell text={file.metadata?.signatureName} />
                       </tr>
                     ))}
-                </tbody>
-              </table>
+
+                    {/* Empty rows for consistent table height */}
+                    {currentRows.length < rowsPerPage &&
+                      Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
+                        <tr key={`empty-${i}`}>
+                          <td className="sticky-col checkbox-col">&nbsp;</td>
+                          <td className="sticky-col title-col">&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                          <td>&nbsp;</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

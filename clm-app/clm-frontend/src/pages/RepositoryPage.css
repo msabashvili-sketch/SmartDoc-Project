@@ -59,7 +59,7 @@ html, body {
   height: calc(100vh - var(--header-height));
 }
 
-/* Filter + table content */
+/* Container for filter + table */
 .repository-content {
   display: flex;
   flex: 1;
@@ -70,27 +70,35 @@ html, body {
 /* Filter panel */
 .filter-panel {
   width: 250px;
-  margin-left: -250px;
-  transition: margin-left 0.3s ease;
   flex-shrink: 0;
-  background: #fff;
-  border-right: 1px solid #ddd;
+  background: #F6FAF9;
   z-index: 2;
-}
-
-.repository-content.filter-open .filter-panel {
-  margin-left: 0;
+  height: calc(100vh - var(--top-space-height));
+  margin-top: var(--top-space-height);
+  margin-left: -250px; /* hidden initially */
+  transition: margin-left 0.3s ease;
 }
 
 /* Table wrapper */
 .table-wrapper {
   flex: 1;
-  overflow: hidden;
   transition: margin-left 0.3s ease;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-bottom: 155px;
+  margin-top: 7px;
+  padding-bottom: 143px;
 }
+
+/* Open filter */
+.repository-content.filter-open .filter-panel {
+  margin-left: 0;
+}
+
+.repository-content.filter-open .table-wrapper {
+  margin-left: 10px; /* exactly panel width */
+}
+
 
 /* Scrollable table area */
 .table-scroll-wrapper {
@@ -110,7 +118,8 @@ html, body {
 .repository-table td {
   border: 1px solid #e7e7e7;
   padding: 5px;
-  height: 35px;
+  padding-left: 15px;
+  height: 40px;
   max-width: 150px;
   font-size: 13px;
   font-weight: 450;
@@ -171,7 +180,12 @@ td:hover .cell-tooltip {
   z-index: 10;
   font-weight: 600;
   border: none;
-  border-bottom: 2px solid #eae9e9;
+  border-bottom: 2px solid #dddddd;
+  padding-left: 15px;
+}
+
+.repository-table tbody td {
+  border: 1px solid #eeeded; /* your desired body border color */
 }
 
 /* ===== Sticky columns — HEADER ONLY ===== */
@@ -184,9 +198,10 @@ td:hover .cell-tooltip {
   border-right: 1px solid #ddd;
   border-left: 1px solid #ddd;
   border-top: 1px solid #ddd;
-  border-bottom: 2px solid #eae9e9;
-  width: 35px;
+  border-bottom: 2px solid #dddddd;
+  width: 40px;
   text-align: center;
+  padding-left: 0;
 }
 
 .repository-table thead th.sticky-col.title-col {
@@ -197,7 +212,7 @@ td:hover .cell-tooltip {
   z-index: 39; /* just under checkbox header */
   border: none;
   width: 400px;
-  border-bottom: 2px solid #eae9e9;
+  border-bottom: 2px solid #dddddd;
   max-width: none;
 }
 
@@ -207,9 +222,14 @@ td:hover .cell-tooltip {
   left: 0;
   background-color: #fff;
   z-index: 20; /* higher than normal cells */
-  border-right: 1px solid #ddd;
-  width: 35px;
+  width: 40px;
   text-align: center;
+  padding: 0;
+  display: flex;
+  justify-content: center; /* center horizontally */
+  align-items: center;     /* center vertically */
+  height: 40px;            /* match row height */
+  box-sizing: border-box;
 }
 
 .repository-table tbody td.sticky-col.title-col {
@@ -217,7 +237,7 @@ td:hover .cell-tooltip {
   left: 35px;
   background-color: #fff;
   z-index: 19; /* just under checkbox sticky */
-  border-right: 1px solid #ddd;
+  border-right: 2px solid #dddddd;
   width: 400px;
   max-width: 400px;
   white-space: nowrap;
@@ -229,12 +249,13 @@ td:hover .cell-tooltip {
 /* Checkbox styles */
 .repository-table input[type="checkbox"] {
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border: 1px solid #d0d0d0;
   border-radius: 3px;
   cursor: pointer;
   position: relative;
+  margin: 0;
 }
 
 .repository-table input[type="checkbox"]:checked {
@@ -245,13 +266,14 @@ td:hover .cell-tooltip {
 .repository-table input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
+  left: 7px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
   border: solid #ffffff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 /* Other columns */
@@ -263,7 +285,7 @@ td:hover .cell-tooltip {
 
 /* Alternate row colors */
 .repository-table tbody tr:nth-child(odd) {
-  background-color: #fcfcfc;
+  background-color: #ffffff;
 }
 
 .repository-table tbody tr:nth-child(even) {
@@ -305,4 +327,23 @@ td:hover .cell-tooltip {
 /* Right side rows-per-page */
 .repository-footer .rows-per-page {
   font-size: 13px;
+}
+
+/* Content wrapper for table + search bar */
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease, padding 0.3s ease;
+}
+
+/* Push content when filter is open */
+.repository-content.filter-open .content-wrapper {
+  margin-left: 250px; /* same width as filter panel */
+}
+
+/* Adjust search bar width when pushed */
+.repository-content.filter-open .search-bar {
+  width: calc(var(--search-width) - 250px);
+  transition: width 0.3s ease;
 }

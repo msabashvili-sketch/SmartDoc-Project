@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DashboardHeader from "./DashboardHeader";
 import "./PageLayout.css";
 import { useTranslation } from "react-i18next";
-import SendModal from "./SendModal"; // Import your new modal
+import SendModal from "./SendModal";
 
 export default function PageLayout({
   title,
@@ -12,18 +12,18 @@ export default function PageLayout({
   onUploadClick = () => {},
   onFilterClick = () => {},
   onColumnsClick = () => {},
-  onSendClick = () => {}, // still keeping external handler if needed
-  onExportClick = () => {}, // export handler
+  onSendClick = () => {},
+  onExportClick = () => {},
   children,
-  selectedDocuments = [], // pass selected docs from parent table
+  selectedDocuments = [],
+  isFilterOpen = false,
 }) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
-  // handle open/close
   const handleSendClick = () => {
-    if (onSendClick) onSendClick(); // optional external handler
+    if (onSendClick) onSendClick();
     setIsSendModalOpen(true);
   };
 
@@ -62,59 +62,59 @@ export default function PageLayout({
           </div>
         )}
 
-        {/* Search + Filter + Columns + Send + Export Area */}
-        <div className="search-filter-bar-wrapper">
-          <div className="search-filter-bar">
-            {/* Filter button on the left */}
-            <button className="filter-button" onClick={onFilterClick}>
-              <img
-                src="/assets/filter-icon.png"
-                alt="Filter"
-                className="button-icon"
+        {/* Wrapper for search + table */}
+        <div className={`content-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
+          {/* Search bar */}
+          <div className={`search-bar-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
+            <div className="search-filter-bar">
+              <button className="filter-button" onClick={onFilterClick}>
+                <img
+                  src="/assets/filter-icon.png"
+                  alt="Filter"
+                  className="button-icon"
+                />
+              </button>
+
+              <input
+                type="text"
+                className="search-bar"
+                placeholder={t("repositorypage.search documents...")}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
               />
-            </button>
 
-            {/* Search bar */}
-            <input
-              type="text"
-              className="search-bar"
-              placeholder={t("repositorypage.search documents...")}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-
-            {/* Columns + Send + Export buttons on the right */}
-            <div className="search-buttons">
-              <button className="columns-button" onClick={onColumnsClick}>
-                <img
-                  src="/assets/column-icon.png"
-                  alt="Columns"
-                  className="button-icon"
-                />
-                {t("repositorypage.columns")}
-              </button>
-              <button className="send-button" onClick={handleSendClick}>
-                <img
-                  src="/assets/email-icon.png"
-                  alt="Send"
-                  className="button-icon"
-                />
-                {t("repositorypage.send")}
-              </button>
-              <button className="export-button" onClick={onExportClick}>
-                <img
-                  src="/assets/export-icon.png"
-                  alt="Export"
-                  className="button-icon"
-                />
-                {t("repositorypage.export")}
-              </button>
+              <div className="search-buttons">
+                <button className="columns-button" onClick={onColumnsClick}>
+                  <img
+                    src="/assets/column-icon.png"
+                    alt="Columns"
+                    className="button-icon"
+                  />
+                  {t("repositorypage.columns")}
+                </button>
+                <button className="send-button" onClick={handleSendClick}>
+                  <img
+                    src="/assets/email-icon.png"
+                    alt="Send"
+                    className="button-icon"
+                  />
+                  {t("repositorypage.send")}
+                </button>
+                <button className="export-button" onClick={onExportClick}>
+                  <img
+                    src="/assets/export-icon.png"
+                    alt="Export"
+                    className="button-icon"
+                  />
+                  {t("repositorypage.export")}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="page-content">{children}</div>
+          {/* Table / children content */}
+          <div className="table-content">{children}</div>
+        </div>
       </div>
 
       {/* Send Modal */}

@@ -1,7 +1,7 @@
 :root {
   --header-height: 60px;
   --top-space-height: 60px;
-  --top-space-bg: #ffffff;  /* color of top space */
+  --top-space-bg: #F6FAF9;  /* color of top space */
   --top-space-title-color: #534a4b;
   --top-space-title-size: 19px;
   --upload-btn-bg: #1f6e77;
@@ -145,7 +145,7 @@
   border: 1px solid #d9d9d9 !important;
   border-radius: 3px;
   padding: 0 12px;
-  height: 36px;
+  height: 28px;
   cursor: pointer;
   font-size: 0.85rem;
   flex-shrink: 0;
@@ -157,13 +157,15 @@
 
 /* Search bar */
 .search-bar {
-  flex: 1; /* expand to available space */
-  height: 36px;
+  flex: 1 1 auto; /* expand to available space */
+  max-width: 100%;      /* don’t overflow parent */
+  height: 28px;
   border-radius: 3px;
   border: 1px solid #dad8d8;
   padding: 0 10px;
   font-size: 14px;
   outline: none;
+  transition: max-width 0.3s ease, flex 0.3s ease;
 }
 .search-bar:focus {
   border-color: #37c193;
@@ -175,6 +177,7 @@
   display: flex;
   gap: 8px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* Columns button */
@@ -250,4 +253,64 @@
 .export-button:hover {
   background-color: #ffffff;
   border-color: #3dd799;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  transition: all 0.3s ease;
+  padding: 0 7px; /* space on left & right */
+}
+
+/* When filter is open → remove left padding */
+.content-wrapper.filter-open {
+  padding: 0 7px 0 0; /* keep right padding only */
+  margin-left: -7px;
+}
+
+.search-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  transition: margin-left 0.32s ease; /* same as table */
+  margin-left: 0
+}
+
+/* Search bar input */
+.search-bar-wrapper .search-bar {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  border-radius: 3px;
+  border: 1px solid #dad8d8;
+  padding: 0 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Shrink search bar when filter panel is open */
+.search-bar-wrapper.filter-open {
+  margin-left: 207px; /* match your table’s margin-left */
+}
+
+.search-filter-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 7px; /* matches table padding */
+}
+
+
+.search-bar {
+  flex: 1 1 auto;
+  height: 28px;
+  border-radius: 3px;
+  border: 1px solid #dad8d8;
+  padding: 0 10px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
 }

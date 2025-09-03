@@ -1,10 +1,13 @@
 import React from "react";
 import "./FilterPanel.css";
 
-export default function FilterPanel({ isOpen, onApply }) {
+export default function FilterPanel({ isOpen, onClose, onApply }) {
   return (
     <div className={`filter-panel ${isOpen ? "open" : ""}`}>
-      <h3>Filter Options</h3>
+      <div className="filter-header">
+        <h3>Filter Options</h3>
+        <button className="close-btn" onClick={onClose}>✕</button>
+      </div>
 
       <div className="filter-group">
         <label>
@@ -24,9 +27,7 @@ export default function FilterPanel({ isOpen, onApply }) {
         </label>
       </div>
 
-      <button className="apply-filters" onClick={onApply}>
-        Apply
-      </button>
+      <button className="apply-filters" onClick={onApply}>Apply</button>
     </div>
   );
 }
