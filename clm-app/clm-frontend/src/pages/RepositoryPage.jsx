@@ -6,11 +6,12 @@ import UploadPopup from "../components/uploadPopup/UploadPopup";
 import "./RepositoryPage.css";
 import { useTranslation } from "react-i18next";
 
-// Tooltip cell component
+// Tooltip cell component with icon support
 const TooltipCell = ({ text, className }) => (
   <td className={className}>
     <div className="cell-content">
-      {text}
+      {text && <img src="/assets/document-icon.png" alt="" className="cell-icon" />}
+      <div className="cell-text">{text}</div>
       <span className="cell-tooltip">{text}</span>
     </div>
   </td>
@@ -106,7 +107,7 @@ export default function RepositoryPage() {
       showUploadButton
       showBanner={false}
       onUploadClick={() => setIsPopupOpen(true)}
-      onFilterClick={() => setIsFilterOpen((prev) => !prev)} // toggle filter panel
+      onFilterClick={() => setIsFilterOpen((prev) => !prev)}
       isFilterOpen={isFilterOpen}
     >
       <div className="repository-page-wrapper">
@@ -118,7 +119,7 @@ export default function RepositoryPage() {
             onApply={handleApplyFilters}
           />
 
-          {/* Table + content wrapper (will be pushed by filter panel) */}
+          {/* Table + content wrapper */}
           <div className="content-wrapper">
             <div className="table-wrapper">
               <div className="table-scroll-wrapper">
@@ -130,8 +131,7 @@ export default function RepositoryPage() {
                           type="checkbox"
                           onChange={toggleSelectAll}
                           checked={
-                            selectedRows.length === currentRows.length &&
-                            currentRows.length > 0
+                            selectedRows.length === currentRows.length && currentRows.length > 0
                           }
                         />
                       </th>
@@ -147,7 +147,10 @@ export default function RepositoryPage() {
                   <tbody>
                     {currentRows.map((file) => (
                       <tr key={file._id} onClick={() => handleRowClick(file)}>
-                        <td className="sticky-col checkbox-col" onClick={(e) => e.stopPropagation()}>
+                        <td
+                          className="sticky-col checkbox-col"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedRows.includes(file._id)}

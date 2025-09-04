@@ -117,9 +117,11 @@ html, body {
 .repository-table th,
 .repository-table td {
   border: 1px solid #e7e7e7;
+  border-left: none;  /* cancel left border */
   padding: 5px;
-  padding-left: 15px;
-  height: 40px;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 35px;
   max-width: 150px;
   font-size: 13px;
   font-weight: 450;
@@ -132,12 +134,24 @@ html, body {
 }
 
 .cell-content {
-  display: block;              /* allows width + ellipsis */
-  width: 100%;                 /* match parent td */
-  white-space: nowrap;         /* keep text on one line */
-  overflow: hidden;            /* hide extra text */
-  text-overflow: ellipsis;     /* show "..." */
-  position: relative;          /* keep your tooltip positioning */
+  display: flex;              /* flex for icon + text */
+  align-items: center;        /* vertically center */
+  gap: 5px;                   /* space between icon and text */
+  position: relative;         /* for tooltip */
+  width: 100%;                /* take full cell width */
+}
+
+.cell-content .cell-text {
+  flex: 1 1 0;                /* allow text to shrink and take remaining space */
+  white-space: nowrap;        /* keep text on one line */
+  overflow: hidden;           /* hide overflow */
+  text-overflow: ellipsis;    /* show "..." */
+}
+
+.cell-content img.cell-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;             /* prevent shrinking */
 }
 
 /* Tooltip popup */
@@ -199,9 +213,11 @@ td:hover .cell-tooltip {
   border-left: 1px solid #ddd;
   border-top: 1px solid #ddd;
   border-bottom: 2px solid #dddddd;
-  width: 40px;
+  width: 35px;
+  min-width: 35px;
+  max-width: 35px;
   text-align: center;
-  padding-left: 0;
+  padding: 0;
 }
 
 .repository-table thead th.sticky-col.title-col {
@@ -222,14 +238,19 @@ td:hover .cell-tooltip {
   left: 0;
   background-color: #fff;
   z-index: 20; /* higher than normal cells */
-  width: 40px;
+  width: 35px;
+  min-width: 35px;   /* force stable width */
+  max-width: 35px;   /* force stable width */
   text-align: center;
   padding: 0;
   display: flex;
   justify-content: center; /* center horizontally */
   align-items: center;     /* center vertically */
-  height: 40px;            /* match row height */
+  height: 35px;            /* match row height */
   box-sizing: border-box;
+  border-right: 1px solid #ddd;
+  will-change: transform;
+  transform: translateZ(0); /* GPU layer */
 }
 
 .repository-table tbody td.sticky-col.title-col {
@@ -238,12 +259,17 @@ td:hover .cell-tooltip {
   background-color: #fff;
   z-index: 19; /* just under checkbox sticky */
   border-right: 2px solid #dddddd;
+  border-left: 1px solid #ddd;
+  border-bottom: 1px solid #eeeded;
+  border-left: none;
   width: 400px;
   max-width: 400px;
+  min-width: 400px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
+  will-change: transform;  /* force GPU layer */
+  transform: translateZ(0);
 }
 
 /* Checkbox styles */
@@ -346,4 +372,19 @@ td:hover .cell-tooltip {
 .repository-content.filter-open .search-bar {
   width: calc(var(--search-width) - 250px);
   transition: width 0.3s ease;
+}
+
+.cell-content {
+  display: flex;
+  align-items: center;
+  gap: 5px; /* space between icon and text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell-content img.cell-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
