@@ -1,26 +1,24 @@
 import React, { useState } from "react";
 import "./SendModal.css";
 
-export default function SendModal({ selectedDocs = [], onClose, onSend }) {
+export default function SendModal({ selectedDocs = [], onClose }) {
   const [emails, setEmails] = useState([]); // store multiple emails
-  const [input, setInput] = useState(""); // for typing new email
+  const [input, setInput] = useState(""); // typing new email
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [contractChecked, setContractChecked] = useState(false);
   const [summaryChecked, setSummaryChecked] = useState(false);
 
   // validate email format
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // handle Enter or comma press
+  // handle Enter or comma press for email chips
   const handleKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && input.trim()) {
       e.preventDefault();
-      if (validateEmail(input.trim())) {
-        setEmails([...emails, input.trim()]);
+      const email = input.trim();
+      if (validateEmail(email)) {
+        setEmails([...emails, email]);
         setInput("");
       }
     }
@@ -31,20 +29,52 @@ export default function SendModal({ selectedDocs = [], onClose, onSend }) {
     setEmails(emails.filter((_, i) => i !== index));
   };
 
-  const handleSend = () => {
+  // send documents
+  const handleSend = async () => {
     if (emails.length === 0) {
       alert("Please enter at least one recipient email");
       return;
     }
-    onSend({
-      recipients: emails,
-      subject,
-      message,
-      contractChecked,
-      summaryChecked,
-      docs: selectedDocs,
+
+    // Filter docs by checkbox selection
+    const docsToSend = selectedDocs.filter((doc) => {
+      if (contractChecked && doc.type === "original") return true;
+      if (summaryChecked && doc.type === "summary") return true;
+      return false;
     });
-    onClose();
+
+    if (docsToSend.length === 0) {
+      alert("Please select at least one document type (Contract / Summary)");
+      return;
+    }
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("recipients", emails.join(","));
+    formData.append("subject", subject);
+    formData.append("message", message);
+
+    docsToSend.forEach((doc) => {
+      formData.append("files", doc.file); // doc.file is a File object from input
+    });
+
+    try {
+      const response = await fetch("/api/send-docs", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert("Email sent successfully!");
+        onClose();
+      } else {
+        alert("Failed to send email: " + result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error sending email");
+    }
   };
 
   return (
