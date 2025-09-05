@@ -57,6 +57,55 @@
   margin-bottom: 12px;
 }
 
+/* Email chips container */
+.email-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 40px;
+  cursor: text;
+  margin-bottom: 12px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Focus effect (same as other fields) */
+.email-chips-container:focus-within {
+  border-color: #3dd799;   /* same green */
+  box-shadow: 0 0 4px rgba(62, 125, 122, 0.4);
+}
+
+
+/* Each chip */
+.email-chip {
+  display: flex;
+  align-items: center;
+  background-color: #3e7d7a;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 13px;
+  font-size: 13px;
+}
+
+/* Remove button (x) */
+.remove-chip {
+  margin-left: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Input inside chip area */
+.email-chips-input {
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 120px;
+  font-size: 14px;
+}
+
 /* Checkbox group */
 .modal-checkbox-group {
   display: flex;
@@ -97,6 +146,7 @@
 .modal-checkbox-group input[type="checkbox"] {
   width: 14px;
   height: 14px;
+  accent-color: #3e7d7a;
 }
 
 /* Textareas */
@@ -114,12 +164,30 @@
 .subject-textarea {
   height: 40px;
   margin-bottom: 12px;
+  line-height: 40px;      /* vertically center text */
+  padding-top: 0;         /* remove default top padding */
+  padding-bottom: 0;      /* remove default bottom padding */
 }
 
 /* Message bigger */
 .message-textarea {
   height: 100px;
   border-bottom: 2px solid #ddd; 
+}
+
+/* Normal state */
+.modal-input,
+.modal-textarea {
+  border: 1px solid #ccc;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Focused (clicked/active) state */
+.modal-input:focus,
+.modal-textarea:focus {
+  border-color: #3dd799;   /* your green brand color */
+  box-shadow: 0 0 4px rgba(62, 125, 122, 0.4); /* subtle glow */
+  outline: none; /* remove default browser outline */
 }
 
 /* Buttons */

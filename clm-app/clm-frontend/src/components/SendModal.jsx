@@ -2,19 +2,42 @@ import React, { useState } from "react";
 import "./SendModal.css";
 
 export default function SendModal({ selectedDocs = [], onClose, onSend }) {
-  const [recipient, setRecipient] = useState("");
+  const [emails, setEmails] = useState([]); // store multiple emails
+  const [input, setInput] = useState(""); // for typing new email
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [contractChecked, setContractChecked] = useState(false);
   const [summaryChecked, setSummaryChecked] = useState(false);
 
+  // validate email format
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  // handle Enter or comma press
+  const handleKeyDown = (e) => {
+    if ((e.key === "Enter" || e.key === ",") && input.trim()) {
+      e.preventDefault();
+      if (validateEmail(input.trim())) {
+        setEmails([...emails, input.trim()]);
+        setInput("");
+      }
+    }
+  };
+
+  // remove email chip
+  const removeEmail = (index) => {
+    setEmails(emails.filter((_, i) => i !== index));
+  };
+
   const handleSend = () => {
-    if (!recipient) {
-      alert("Please enter recipient email");
+    if (emails.length === 0) {
+      alert("Please enter at least one recipient email");
       return;
     }
     onSend({
-      recipient,
+      recipients: emails,
       subject,
       message,
       contractChecked,
@@ -33,13 +56,24 @@ export default function SendModal({ selectedDocs = [], onClose, onSend }) {
 
         {/* Send To Field */}
         <div className="modal-label">Send To</div>
-        <input
-          type="email"
-          className="modal-input email-input"
-          placeholder="Recipient Email"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
-        />
+        <div className="email-chips-container">
+          {emails.map((email, index) => (
+            <div className="email-chip" key={index}>
+              {email}
+              <span className="remove-chip" onClick={() => removeEmail(index)}>
+                ×
+              </span>
+            </div>
+          ))}
+          <input
+            type="text"
+            className="email-chips-input"
+            placeholder={emails.length === 0 ? "Recipient Email" : ""}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
 
         {/* Contract Checkbox Group */}
         <div className="modal-label">Contract</div>
