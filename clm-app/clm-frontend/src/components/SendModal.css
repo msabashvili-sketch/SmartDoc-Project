@@ -1,3 +1,4 @@
+/* SendModal.css */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -13,24 +14,142 @@
 
 .modal-content {
   background: white;
-  padding: 20px;
+  width: 50vw;         /* square dynamic */
+  height: 50vh;
+  max-width: 600px;
+  max-height: 600px;
+  min-width: 300px;
+  min-height: 400px;
+  padding: 20px 20px 1px 20px; /* keep top, sides, minimal bottom */
   border-radius: 8px;
-  width: 400px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-.modal-content h3 {
-  margin-top: 0;
+.modal-title {
+  font-size: 17px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 15px;
 }
 
-.modal-content input,
-.modal-content textarea {
+.modal-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px 0 5px 0;
+}
+
+/* Input Field */
+.modal-input {
   width: 100%;
-  margin: 10px 0;
-  padding: 8px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
 }
 
+/* Email Input smaller height */
+.email-input {
+  height: 40px;
+  margin-bottom: 12px;
+}
+
+/* Checkbox group */
+.modal-checkbox-group {
+  display: flex;
+  gap: 15px;
+  padding: 5px 0;
+}
+
+/* Checkbox container */
+.modal-checkbox-container {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  width: 100%;          /* full width of modal */
+  max-width: 350px;     /* optional max width */
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+/* Checkbox group layout */
+.modal-checkbox-group {
+  display: flex;
+  gap: 25px;           /* space between checkboxes */
+  align-items: center;
+  flex-wrap: wrap;      /* wrap if too many checkboxes */
+  border-bottom: 1px solid #ddd;  /* added bottom border */
+  margin-bottom: 12px; 
+}
+
+/* Individual checkbox label styling */
+.modal-checkbox-group label {
+  font-size: 14px;      /* smaller font */
+  display: flex;
+  align-items: center;
+  gap: 8px;             /* space between box and text */
+}
+
+/* Optional: smaller checkboxes */
+.modal-checkbox-group input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+
+/* Textareas */
+.modal-textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: vertical;
+  font-size: 14px;
+}
+
+/* Subject smaller */
+.subject-textarea {
+  height: 40px;
+  margin-bottom: 12px;
+}
+
+/* Message bigger */
+.message-textarea {
+  height: 100px;
+  border-bottom: 2px solid #ddd; 
+}
+
+/* Buttons */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  padding-top: 10px;
+  padding-bottom: 0;  /* reduced bottom padding */
+  margin-bottom: 0;   /* remove any default margin */
+}
+
+/* Shared button style */
+.modal-content .modal-btn {
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Cancel button */
+.modal-content .modal-btn-cancel {
+  background-color: #eee;
+  color: #333;
+}
+
+/* Send button */
+.modal-content .modal-btn-send {
+  background-color: #3e7d7a;
+  color: white;
 }
