@@ -92,10 +92,10 @@ router.get("/view/:id", async (req, res) => {
   }
 });
 
-// --- Send selected files to repository with folder ---
+// --- Send selected files to repository with folder info ---
 router.post("/send-to-repository", async (req, res) => {
   try {
-    const { files } = req.body; // Expecting [{ id, folderId }]
+    const { files } = req.body; // Expecting [{ id, folderId, folderName }]
     if (!files || !Array.isArray(files) || files.length === 0) {
       return res.status(400).json({ message: "No files provided" });
     }
@@ -103,27 +103,20 @@ router.post("/send-to-repository", async (req, res) => {
     const bucket = getBucket();
     const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
 
+    // Save folderId and folderName directly from frontend
     await Promise.all(
-      files.map(async ({ id, folderId }) => {
+      files.map(async ({ id, folderId, folderName }) => {
         if (!ObjectId.isValid(id)) return;
-
         const _id = new ObjectId(id);
-
-        // Optional: fetch folder name from Folders collection
-        let folderName = "";
-        if (folderId && ObjectId.isValid(folderId)) {
-          const folderDoc = await bucket.s.db.collection("Folders").findOne({ _id: new ObjectId(folderId) });
-          folderName = folderDoc?.name || "";
-        }
 
         await filesCollection.updateOne(
           { _id },
-          { 
-            $set: { 
+          {
+            $set: {
               "metadata.repository": true,
               "metadata.folderId": folderId || null,
-              "metadata.folderName": folderName || null
-            } 
+              "metadata.folderName": folderName || null,
+            },
           }
         );
       })
@@ -154,14 +147,12 @@ router.post("/delete", async (req, res) => {
         const _id = new ObjectId(id);
 
         try {
-          // Delete from GridFS if exists
           await bucket.delete(_id);
         } catch (err) {
           console.log(`GridFS delete error for ${id}:`, err.message);
         }
 
         try {
-          // Delete from TextDocuments collection if exists
           await textCollection.deleteOne({ _id });
         } catch (err) {
           console.log(`TextDocuments delete error for ${id}:`, err.message);

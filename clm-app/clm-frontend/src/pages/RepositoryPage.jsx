@@ -37,7 +37,8 @@ export default function RepositoryPage() {
       const data = await res.json();
       setFiles((data.files || []).map(file => ({
         ...file,
-        _id: file._id.toString()
+        _id: file._id.toString(),
+        folderName: file.metadata?.folderName || "" // <-- pull folder name from metadata
       })));
     } catch (err) {
       console.error(err);
@@ -165,7 +166,7 @@ export default function RepositoryPage() {
                             />
                           </td>
                           <TooltipCell className="sticky-col title-col" text={file.filename} />
-                          <TooltipCell text={file.metadata?.folder} />
+                          <TooltipCell text={file.folderName} /> {/* <-- updated here */}
                           <TooltipCell text={file.metadata?.counterparty} />
                           <TooltipCell text={file.metadata?.documentType} />
                           <TooltipCell text={file.metadata?.agreementDate} />

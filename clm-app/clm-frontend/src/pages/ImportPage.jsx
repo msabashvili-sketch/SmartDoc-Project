@@ -15,7 +15,6 @@ export default function ImportPage() {
   const [loadingFolders, setLoadingFolders] = useState(true);
   const { t } = useTranslation();
 
-  // Normalize GridFS files
   const normalizeFiles = (raw = []) =>
     raw.map((f, idx) => {
       let id = "";
@@ -38,7 +37,6 @@ export default function ImportPage() {
       };
     });
 
-  // Fetch import files
   const fetchFiles = useCallback(async () => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents?_=${Date.now()}`);
@@ -52,14 +50,11 @@ export default function ImportPage() {
     }
   }, []);
 
-  // Fetch folders
   const fetchFolders = useCallback(async () => {
     setLoadingFolders(true);
     try {
       const res = await fetch("http://localhost:4000/api/folders");
       const data = await res.json();
-
-      console.log("Fetched folders:", data); // Debug
 
       const normalizedFolders = (data.folders || data).map(f => ({
         id: f._id || f.id,
@@ -110,13 +105,21 @@ export default function ImportPage() {
       return alert("Please assign a folder to all selected files before sending.");
     }
 
+    // Build payload including folderName
+    const filesPayload = selectedFiles.map((f) => {
+      const folder = folders.find(x => x.id === f.selectedFolder);
+      return {
+        id: f.id,
+        folderId: folder?.id || null,
+        folderName: folder?.name || null
+      };
+    });
+
     try {
       const res = await fetch("http://localhost:4000/api/documents/send-to-repository", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          files: selectedFiles.map((f) => ({ id: f.id, folderId: f.selectedFolder })),
-        }),
+        body: JSON.stringify({ files: filesPayload }),
       });
 
       if (!res.ok) throw new Error("Failed to send files");
@@ -242,7 +245,6 @@ export default function ImportPage() {
                       <AiOutlineEye size={18} />
                     </button>
                   </td>
-                  {/* Folder dropdown */}
                   <td>
                     <select
                       value={file.selectedFolder}
@@ -266,8 +268,6 @@ export default function ImportPage() {
                   <td></td>
                 </tr>
               ))}
-
-              {/* Empty rows */}
               {Array.from({ length: Math.max(0, 25 - files.length) }).map((_, idx) => (
                 <tr key={`empty-${idx}`} className="empty-row">
                   <td className="sticky-col checkbox-col"></td>
