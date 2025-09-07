@@ -11,7 +11,8 @@ export default function ImportPage() {
   const [allChecked, setAllChecked] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [files, setFiles] = useState([]);
-  const [folders, setFolders] = useState([]); // NEW: available folders
+  const [folders, setFolders] = useState([]);
+  const [loadingFolders, setLoadingFolders] = useState(true);
   const { t } = useTranslation();
 
   // Normalize GridFS files
@@ -33,7 +34,7 @@ export default function ImportPage() {
         filename,
         contentType: typeof f?.contentType === "string" ? f.contentType : "",
         uploadDate: f?.uploadDate ? String(f.uploadDate) : "",
-        selectedFolder: f?.folderId || "", // NEW: track folder selection
+        selectedFolder: f?.folderId || "",
       };
     });
 
@@ -53,29 +54,38 @@ export default function ImportPage() {
 
   // Fetch folders
   const fetchFolders = useCallback(async () => {
+    setLoadingFolders(true);
     try {
       const res = await fetch("http://localhost:4000/api/folders");
       const data = await res.json();
-      setFolders(data?.folders || []);
+
+      console.log("Fetched folders:", data); // Debug
+
+      const normalizedFolders = (data.folders || data).map(f => ({
+        id: f._id || f.id,
+        name: f.name || f.folderName
+      }));
+
+      setFolders(normalizedFolders);
     } catch (err) {
       console.error("Error fetching folders:", err);
+    } finally {
+      setLoadingFolders(false);
     }
   }, []);
 
   useEffect(() => {
     setBannerImage("/images/banner-placeholder.jpg");
     fetchFiles();
-    fetchFolders(); // load folders when page loads
+    fetchFolders();
   }, [fetchFiles, fetchFolders]);
 
-  // Toggle all checkboxes
   const toggleAll = () => {
     const newValue = !allChecked;
     setAllChecked(newValue);
     setRows((prev) => prev.map(() => newValue));
   };
 
-  // Toggle single row
   const toggleRow = (index) => {
     setRows((prev) => {
       const next = [...prev];
@@ -85,19 +95,16 @@ export default function ImportPage() {
     });
   };
 
-  // Handle folder selection
   const handleFolderChange = (fileId, folderId) => {
     setFiles((prev) =>
       prev.map((f) => (f.id === fileId ? { ...f, selectedFolder: folderId } : f))
     );
   };
 
-  // Send selected files to repository
   const sendToRepository = async () => {
     const selectedFiles = files.filter((_, idx) => rows[idx]);
     if (selectedFiles.length === 0) return alert("Please select at least one file");
 
-    // Check folder assignment
     const missingFolders = selectedFiles.filter((f) => !f.selectedFolder);
     if (missingFolders.length > 0) {
       return alert("Please assign a folder to all selected files before sending.");
@@ -122,7 +129,6 @@ export default function ImportPage() {
     }
   };
 
-  // Delete selected files
   const deleteFiles = async () => {
     const selectedIds = files.filter((_, idx) => rows[idx]).map((f) => f.id);
     if (selectedIds.length === 0) return alert("Please select at least one file");
@@ -236,13 +242,15 @@ export default function ImportPage() {
                       <AiOutlineEye size={18} />
                     </button>
                   </td>
-                  {/* NEW: Folder dropdown */}
+                  {/* Folder dropdown */}
                   <td>
                     <select
                       value={file.selectedFolder}
                       onChange={(e) => handleFolderChange(file.id, e.target.value)}
                     >
-                      <option value="">-- Select Folder --</option>
+                      <option value="">
+                        {loadingFolders ? "Loading folders..." : "-- Select Folder --"}
+                      </option>
                       {folders.map((folder) => (
                         <option key={folder.id} value={folder.id}>
                           {folder.name}

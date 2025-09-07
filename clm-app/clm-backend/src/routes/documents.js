@@ -48,7 +48,7 @@ router.get("/view/:id", async (req, res) => {
     const db = bucket.s.db;
     const _id = new ObjectId(fileId);
 
-    // 1️⃣ Try to find in GridFS
+    // Try to find in GridFS
     const files = await bucket.find({ _id }).toArray();
     if (files.length > 0) {
       const file = files[0];
@@ -70,7 +70,7 @@ router.get("/view/:id", async (req, res) => {
       return downloadStream.pipe(res);
     }
 
-    // 2️⃣ If not found in GridFS, try TextDocuments collection
+    // If not found in GridFS, try TextDocuments collection
     const textCollection = db.collection("TextDocuments");
     const textDoc = await textCollection.findOne({ _id });
     if (!textDoc) {
@@ -92,24 +92,39 @@ router.get("/view/:id", async (req, res) => {
   }
 });
 
-// --- Send selected files to repository ---
+// --- Send selected files to repository with folder ---
 router.post("/send-to-repository", async (req, res) => {
   try {
-    const { fileIds } = req.body;
-    if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
-      return res.status(400).json({ message: "No file IDs provided" });
+    const { files } = req.body; // Expecting [{ id, folderId }]
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ message: "No files provided" });
     }
 
     const bucket = getBucket();
     const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
 
     await Promise.all(
-      fileIds.map(async (id) => {
+      files.map(async ({ id, folderId }) => {
         if (!ObjectId.isValid(id)) return;
+
         const _id = new ObjectId(id);
+
+        // Optional: fetch folder name from Folders collection
+        let folderName = "";
+        if (folderId && ObjectId.isValid(folderId)) {
+          const folderDoc = await bucket.s.db.collection("Folders").findOne({ _id: new ObjectId(folderId) });
+          folderName = folderDoc?.name || "";
+        }
+
         await filesCollection.updateOne(
           { _id },
-          { $set: { "metadata.repository": true } }
+          { 
+            $set: { 
+              "metadata.repository": true,
+              "metadata.folderId": folderId || null,
+              "metadata.folderName": folderName || null
+            } 
+          }
         );
       })
     );
