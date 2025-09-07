@@ -11,6 +11,7 @@ export default function ImportPage() {
   const [allChecked, setAllChecked] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [files, setFiles] = useState([]);
+  const [folders, setFolders] = useState([]); // NEW: available folders
   const { t } = useTranslation();
 
   // Normalize GridFS files
@@ -32,10 +33,11 @@ export default function ImportPage() {
         filename,
         contentType: typeof f?.contentType === "string" ? f.contentType : "",
         uploadDate: f?.uploadDate ? String(f.uploadDate) : "",
+        selectedFolder: f?.folderId || "", // NEW: track folder selection
       };
     });
 
-  // Fetch import files from backend
+  // Fetch import files
   const fetchFiles = useCallback(async () => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents?_=${Date.now()}`);
@@ -49,10 +51,22 @@ export default function ImportPage() {
     }
   }, []);
 
+  // Fetch folders
+  const fetchFolders = useCallback(async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/folders");
+      const data = await res.json();
+      setFolders(data?.folders || []);
+    } catch (err) {
+      console.error("Error fetching folders:", err);
+    }
+  }, []);
+
   useEffect(() => {
     setBannerImage("/images/banner-placeholder.jpg");
     fetchFiles();
-  }, [fetchFiles]);
+    fetchFolders(); // load folders when page loads
+  }, [fetchFiles, fetchFolders]);
 
   // Toggle all checkboxes
   const toggleAll = () => {
@@ -71,16 +85,31 @@ export default function ImportPage() {
     });
   };
 
+  // Handle folder selection
+  const handleFolderChange = (fileId, folderId) => {
+    setFiles((prev) =>
+      prev.map((f) => (f.id === fileId ? { ...f, selectedFolder: folderId } : f))
+    );
+  };
+
   // Send selected files to repository
   const sendToRepository = async () => {
-    const selectedIds = files.filter((_, idx) => rows[idx]).map(f => f.id);
-    if (selectedIds.length === 0) return alert("Please select at least one file");
+    const selectedFiles = files.filter((_, idx) => rows[idx]);
+    if (selectedFiles.length === 0) return alert("Please select at least one file");
+
+    // Check folder assignment
+    const missingFolders = selectedFiles.filter((f) => !f.selectedFolder);
+    if (missingFolders.length > 0) {
+      return alert("Please assign a folder to all selected files before sending.");
+    }
 
     try {
       const res = await fetch("http://localhost:4000/api/documents/send-to-repository", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileIds: selectedIds }),
+        body: JSON.stringify({
+          files: selectedFiles.map((f) => ({ id: f.id, folderId: f.selectedFolder })),
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to send files");
@@ -95,7 +124,7 @@ export default function ImportPage() {
 
   // Delete selected files
   const deleteFiles = async () => {
-    const selectedIds = files.filter((_, idx) => rows[idx]).map(f => f.id);
+    const selectedIds = files.filter((_, idx) => rows[idx]).map((f) => f.id);
     if (selectedIds.length === 0) return alert("Please select at least one file");
 
     if (!window.confirm("Are you sure you want to delete the selected files?")) return;
@@ -110,7 +139,7 @@ export default function ImportPage() {
       if (!res.ok) throw new Error("Failed to delete files");
 
       alert("Selected files deleted successfully!");
-      await fetchFiles(); // Refresh file list after deletion
+      await fetchFiles();
     } catch (err) {
       console.error("Delete files error:", err);
       alert("Error deleting files");
@@ -131,7 +160,7 @@ export default function ImportPage() {
               className="upload-button-icon"
             />
             <span style={{ marginLeft: "6px" }}>
-            {t("importpage.upload document")}
+              {t("importpage.upload document")}
             </span>
           </label>
         </div>
@@ -185,53 +214,66 @@ export default function ImportPage() {
               </tr>
             </thead>
             <tbody>
-  {files.map((file, index) => (
-    <tr key={file.id || index}>
-      <td className="sticky-col checkbox-col">
-        <input
-          type="checkbox"
-          checked={rows[index] || false}
-          onChange={() => toggleRow(index)}
-        />
-      </td>
-      <td className="sticky-col view-col">
-        <button
-          className="view-btn"
-          onClick={() =>
-            window.open(
-              `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
-              "_blank"
-            )
-          }
-        >
-          <AiOutlineEye size={18} />
-        </button>
-      </td>
-      <td></td>
-      <td>{file.filename}</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-  ))}
+              {files.map((file, index) => (
+                <tr key={file.id || index}>
+                  <td className="sticky-col checkbox-col">
+                    <input
+                      type="checkbox"
+                      checked={rows[index] || false}
+                      onChange={() => toggleRow(index)}
+                    />
+                  </td>
+                  <td className="sticky-col view-col">
+                    <button
+                      className="view-btn"
+                      onClick={() =>
+                        window.open(
+                          `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      <AiOutlineEye size={18} />
+                    </button>
+                  </td>
+                  {/* NEW: Folder dropdown */}
+                  <td>
+                    <select
+                      value={file.selectedFolder}
+                      onChange={(e) => handleFolderChange(file.id, e.target.value)}
+                    >
+                      <option value="">-- Select Folder --</option>
+                      {folders.map((folder) => (
+                        <option key={folder.id} value={folder.id}>
+                          {folder.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>{file.filename}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              ))}
 
-  {/* Add empty rows to reach 25 if files are less */}
-  {Array.from({ length: Math.max(0, 25 - files.length) }).map((_, idx) => (
-    <tr key={`empty-${idx}`} className="empty-row">
-      <td className="sticky-col checkbox-col"></td>
-      <td className="sticky-col view-col"></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-  ))}
-</tbody>
+              {/* Empty rows */}
+              {Array.from({ length: Math.max(0, 25 - files.length) }).map((_, idx) => (
+                <tr key={`empty-${idx}`} className="empty-row">
+                  <td className="sticky-col checkbox-col"></td>
+                  <td className="sticky-col view-col"></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
 
@@ -242,7 +284,7 @@ export default function ImportPage() {
         isOpen={isPopupOpen}
         onClose={() => {
           setIsPopupOpen(false);
-          fetchFiles(); // Refetch after closing popup in case of new uploads
+          fetchFiles();
         }}
       />
     </>
