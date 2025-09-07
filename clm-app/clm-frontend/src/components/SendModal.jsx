@@ -1,18 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./SendModal.css";
 
-export default function SendModal({ selectedDocs = [], onClose }) {
-  const [emails, setEmails] = useState([]); // store multiple emails
-  const [input, setInput] = useState(""); // typing new email
+export default function SendModal({ selectedRows = [], files = [], onClose }) {
+  const [emails, setEmails] = useState([]);
+  const [input, setInput] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [contractChecked, setContractChecked] = useState(false);
   const [summaryChecked, setSummaryChecked] = useState(false);
 
-  // validate email format
+  // Compute selected docs dynamically from current props
+  const selectedDocs = useMemo(() => {
+    return files
+      .filter((file) => selectedRows.includes(file._id))
+      .map((file) => ({ _id: file._id, filename: file.filename }));
+  }, [selectedRows, files]);
+
+  useEffect(() => {
+    console.log("SendModal sees docs:", selectedDocs);
+  }, [selectedDocs]);
+
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // handle Enter or comma press for email chips
   const handleKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && input.trim()) {
       e.preventDefault();
@@ -24,44 +33,35 @@ export default function SendModal({ selectedDocs = [], onClose }) {
     }
   };
 
-  // remove email chip
-  const removeEmail = (index) => {
-    setEmails(emails.filter((_, i) => i !== index));
-  };
+  const removeEmail = (index) => setEmails(emails.filter((_, i) => i !== index));
 
-  // send documents
   const handleSend = async () => {
     if (emails.length === 0) {
       alert("Please enter at least one recipient email");
       return;
     }
 
-    // Filter docs by checkbox selection
-    const docsToSend = selectedDocs.filter((doc) => {
-      if (contractChecked && doc.type === "original") return true;
-      if (summaryChecked && doc.type === "summary") return true;
-      return false;
-    });
-
-    if (docsToSend.length === 0) {
-      alert("Please select at least one document type (Contract / Summary)");
+    if (!selectedDocs || selectedDocs.length === 0) {
+      alert("No files selected to send");
       return;
     }
 
-    // Prepare form data
-    const formData = new FormData();
-    formData.append("recipients", emails.join(","));
-    formData.append("subject", subject);
-    formData.append("message", message);
+    const payload = {
+      fileIds: selectedDocs.map((doc) => doc._id),
+      recipients: emails,
+      subject,
+      message,
+      sendContract: contractChecked,
+      sendSummary: summaryChecked,
+    };
 
-    docsToSend.forEach((doc) => {
-      formData.append("files", doc.file); // doc.file is a File object from input
-    });
+    console.log("Sending payload:", payload);
 
     try {
-      const response = await fetch("/api/send-docs", {
+      const response = await fetch("http://localhost:4000/api/send-docs", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -69,10 +69,11 @@ export default function SendModal({ selectedDocs = [], onClose }) {
         alert("Email sent successfully!");
         onClose();
       } else {
+        console.error("Send failed:", result);
         alert("Failed to send email: " + result.message);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error sending email:", error);
       alert("Error sending email");
     }
   };
@@ -80,19 +81,24 @@ export default function SendModal({ selectedDocs = [], onClose }) {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        {/* Title */}
         <h3 className="modal-title">Send Documents</h3>
         <div className="modal-underline"></div>
 
-        {/* Send To Field */}
+        <div className="modal-label">Selected Files</div>
+        <ul>
+          {selectedDocs.length > 0 ? (
+            selectedDocs.map((doc) => <li key={doc._id}>{doc.filename}</li>)
+          ) : (
+            <li>No files selected</li>
+          )}
+        </ul>
+
         <div className="modal-label">Send To</div>
         <div className="email-chips-container">
           {emails.map((email, index) => (
             <div className="email-chip" key={index}>
               {email}
-              <span className="remove-chip" onClick={() => removeEmail(index)}>
-                ×
-              </span>
+              <span className="remove-chip" onClick={() => removeEmail(index)}>×</span>
             </div>
           ))}
           <input
@@ -105,8 +111,7 @@ export default function SendModal({ selectedDocs = [], onClose }) {
           />
         </div>
 
-        {/* Contract Checkbox Group */}
-        <div className="modal-label">Contract</div>
+        <div className="modal-label">Document Type</div>
         <div className="modal-checkbox-group">
           <label>
             <input
@@ -121,12 +126,12 @@ export default function SendModal({ selectedDocs = [], onClose }) {
               type="checkbox"
               checked={summaryChecked}
               onChange={() => setSummaryChecked(!summaryChecked)}
+              disabled
             />
-            Summary
+            Summary (Coming Soon)
           </label>
         </div>
 
-        {/* Subject Field */}
         <div className="modal-label">Subject</div>
         <textarea
           className="modal-textarea subject-textarea"
@@ -135,7 +140,6 @@ export default function SendModal({ selectedDocs = [], onClose }) {
           onChange={(e) => setSubject(e.target.value)}
         />
 
-        {/* Message Field */}
         <div className="modal-label">Message</div>
         <textarea
           className="modal-textarea message-textarea"
@@ -144,14 +148,9 @@ export default function SendModal({ selectedDocs = [], onClose }) {
           onChange={(e) => setMessage(e.target.value)}
         />
 
-        {/* Buttons */}
         <div className="modal-actions">
-          <button className="modal-btn modal-btn-cancel" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="modal-btn modal-btn-send" onClick={handleSend}>
-            Send
-          </button>
+          <button className="modal-btn modal-btn-cancel" onClick={onClose}>Cancel</button>
+          <button className="modal-btn modal-btn-send" onClick={handleSend}>Send</button>
         </div>
       </div>
     </div>

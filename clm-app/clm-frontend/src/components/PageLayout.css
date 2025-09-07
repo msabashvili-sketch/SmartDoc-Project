@@ -3,7 +3,7 @@
   --top-space-height: 60px;
   --top-space-bg: #F6FAF9;  /* color of top space */
   --top-space-title-color: #534a4b;
-  --top-space-title-size: 19px;
+  --top-space-title-size: 18px;
   --upload-btn-bg: #1f6e77;
   --upload-btn-color: #fff;
   --upload-btn-padding: 6px 12px;
@@ -69,6 +69,7 @@
   font-weight: 400;
   cursor: pointer;
   border: 1px solid var(--upload-btn-bg);
+  margin-right: 15px;
 }
 
 .upload-button:hover {

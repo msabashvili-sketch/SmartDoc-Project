@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DashboardHeader from "./DashboardHeader";
 import "./PageLayout.css";
 import { useTranslation } from "react-i18next";
 import SendModal from "./SendModal";
+import ColumnsPopup from "./ColumnsPopup";
 
 export default function PageLayout({
   title,
@@ -11,7 +12,6 @@ export default function PageLayout({
   bannerImage = null,
   onUploadClick = () => {},
   onFilterClick = () => {},
-  onColumnsClick = () => {},
   onSendClick = () => {},
   onExportClick = () => {},
   children,
@@ -20,11 +20,31 @@ export default function PageLayout({
 }) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
-  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
+  // Send modal
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const handleSendClick = () => {
     if (onSendClick) onSendClick();
     setIsSendModalOpen(true);
+  };
+
+  // Columns popup
+  const [isColumnsPopupOpen, setIsColumnsPopupOpen] = useState(false);
+  const columnsButtonRef = useRef(null);
+
+  // Example columns (later you can pass this list from RepositoryPage / ArchivePage)
+  const [visibleColumns, setVisibleColumns] = useState(["name", "date", "type"]);
+  const columns = [
+    { key: "name", label: "Name" },
+    { key: "date", label: "Date" },
+    { key: "type", label: "Type" },
+    { key: "owner", label: "Owner" },
+  ];
+
+  const handleToggleColumn = (key) => {
+    setVisibleColumns((prev) =>
+      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
+    );
   };
 
   return (
@@ -65,7 +85,11 @@ export default function PageLayout({
         {/* Wrapper for search + table */}
         <div className={`content-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
           {/* Search bar */}
-          <div className={`search-bar-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
+          <div
+            className={`search-bar-wrapper ${
+              isFilterOpen ? "filter-open" : ""
+            }`}
+          >
             <div className="search-filter-bar">
               <button className="filter-button" onClick={onFilterClick}>
                 <img
@@ -84,7 +108,11 @@ export default function PageLayout({
               />
 
               <div className="search-buttons">
-                <button className="columns-button" onClick={onColumnsClick}>
+                <button
+                  className="columns-button"
+                  onClick={() => setIsColumnsPopupOpen((prev) => !prev)}
+                  ref={columnsButtonRef}
+                >
                   <img
                     src="/assets/column-icon.png"
                     alt="Columns"
@@ -92,6 +120,7 @@ export default function PageLayout({
                   />
                   {t("repositorypage.columns")}
                 </button>
+
                 <button className="send-button" onClick={handleSendClick}>
                   <img
                     src="/assets/email-icon.png"
@@ -100,6 +129,7 @@ export default function PageLayout({
                   />
                   {t("repositorypage.send")}
                 </button>
+
                 <button className="export-button" onClick={onExportClick}>
                   <img
                     src="/assets/export-icon.png"
@@ -116,6 +146,16 @@ export default function PageLayout({
           <div className="table-content">{children}</div>
         </div>
       </div>
+
+      {/* Columns Popup */}
+      <ColumnsPopup
+        isOpen={isColumnsPopupOpen}
+        onClose={() => setIsColumnsPopupOpen(false)}
+        columns={columns}
+        visibleColumns={visibleColumns}
+        onToggleColumn={handleToggleColumn}
+        anchorRef={columnsButtonRef}
+      />
 
       {/* Send Modal */}
       {isSendModalOpen && (

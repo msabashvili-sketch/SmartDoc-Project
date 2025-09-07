@@ -1,0 +1,187 @@
+/* -------------------- FoldersPage Layout -------------------- */
+.page-layout {
+  min-height: 100vh;         /* full viewport height */
+  background-color: #fdfdfd; /* your desired color */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #fdfdfd;
+}
+
+.folders-layout {
+  display: flex;
+  margin-top: 20px;
+  /* background removed so .page-layout color shows */
+}
+
+/* -------------------- Sidebar Box -------------------- */
+.folders-sidebar {
+  width: 600px;
+  height: 80vh;
+  margin-left: 20px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* -------------------- Sidebar Header -------------------- */
+.folders-header {
+  display: flex;
+  justify-content: space-between; /* left block + new folder button */
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e7e7e7;
+  font-weight: 600;
+  font-size: 16px;
+  height: 50px;
+}
+
+/* Left section: icon + title */
+.folders-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;       /* space between icon and title */
+  flex-shrink: 1; /* allows text to shrink slightly if needed */
+}
+
+/* Header folder icon */
+.folders-header-left .folder-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0; /* prevent icon from shrinking */
+}
+
+/* New folder button */
+.new-folder-btn {
+  color: #2085cc;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.new-folder-btn:hover {
+  background-color: rgba(32, 133, 204, 0.1);
+}
+
+/* -------------------- Sidebar Body -------------------- */
+.folders-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+/* Footer */
+.folders-footer {
+  padding: 10px;
+  background: #fff;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* -------------------- New Folder Popup -------------------- */
+.new-folder-popup {
+  position: absolute;
+  top: 36px;  /* below the button */
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  z-index: 100;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.new-folder-popup input {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+}
+.new-folder-popup input:focus {
+  border-color: #3dd799;
+  box-shadow: 0 0 4px rgba(32, 133, 204, 0.4);
+}
+
+.new-folder-popup-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.new-folder-popup .cancel-btn,
+.new-folder-popup .create-btn {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 13px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+}
+
+.new-folder-popup .cancel-btn {
+  background: #f0f0f0;
+}
+.new-folder-popup .create-btn {
+  background: #26858f;
+  color: #fff;
+}
+
+/* -------------------- Folder Grid -------------------- */
+.folders-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 per row */
+  gap: 16px; /* spacing between folders */
+  padding: 10px;
+}
+
+/* Individual folder item */
+.folder-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Folder icon wrapper to crop extra transparent space */
+.folder-icon-wrapper {
+  width: 100px;     /* adjust icon size here */
+  height: 100px;    /* adjust icon size here */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 1px; /* space between icon and title */
+}
+
+/* Folder icon inside wrapper */
+.folder-grid-icon {
+  width: 100%;     /* fills wrapper */
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Folder name */
+.folder-name {
+  font-size: 14px;  /* adjust font size here */
+  font-weight: 500;
+  color: #454545;   /* adjust font color here */
+  word-break: break-word;
+  text-align: center;
+  margin-top: 2px;  /* adjust space between icon and title */
+}
