@@ -166,7 +166,7 @@ export default function RepositoryPage() {
                             />
                           </td>
                           <TooltipCell className="sticky-col title-col" text={file.filename} />
-                          <TooltipCell text={file.folderName} /> {/* <-- updated here */}
+                          <td>{file.folderName}</td>
                           <TooltipCell text={file.metadata?.counterparty} />
                           <TooltipCell text={file.metadata?.documentType} />
                           <TooltipCell text={file.metadata?.agreementDate} />

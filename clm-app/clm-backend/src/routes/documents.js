@@ -48,7 +48,6 @@ router.get("/view/:id", async (req, res) => {
     const db = bucket.s.db;
     const _id = new ObjectId(fileId);
 
-    // Try to find in GridFS
     const files = await bucket.find({ _id }).toArray();
     if (files.length > 0) {
       const file = files[0];
@@ -70,7 +69,6 @@ router.get("/view/:id", async (req, res) => {
       return downloadStream.pipe(res);
     }
 
-    // If not found in GridFS, try TextDocuments collection
     const textCollection = db.collection("TextDocuments");
     const textDoc = await textCollection.findOne({ _id });
     if (!textDoc) {
@@ -103,7 +101,6 @@ router.post("/send-to-repository", async (req, res) => {
     const bucket = getBucket();
     const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
 
-    // Save folderId and folderName directly from frontend
     await Promise.all(
       files.map(async ({ id, folderId, folderName }) => {
         if (!ObjectId.isValid(id)) return;
@@ -163,6 +160,27 @@ router.post("/delete", async (req, res) => {
     res.json({ message: "Files deleted successfully!" });
   } catch (err) {
     console.error("❌ Delete files error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// --- NEW ROUTE: Get documents by folderId ---
+router.get("/by-folder/:folderId", async (req, res) => {
+  try {
+    const { folderId } = req.params;
+    const bucket = getBucket();
+
+    const files = await bucket
+      .find({ 
+        "metadata.repository": true, 
+        "metadata.folderId": folderId 
+      })
+      .sort({ uploadDate: -1 })
+      .toArray();
+
+    res.json({ files });
+  } catch (err) {
+    console.error("❌ Error fetching folder documents:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
