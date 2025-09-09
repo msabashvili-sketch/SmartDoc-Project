@@ -8,9 +8,16 @@ export default function FolderDetailsPage({ folderId, onBack }) {
   const { t } = useTranslation();
   const [documents, setDocuments] = useState([]);
   const [folderName, setFolderName] = useState("");
+  const [folders, setFolders] = useState([]);
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteDocId, setDeleteDocId] = useState(null);
 
+  const [showMovePopup, setShowMovePopup] = useState(false);
+  const [moveDocId, setMoveDocId] = useState(null);
+  const [targetFolderId, setTargetFolderId] = useState("");
+
+  // Fetch documents in folder
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -28,6 +35,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
         const res = await axios.get(`http://localhost:4000/api/folders`);
         const folder = res.data.find((f) => f._id === folderId);
         setFolderName(folder ? folder.name : t("detailspanel.folderDocuments"));
+        setFolders(res.data || []);
       } catch (err) {
         console.error("Error fetching folder name:", err);
       }
@@ -47,6 +55,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
     };
   };
 
+  // Delete document
   const handleDeleteClick = (docId) => {
     setDeleteDocId(docId);
     setShowDeleteConfirm(true);
@@ -67,9 +76,41 @@ export default function FolderDetailsPage({ folderId, onBack }) {
     }
   };
 
+  // Move document
+  const handleMoveClick = (docId) => {
+    setMoveDocId(docId);
+    setTargetFolderId(""); // reset dropdown
+    setShowMovePopup(true);
+  };
+
+  const handleConfirmMove = async () => {
+    if (!targetFolderId) return;
+
+    try {
+      await axios.post("http://localhost:4000/api/documents/send-to-repository", {
+        files: [
+          {
+            id: moveDocId,
+            folderId: targetFolderId,
+            folderName: folders.find((f) => f._id === targetFolderId)?.name,
+          },
+        ],
+      });
+      // Remove moved document from current list
+      setDocuments((prev) => prev.filter((doc) => doc._id !== moveDocId));
+    } catch (err) {
+      console.error("Move failed:", err);
+      alert(t("detailspanel.moveFailed"));
+    } finally {
+      setShowMovePopup(false);
+      setMoveDocId(null);
+      setTargetFolderId("");
+    }
+  };
+
   return (
     <div className="folder-documents-page">
-      {/* Fixed header with folder name */}
+      {/* Header */}
       <div className="folder-details-header">
         <button className="back-button" onClick={onBack}>
           ← {t("folderdetailspanel.back")}
@@ -84,6 +125,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
         </div>
       </div>
 
+      {/* Documents Table */}
       {documents.length === 0 ? (
         <p className="no-documents-text">{t("folderdetailspanel.noDocuments")}</p>
       ) : (
@@ -129,13 +171,19 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                           className="action-icon"
                         />
                       </button>
-                      <button className="action-button">
+
+                      {/* Move button */}
+                      <button
+                        className="action-button"
+                        onClick={() => handleMoveClick(doc._id)}
+                      >
                         <img
                           src="/assets/folder-big-icon7.png"
                           alt={t("folderdetailspanel.move")}
                           className="action-icon"
                         />
                       </button>
+
                       <button
                         className="action-button"
                         onClick={() => handleDeleteClick(doc._id)}
@@ -169,6 +217,36 @@ export default function FolderDetailsPage({ folderId, onBack }) {
               </button>
               <button className="confirm-delete" onClick={handleConfirmDelete}>
                 {t("folderdetailspanel.delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Move Popup */}
+      {showMovePopup && (
+        <div className="confirm-overlay">
+          <div className="new-folder-popup move-popup">
+            <input type="text" value={folderName} disabled />
+            <select
+              value={targetFolderId}
+              onChange={(e) => setTargetFolderId(e.target.value)}
+            >
+              <option value="">{t("folderdetailspanel.selectFolder")}</option>
+              {folders
+                .filter((f) => f._id !== folderId)
+                .map((f) => (
+                  <option key={f._id} value={f._id}>
+                    {f.name}
+                  </option>
+                ))}
+            </select>
+            <div className="new-folder-popup-buttons">
+              <button className="cancel-btn" onClick={() => setShowMovePopup(false)}>
+                {t("folderdetailspanel.cancel")}
+              </button>
+              <button className="create-btn" onClick={handleConfirmMove}>
+                {t("folderdetailspanel.move")}
               </button>
             </div>
           </div>
