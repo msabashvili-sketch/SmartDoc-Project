@@ -19,7 +19,7 @@
 
 .back-button {
   position: absolute;
-  left: 0px; /* push it to the far left */
+  left: 1px; /* push it to the far left */
   display: flex;
   align-items: center;
   gap: 4px;

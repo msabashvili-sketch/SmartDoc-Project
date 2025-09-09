@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./FolderDetailsPage.css";
+import { useTranslation } from "react-i18next";
 
 export default function FolderDetailsPage({ folderId, onBack }) {
+  const { t } = useTranslation();
   const [documents, setDocuments] = useState([]);
   const [folderName, setFolderName] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -25,7 +27,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
       try {
         const res = await axios.get(`http://localhost:4000/api/folders`);
         const folder = res.data.find((f) => f._id === folderId);
-        setFolderName(folder ? folder.name : "Folder Documents");
+        setFolderName(folder ? folder.name : t("detailspanel.folderDocuments"));
       } catch (err) {
         console.error("Error fetching folder name:", err);
       }
@@ -35,7 +37,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
       fetchDocuments();
       fetchFolderName();
     }
-  }, [folderId]);
+  }, [folderId, t]);
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -58,7 +60,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
       setDocuments((prev) => prev.filter((doc) => doc._id !== deleteDocId));
     } catch (err) {
       console.error("Delete failed:", err);
-      alert("Failed to delete file. Please try again.");
+      alert(t("detailspanel.deleteFailed"));
     } finally {
       setShowDeleteConfirm(false);
       setDeleteDocId(null);
@@ -70,11 +72,11 @@ export default function FolderDetailsPage({ folderId, onBack }) {
       {/* Fixed header with folder name */}
       <div className="folder-details-header">
         <button className="back-button" onClick={onBack}>
-          ← Back
+          ← {t("folderdetailspanel.back")}
         </button>
         <div className="folder-title-container">
           <img
-            src="/assets/folder-small-icon.png"
+            src="/assets/folder-big-icon5.png"
             alt="Folder Icon"
             className="folder-header-icon"
           />
@@ -83,7 +85,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
       </div>
 
       {documents.length === 0 ? (
-        <p className="no-documents-text">No documents in this folder.</p>
+        <p className="no-documents-text">{t("folderdetailspanel.noDocuments")}</p>
       ) : (
         <table className="documents-table">
           <colgroup>
@@ -93,9 +95,9 @@ export default function FolderDetailsPage({ folderId, onBack }) {
           </colgroup>
           <thead>
             <tr>
-              <th>File Name</th>
-              <th>Uploaded On</th>
-              <th>Actions</th>
+              <th>{t("folderdetailspanel.fileName")}</th>
+              <th>{t("folderdetailspanel.uploadedOn")}</th>
+              <th>{t("folderdetailspanel.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -122,15 +124,15 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                         }
                       >
                         <img
-                          src="/assets/view-icon.png"
-                          alt="View"
+                          src="/assets/view-icon4.png"
+                          alt={t("folderdetailspanel.view")}
                           className="action-icon"
                         />
                       </button>
                       <button className="action-button">
                         <img
-                          src="/assets/folder-small-icon.png"
-                          alt="Move"
+                          src="/assets/folder-big-icon7.png"
+                          alt={t("folderdetailspanel.move")}
                           className="action-icon"
                         />
                       </button>
@@ -140,7 +142,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                       >
                         <img
                           src="/assets/delete-icon.png"
-                          alt="Delete"
+                          alt={t("folderdetailspanel.delete")}
                           className="action-icon"
                         />
                       </button>
@@ -157,16 +159,16 @@ export default function FolderDetailsPage({ folderId, onBack }) {
       {showDeleteConfirm && (
         <div className="confirm-overlay">
           <div className="confirm-box">
-            <p>Are you sure you want to delete this file?</p>
+            <p>{t("folderdetailspanel.confirmDelete")}</p>
             <div className="confirm-actions">
               <button
                 className="confirm-cancel"
                 onClick={() => setShowDeleteConfirm(false)}
               >
-                Cancel
+                {t("folderdetailspanel.cancel")}
               </button>
               <button className="confirm-delete" onClick={handleConfirmDelete}>
-                Delete
+                {t("folderdetailspanel.delete")}
               </button>
             </div>
           </div>

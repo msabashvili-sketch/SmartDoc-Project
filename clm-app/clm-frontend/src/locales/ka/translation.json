@@ -139,7 +139,21 @@
     "cancel": "გაუქმება",
     "create": "შექმნა",
     "folder name": "ახალი საქაღალდის სახელი"
-  }
+  },
 
+  "folderdetailspanel": {
+    "back": "უკან",
+    "fileName": "ფაილის სახელი",
+    "uploadedOn": "აიტვირთა",
+    "actions": "მოქმედება",
+    "view": "ნახვა",
+    "move": "გადატანა",
+    "delete": "წაშლა",
+    "confirmDelete": "ნამდვილად გსურს წაშლა?",
+    "cancel": "გაუქმება",
+    "deleteFailed": "ფაილის წაშლა ვერ მოხერხდა. გთხოვთ, სცადეთ ხელახლა.",
+    "noDocuments": "",
+    "folderDocuments": "საქაღალდის დოკუმენტები"
+  }
 
 }

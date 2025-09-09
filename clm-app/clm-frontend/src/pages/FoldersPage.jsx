@@ -207,7 +207,7 @@ export default function FoldersPage() {
                     >
                       <div className="folder-icon-wrapper">
                         <img
-                          src="/assets/folder-big-icon4.png"
+                          src="/assets/folder-big-icon7.png"
                           alt="Folder"
                           className="folder-grid-icon"
                         />
