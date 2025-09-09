@@ -6,6 +6,8 @@ import "./FolderDetailsPage.css";
 export default function FolderDetailsPage({ folderId, onBack }) {
   const [documents, setDocuments] = useState([]);
   const [folderName, setFolderName] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteDocId, setDeleteDocId] = useState(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -43,6 +45,26 @@ export default function FolderDetailsPage({ folderId, onBack }) {
     };
   };
 
+  const handleDeleteClick = (docId) => {
+    setDeleteDocId(docId);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await axios.post("http://localhost:4000/api/documents/delete", {
+        fileIds: [deleteDocId],
+      });
+      setDocuments((prev) => prev.filter((doc) => doc._id !== deleteDocId));
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete file. Please try again.");
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteDocId(null);
+    }
+  };
+
   return (
     <div className="folder-documents-page">
       {/* Fixed header with folder name */}
@@ -55,10 +77,11 @@ export default function FolderDetailsPage({ folderId, onBack }) {
             src="/assets/folder-small-icon.png"
             alt="Folder Icon"
             className="folder-header-icon"
-          />  
-        <h2 className="folder-title">{folderName}</h2>
-       </div>
-      </div> 
+          />
+          <h2 className="folder-title">{folderName}</h2>
+        </div>
+      </div>
+
       {documents.length === 0 ? (
         <p className="no-documents-text">No documents in this folder.</p>
       ) : (
@@ -111,7 +134,10 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                           className="action-icon"
                         />
                       </button>
-                      <button className="action-button">
+                      <button
+                        className="action-button"
+                        onClick={() => handleDeleteClick(doc._id)}
+                      >
                         <img
                           src="/assets/delete-icon.png"
                           alt="Delete"
@@ -125,6 +151,26 @@ export default function FolderDetailsPage({ folderId, onBack }) {
             })}
           </tbody>
         </table>
+      )}
+
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirm && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <p>Are you sure you want to delete this file?</p>
+            <div className="confirm-actions">
+              <button
+                className="confirm-cancel"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button className="confirm-delete" onClick={handleConfirmDelete}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
