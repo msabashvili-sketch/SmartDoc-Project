@@ -23,7 +23,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 6px;
+  padding: 4px 6px;
   font-size: 12px;
   cursor: pointer;
   background-color: #f0f0f0;
@@ -287,4 +287,12 @@
 .create-btn {
   background: #26858f;
   color: #fff;
+}
+
+/* Highlight selected row */
+.selected-row {
+  background-color: #e6f7ff;
+}
+.selected-row:hover {
+  background-color: #cceeff;
 }

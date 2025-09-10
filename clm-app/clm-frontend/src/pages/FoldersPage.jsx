@@ -32,6 +32,9 @@ export default function FoldersPage() {
   const [viewMode, setViewMode] = useState("folders"); // "folders" or "folderContents"
   const [selectedFolder, setSelectedFolder] = useState(null);
 
+  // Document preview state
+  const [previewDocument, setPreviewDocument] = useState(null); // store clicked document
+
   // Close new-folder popup when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -58,7 +61,6 @@ export default function FoldersPage() {
       const response = await axios.get("http://localhost:4000/api/folders");
       setFolders(response.data || []);
 
-      // If URL has folderId, auto-open that folder
       if (paramFolderId) {
         const folder = response.data.find((f) => f._id === paramFolderId);
         if (folder) {
@@ -73,7 +75,6 @@ export default function FoldersPage() {
 
   useEffect(() => {
     fetchFolders();
-    // eslint-disable-next-line
   }, [paramFolderId]);
 
   // Handlers
@@ -82,7 +83,6 @@ export default function FoldersPage() {
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) return;
-
     try {
       const response = await axios.post("http://localhost:4000/api/folders", {
         name: newFolderName.trim(),
@@ -104,25 +104,29 @@ export default function FoldersPage() {
     setSelectedFolder(folder);
     setViewMode("folderContents");
     navigate(`/folders/${folder._id}`);
+    setPreviewDocument(null);
   };
 
   const handleBackClick = () => {
     setSelectedFolder(null);
     setViewMode("folders");
     navigate("/folders");
+    setPreviewDocument(null);
+  };
+
+  // Callback when a document row is clicked in FolderDetailsPage
+  const handleDocumentClick = (doc) => {
+    setPreviewDocument(doc);
   };
 
   return (
     <div className="page-layout">
-      {/* Main Header */}
       <DashboardHeader />
 
-      {/* Top space */}
       <div className="top-space">
         {viewMode === "folders" && (
           <>
             <h1 className="top-space-title">{t("folderspage.title")}</h1>
-
             {showUploadButton && (
               <label className="upload-button" onClick={handleUploadClick}>
                 <img
@@ -139,7 +143,6 @@ export default function FoldersPage() {
         )}
       </div>
 
-      {/* Upload popup */}
       <UploadPopup
         isOpen={isUploadPopupOpen}
         onClose={() => {
@@ -148,7 +151,6 @@ export default function FoldersPage() {
         }}
       />
 
-      {/* Main content */}
       <div className="folders-layout">
         {/* Sidebar */}
         <div className="folders-sidebar">
@@ -192,7 +194,6 @@ export default function FoldersPage() {
             </div>
           </div>
 
-          {/* Main area */}
           <div className="folders-body">
             {viewMode === "folders" ? (
               folders.length === 0 ? (
@@ -218,15 +219,35 @@ export default function FoldersPage() {
                 </div>
               )
             ) : selectedFolder ? (
-              // FolderDetailsPage handles its own header/back button
               <FolderDetailsPage
                 folderId={selectedFolder._id}
                 onBack={handleBackClick}
+                onDocumentClick={handleDocumentClick} // row click callback
               />
             ) : null}
           </div>
 
           <div className="folders-footer">{t("folderspage.footer")}</div>
+        </div>
+
+        {/* Document preview area */}
+        <div className="extra-area">
+          {!previewDocument && (
+            <div className="empty-preview">
+              <img
+                src="/assets/brand-logo2.png"
+                alt="Brand Logo"
+                className="brand-logo"
+              />
+            </div>
+          )}
+          {previewDocument && (
+            <iframe
+              src={`http://localhost:4000/api/documents/view/${previewDocument._id}`}
+              title={previewDocument.filename}
+              style={{ width: "100%", height: "100%", border: "none" }}
+            />
+          )}
         </div>
       </div>
     </div>

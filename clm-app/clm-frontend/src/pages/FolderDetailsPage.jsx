@@ -4,7 +4,7 @@ import axios from "axios";
 import "./FolderDetailsPage.css";
 import { useTranslation } from "react-i18next";
 
-export default function FolderDetailsPage({ folderId, onBack }) {
+export default function FolderDetailsPage({ folderId, onBack, onDocumentClick }) {
   const { t } = useTranslation();
   const [documents, setDocuments] = useState([]);
   const [folderName, setFolderName] = useState("");
@@ -16,6 +16,8 @@ export default function FolderDetailsPage({ folderId, onBack }) {
   const [showMovePopup, setShowMovePopup] = useState(false);
   const [moveDocId, setMoveDocId] = useState(null);
   const [targetFolderId, setTargetFolderId] = useState("");
+
+  const [selectedDocId, setSelectedDocId] = useState(null); // NEW: selected row
 
   // Fetch documents in folder
   useEffect(() => {
@@ -79,7 +81,7 @@ export default function FolderDetailsPage({ folderId, onBack }) {
   // Move document
   const handleMoveClick = (docId) => {
     setMoveDocId(docId);
-    setTargetFolderId(""); // reset dropdown
+    setTargetFolderId("");
     setShowMovePopup(true);
   };
 
@@ -96,7 +98,6 @@ export default function FolderDetailsPage({ folderId, onBack }) {
           },
         ],
       });
-      // Remove moved document from current list
       setDocuments((prev) => prev.filter((doc) => doc._id !== moveDocId));
     } catch (err) {
       console.error("Move failed:", err);
@@ -146,7 +147,14 @@ export default function FolderDetailsPage({ folderId, onBack }) {
             {documents.map((doc) => {
               const { date, time } = formatDateTime(doc.uploadDate);
               return (
-                <tr key={doc._id}>
+                <tr
+                  key={doc._id}
+                  className={selectedDocId === doc._id ? "selected-row" : ""}
+                  onClick={() => {
+                    setSelectedDocId(doc._id);
+                    if (onDocumentClick) onDocumentClick(doc);
+                  }}
+                >
                   <td className="td-filename">
                     <span className="filename-text">{doc.filename}</span>
                   </td>
@@ -156,14 +164,16 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                   </td>
                   <td className="td-actions">
                     <div className="actions-container">
+                      {/* View button opens in new tab */}
                       <button
                         className="action-button"
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.stopPropagation();
                           window.open(
                             `http://localhost:4000/api/documents/view/${doc._id}`,
                             "_blank"
-                          )
-                        }
+                          );
+                        }}
                       >
                         <img
                           src="/assets/view-icon4.png"
@@ -175,7 +185,10 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                       {/* Move button */}
                       <button
                         className="action-button"
-                        onClick={() => handleMoveClick(doc._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMoveClick(doc._id);
+                        }}
                       >
                         <img
                           src="/assets/folder-big-icon7.png"
@@ -184,9 +197,13 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                         />
                       </button>
 
+                      {/* Delete button */}
                       <button
                         className="action-button"
-                        onClick={() => handleDeleteClick(doc._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(doc._id);
+                        }}
                       >
                         <img
                           src="/assets/delete-icon.png"
@@ -242,7 +259,10 @@ export default function FolderDetailsPage({ folderId, onBack }) {
                 ))}
             </select>
             <div className="new-folder-popup-buttons">
-              <button className="cancel-btn" onClick={() => setShowMovePopup(false)}>
+              <button
+                className="cancel-btn"
+                onClick={() => setShowMovePopup(false)}
+              >
                 {t("folderdetailspanel.cancel")}
               </button>
               <button className="create-btn" onClick={handleConfirmMove}>
