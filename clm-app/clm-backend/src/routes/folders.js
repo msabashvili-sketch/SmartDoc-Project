@@ -5,11 +5,28 @@ const { ObjectId } = require("mongodb");
 
 const router = express.Router();
 
-// --- Get all folders ---
+// --- Get all folders with file count ---
 router.get("/", async (req, res) => {
   try {
+    const bucket = getBucket();
+
+    // Fetch all folders
     const folders = await Folder.find().sort({ createdAt: -1 });
-    res.json(folders);
+
+    // Count files for each folder
+    const foldersWithCount = await Promise.all(
+      folders.map(async (folder) => {
+        const count = await bucket
+          .find({ "metadata.folderId": folder._id.toString() })
+          .count();
+        return {
+          ...folder.toObject(), // keep _id, name, timestamps
+          fileCount: count,     // add fileCount
+        };
+      })
+    );
+
+    res.json(foldersWithCount);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch folders" });

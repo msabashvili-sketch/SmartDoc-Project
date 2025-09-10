@@ -15,8 +15,6 @@ export default function FoldersPage() {
   const { folderId: paramFolderId } = useParams();
 
   const [showUploadButton] = useState(true);
-
-  // Upload popup
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
 
   // New folder popup
@@ -27,13 +25,18 @@ export default function FoldersPage() {
 
   // Folders state
   const [folders, setFolders] = useState([]);
+  const [totalDocuments, setTotalDocuments] = useState(0);
 
   // Folder view state
-  const [viewMode, setViewMode] = useState("folders"); // "folders" or "folderContents"
+  const [viewMode, setViewMode] = useState("folders");
   const [selectedFolder, setSelectedFolder] = useState(null);
 
   // Document preview state
-  const [previewDocument, setPreviewDocument] = useState(null); // store clicked document
+  const [previewDocument, setPreviewDocument] = useState(null);
+
+  // Delete state (multiple selection allowed)
+  const [selectedForDelete, setSelectedForDelete] = useState([]);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   // Close new-folder popup when clicking outside
   useEffect(() => {
@@ -55,14 +58,23 @@ export default function FoldersPage() {
     };
   }, [isNewFolderPopupOpen]);
 
-  // Fetch folders from backend
+  // Fetch folders with file counts from backend
   const fetchFolders = async () => {
     try {
       const response = await axios.get("http://localhost:4000/api/folders");
-      setFolders(response.data || []);
+      const foldersData = response.data || [];
+      setFolders(foldersData);
 
+      // Compute total documents
+      const totalDocs = foldersData.reduce(
+        (sum, f) => sum + (f.fileCount ?? 0),
+        0
+      );
+      setTotalDocuments(totalDocs);
+
+      // Handle direct navigation
       if (paramFolderId) {
-        const folder = response.data.find((f) => f._id === paramFolderId);
+        const folder = foldersData.find((f) => f._id === paramFolderId);
         if (folder) {
           setSelectedFolder(folder);
           setViewMode("folderContents");
@@ -87,7 +99,7 @@ export default function FoldersPage() {
       const response = await axios.post("http://localhost:4000/api/folders", {
         name: newFolderName.trim(),
       });
-      setFolders((prev) => [response.data, ...prev]);
+      setFolders((prev) => [{ ...response.data, fileCount: 0 }, ...prev]);
       setNewFolderName("");
       setIsNewFolderPopupOpen(false);
     } catch (err) {
@@ -114,10 +126,46 @@ export default function FoldersPage() {
     setPreviewDocument(null);
   };
 
-  // Callback when a document row is clicked in FolderDetailsPage
   const handleDocumentClick = (doc) => {
     setPreviewDocument(doc);
   };
+
+  // Toggle select/unselect folder for delete (keeps popup open while selecting)
+  const handleToggleSelect = (folderId, checked) => {
+    setSelectedForDelete((prev) => {
+      let next;
+      if (checked) {
+        next = prev.includes(folderId) ? prev : [...prev, folderId];
+      } else {
+        next = prev.filter((id) => id !== folderId);
+      }
+      // keep popup visible as long as there's at least one selection
+      setShowDeletePopup(next.length > 0);
+      return next;
+    });
+  };
+
+  // Delete selected empty folders
+  const handleDeleteFolder = async () => {
+    try {
+      for (let folderId of selectedForDelete) {
+        const folder = folders.find((f) => f._id === folderId);
+        if (folder && (folder.fileCount ?? 0) === 0) {
+          await axios.delete(`http://localhost:4000/api/folders/${folderId}`);
+        }
+      }
+      setSelectedForDelete([]);
+      setShowDeletePopup(false);
+      fetchFolders();
+    } catch (err) {
+      console.error("Failed to delete folder:", err);
+    }
+  };
+
+  // compute whether any selected are non-empty (then disable delete)
+  const selectedHasNonEmpty = selectedForDelete.some(
+    (id) => folders.find((f) => f._id === id)?.fileCount > 0
+  );
 
   return (
     <div className="page-layout">
@@ -152,7 +200,6 @@ export default function FoldersPage() {
       />
 
       <div className="folders-layout">
-        {/* Sidebar */}
         <div className="folders-sidebar">
           <div className="folders-header">
             <div className="folders-header-left">
@@ -201,16 +248,26 @@ export default function FoldersPage() {
               ) : (
                 <div className="folders-grid">
                   {folders.map((folder) => (
-                    <div
-                      className="folder-item"
-                      key={folder._id}
-                      onClick={() => handleFolderClick(folder)}
-                    >
+                    <div className="folder-item" key={folder._id}>
                       <div className="folder-icon-wrapper">
                         <img
                           src="/assets/folder-big-icon7.png"
                           alt="Folder"
                           className="folder-grid-icon"
+                          onClick={() => handleFolderClick(folder)}
+                        />
+                        <span className="folder-badge">
+                          {folder.fileCount ?? 0}
+                        </span>
+
+                        <input
+                          type="checkbox"
+                          className="folder-delete-checkbox"
+                          checked={selectedForDelete.includes(folder._id)}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) =>
+                            handleToggleSelect(folder._id, e.target.checked)
+                          }
                         />
                       </div>
                       <span className="folder-name">{folder.name}</span>
@@ -222,15 +279,17 @@ export default function FoldersPage() {
               <FolderDetailsPage
                 folderId={selectedFolder._id}
                 onBack={handleBackClick}
-                onDocumentClick={handleDocumentClick} // row click callback
+                onDocumentClick={handleDocumentClick}
               />
             ) : null}
           </div>
 
-          <div className="folders-footer">{t("folderspage.footer")}</div>
+          <div className="folders-footer">
+            {t("folderspage.totalFolders")}: {folders.length} |{" "}
+            {t("folderspage.totalDocuments")}: {totalDocuments}
+          </div>
         </div>
 
-        {/* Document preview area */}
         <div className="extra-area">
           {!previewDocument && (
             <div className="empty-preview">
@@ -250,6 +309,39 @@ export default function FoldersPage() {
           )}
         </div>
       </div>
+
+      {/* Wide horizontal delete popup (overlay is visual-only, pointer-events pass through) */}
+      {selectedForDelete.length > 0 && (
+        <>
+          <div
+            className={`bottom-popup wide-popup ${showDeletePopup ? "show" : ""}`}
+            // clicking inside popup should not close it — we don't attach outside click handlers
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="popup-left"> {selectedForDelete.length} {t("folderspage.selected")}</div>
+
+            {/* Trash / delete icon centered absolutely inside popup */}
+            <button
+              className="delete-btn"
+              onClick={handleDeleteFolder}
+              disabled={selectedHasNonEmpty}
+              aria-label="Delete selected folders"
+            >
+              <img src="/assets/trash-icon2.png" alt="Delete" className="delete-icon" />
+            </button>
+
+            <button
+              className="cancel-btn"
+              onClick={() => {
+                setSelectedForDelete([]);
+                setShowDeletePopup(false);
+              }}
+            >
+              {t("folderspage.cancel")}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -138,7 +138,11 @@
     "new folder": "ახალი საქაღალდე",
     "cancel": "გაუქმება",
     "create": "შექმნა",
-    "folder name": "ახალი საქაღალდის სახელი"
+    "folder name": "ახალი საქაღალდის სახელი",
+    "totalFolders": "საქაღალდეების რაოდენობა",
+    "totalDocuments": "დოკუმენტების რაოდენობა",
+    "no folders": "",
+    "selected": "საქაღალდე შერჩეულია"
   },
 
   "folderdetailspanel": {

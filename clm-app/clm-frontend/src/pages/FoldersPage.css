@@ -20,7 +20,7 @@ html, body {
 /* -------------------- Sidebar Box -------------------- */
 .folders-sidebar {
   width: 600px;
-  height: 80vh;
+  height: 82vh;
   margin-left: 16px;
   background: #fff;
   border-radius: 6px;
@@ -89,7 +89,8 @@ html, body {
   background: #fff;
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
+  color: #777;
 }
 
 /* -------------------- New Folder Popup -------------------- */
@@ -160,6 +161,173 @@ html, body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  position: relative; /* required for badge positioning */
+}
+
+/* Badge for file count, centered over the folder icon */
+.folder-badge {
+  position: absolute;
+  top: 50%;        /* vertical center */
+  left: 50%;       /* horizontal center */
+  transform: translate(-50%, -30%); /* truly center it */
+  color: #cab062;     /* black text */
+  font-size: 22px;
+  font-weight: 500;
+  pointer-events: none; /* clicks pass through */
+}
+
+.folder-delete-checkbox {
+  position: absolute;
+  bottom: 15px;
+  left: 6px;
+  z-index: 3;
+  display: none;
+  transform: scale(1.3);
+
+  /* unchecked border color */
+  border: 1px solid #cfcfcf; 
+  border-radius: 4px;
+
+  /* remove accent-color so we can style checked separately */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  width: 18px;
+  height: 18px;
+  background-color: #fff8e5;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  display: none; /* hide by default, unless hovered or checked */
+}
+
+/* show on hover */
+.folder-icon-wrapper:hover .folder-delete-checkbox,
+.folder-delete-checkbox:checked {    
+  display: block;
+}
+
+/* checked state */
+.folder-delete-checkbox:checked {
+  background-color: #f43a49; 
+  border-color: #f43a49;     
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M20.285 6.708l-11.39 11.39-5.18-5.18 1.414-1.414 3.766 3.766 9.975-9.975z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 60%;
+}
+
+/* ---------------- Popup / Overlay (visual-only overlay so page stays interactive) ---------------- */
+
+/* Wide horizontal popup - hidden state */
+.bottom-popup.wide-popup {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translateX(-50%) translateY(100%); /* start hidden below view */
+  width: 80%;
+  max-width: 750px;
+  background-color: #fff;
+  border-radius: 12px; /* all corners rounded */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  padding: 18px 24px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* left & right aligned */
+  position: fixed;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+  overflow: visible; /* allow centered delete icon overflow */
+  /* make it relative so absolute-centred delete-btn is positioned correctly */
+  pointer-events: auto; /* popup itself is interactive */
+}
+
+/* Visible state: slide up */
+.bottom-popup.wide-popup.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Left message area: keep compact so it doesn't push center icon */
+.popup-left {
+  flex: 0 0 auto;  /* do not grow / do not shrink */
+  margin: 0;
+  padding-left: 8px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+  background-color: #ffffff;
+}
+
+/* Cancel button on the right (keeps to the far right) */
+.bottom-popup.wide-popup .cancel-btn {
+  flex: 0 0 auto;
+  background-color: #ffffff;
+  color: #111;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+/* Delete button: absolute-centered in the popup container so left width won't move it */
+.bottom-popup.wide-popup {
+  position: fixed; /* already fixed above */
+}
+.bottom-popup.wide-popup .delete-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%); /* vertically center too */
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto; /* allow clicking the button */
+}
+
+/* Prevent hover/active backgrounds on delete button */
+.bottom-popup.wide-popup .delete-btn:hover,
+.bottom-popup.wide-popup .delete-btn:focus,
+.bottom-popup.wide-popup .delete-btn:active {
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Trash icon size inside delete button */
+.bottom-popup.wide-popup .delete-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+  object-fit: contain;
+}
+
+/* Disabled state for delete button */
+.bottom-popup.wide-popup .delete-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Optional: tweak for very small screens */
+@media (max-width: 520px) {
+  .bottom-popup.wide-popup {
+    width: 95%;
+    padding: 14px;
+  }
+  .bottom-popup.wide-popup .delete-icon {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 /* Folder icon wrapper to crop extra transparent space */
@@ -184,8 +352,8 @@ html, body {
 /* Folder name */
 .folder-name {
   font-size: 14px;  /* adjust font size here */
-  font-weight: 500;
-  color: #454545;   /* adjust font color here */
+  font-weight: 550;
+  color: #5e5e5e;   /* adjust font color here */
   word-break: break-word;
   text-align: center;
   margin-top: 2px;  /* adjust space between icon and title */
@@ -260,3 +428,4 @@ html, body {
   opacity: 0.45;    /* light watermark effect */
   object-fit: contain;
 }
+
