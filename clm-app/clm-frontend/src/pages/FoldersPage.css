@@ -210,8 +210,8 @@ html, body {
 
 /* checked state */
 .folder-delete-checkbox:checked {
-  background-color: #f43a49; 
-  border-color: #f43a49;     
+  background-color: #3dd799; 
+  border-color: #3dd799;     
   background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M20.285 6.708l-11.39 11.39-5.18-5.18 1.414-1.414 3.766 3.766 9.975-9.975z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
@@ -286,22 +286,28 @@ html, body {
   transform: translate(-50%, -50%); /* vertically center too */
   background: none;
   border: none;
-  padding: 6px;
+  padding: 7px;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto; /* allow clicking the button */
+  transition: background-color 0.2s ease;
 }
 
 /* Prevent hover/active backgrounds on delete button */
 .bottom-popup.wide-popup .delete-btn:hover,
 .bottom-popup.wide-popup .delete-btn:focus,
 .bottom-popup.wide-popup .delete-btn:active {
-  background: none;
-  box-shadow: none;
+  background-color: #f4f4f4 !important;
   outline: none;
+}
+
+.delete-btn img {
+  width: 27px;
+  height: 27px;
+  display: block;
 }
 
 /* Trash icon size inside delete button */
@@ -329,6 +335,48 @@ html, body {
     height: 24px;
   }
 }
+
+/* -------------------- Popup Buttons -------------------- */
+
+/* Reuse general popup button style */
+.move-btn {
+  background: none;          /* no background by default */
+  border: none;
+  padding: 7px;
+  margin-right: 8px;         /* space between move and delete */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;        /* same as delete button */
+  transition: background-color 0.2s ease;
+}
+
+.move-btn:hover,
+.move-btn:focus,
+.move-btn:active {
+  background-color: #f4f4f4;  /* hover effect */
+  outline: none;
+}
+
+.move-btn img {
+  width: 27px;
+  height: 27px;
+  display: block;
+}
+
+.popup-icon {
+  width: 27px;    /* same size as delete icon */
+  height: 27px;
+  display: block;
+}
+
+/* Optional: spacing between Move, Delete, Cancel buttons */
+.bottom-popup.wide-popup .delete-btn {
+  margin-right: 8px;
+}
+
+
 
 /* Folder icon wrapper to crop extra transparent space */
 .folder-icon-wrapper {

@@ -38,6 +38,9 @@ export default function FoldersPage() {
   const [selectedForDelete, setSelectedForDelete] = useState([]);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
+  // Move popup state
+  const [isMovePopupOpen, setIsMovePopupOpen] = useState(false);
+
   // Close new-folder popup when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -65,14 +68,12 @@ export default function FoldersPage() {
       const foldersData = response.data || [];
       setFolders(foldersData);
 
-      // Compute total documents
       const totalDocs = foldersData.reduce(
         (sum, f) => sum + (f.fileCount ?? 0),
         0
       );
       setTotalDocuments(totalDocs);
 
-      // Handle direct navigation
       if (paramFolderId) {
         const folder = foldersData.find((f) => f._id === paramFolderId);
         if (folder) {
@@ -89,7 +90,6 @@ export default function FoldersPage() {
     fetchFolders();
   }, [paramFolderId]);
 
-  // Handlers
   const handleUploadClick = () => setIsUploadPopupOpen(true);
   const handleNewFolderClick = () => setIsNewFolderPopupOpen((prev) => !prev);
 
@@ -130,7 +130,6 @@ export default function FoldersPage() {
     setPreviewDocument(doc);
   };
 
-  // Toggle select/unselect folder for delete (keeps popup open while selecting)
   const handleToggleSelect = (folderId, checked) => {
     setSelectedForDelete((prev) => {
       let next;
@@ -139,13 +138,11 @@ export default function FoldersPage() {
       } else {
         next = prev.filter((id) => id !== folderId);
       }
-      // keep popup visible as long as there's at least one selection
       setShowDeletePopup(next.length > 0);
       return next;
     });
   };
 
-  // Delete selected empty folders
   const handleDeleteFolder = async () => {
     try {
       for (let folderId of selectedForDelete) {
@@ -162,7 +159,6 @@ export default function FoldersPage() {
     }
   };
 
-  // compute whether any selected are non-empty (then disable delete)
   const selectedHasNonEmpty = selectedForDelete.some(
     (id) => folders.find((f) => f._id === id)?.fileCount > 0
   );
@@ -310,37 +306,65 @@ export default function FoldersPage() {
         </div>
       </div>
 
-      {/* Wide horizontal delete popup (overlay is visual-only, pointer-events pass through) */}
+      {/* Wide horizontal delete popup with Move button */}
       {selectedForDelete.length > 0 && (
-        <>
-          <div
-            className={`bottom-popup wide-popup ${showDeletePopup ? "show" : ""}`}
-            // clicking inside popup should not close it — we don't attach outside click handlers
-            onClick={(e) => e.stopPropagation()}
+        <div
+          className={`bottom-popup wide-popup ${showDeletePopup ? "show" : ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="popup-left">
+            {selectedForDelete.length} {t("folderspage.selected")}
+          </div>
+
+          {/* Move button */}
+          <button
+            className="move-btn"
+            onClick={() => setIsMovePopupOpen(true)}
+            aria-label="Move selected folders"
           >
-            <div className="popup-left"> {selectedForDelete.length} {t("folderspage.selected")}</div>
+            <img
+              src="/assets/folder-small-icon10.png"
+              alt="Move"
+              className="popup-icon"
+            />
+          </button>
 
-            {/* Trash / delete icon centered absolutely inside popup */}
-            <button
-              className="delete-btn"
-              onClick={handleDeleteFolder}
-              disabled={selectedHasNonEmpty}
-              aria-label="Delete selected folders"
-            >
-              <img src="/assets/trash-icon2.png" alt="Delete" className="delete-icon" />
-            </button>
+          {/* Delete button */}
+          <button
+            className="delete-btn"
+            onClick={handleDeleteFolder}
+            disabled={selectedHasNonEmpty}
+            aria-label="Delete selected folders"
+          >
+            <img src="/assets/trash-icon2.png" alt="Delete" className="delete-icon" />
+          </button>
 
+          {/* Cancel button */}
+          <button
+            className="cancel-btn"
+            onClick={() => {
+              setSelectedForDelete([]);
+              setShowDeletePopup(false);
+            }}
+          >
+            {t("folderspage.cancel")}
+          </button>
+        </div>
+      )}
+
+      {/* Move Popup */}
+      {isMovePopupOpen && (
+        <div className="center-popup">
+          <div className="move-popup-content">
+            <h3>{t("folderspage.move folders")}</h3>
             <button
               className="cancel-btn"
-              onClick={() => {
-                setSelectedForDelete([]);
-                setShowDeletePopup(false);
-              }}
+              onClick={() => setIsMovePopupOpen(false)}
             >
               {t("folderspage.cancel")}
             </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
