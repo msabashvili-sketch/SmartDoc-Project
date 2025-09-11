@@ -41,6 +41,10 @@ export default function FoldersPage() {
   // Move popup state
   const [isMovePopupOpen, setIsMovePopupOpen] = useState(false);
 
+  // Confirm delete modal state
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [foldersToConfirmDelete, setFoldersToConfirmDelete] = useState([]);
+
   // Close new-folder popup when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -141,22 +145,6 @@ export default function FoldersPage() {
       setShowDeletePopup(next.length > 0);
       return next;
     });
-  };
-
-  const handleDeleteFolder = async () => {
-    try {
-      for (let folderId of selectedForDelete) {
-        const folder = folders.find((f) => f._id === folderId);
-        if (folder && (folder.fileCount ?? 0) === 0) {
-          await axios.delete(`http://localhost:4000/api/folders/${folderId}`);
-        }
-      }
-      setSelectedForDelete([]);
-      setShowDeletePopup(false);
-      fetchFolders();
-    } catch (err) {
-      console.error("Failed to delete folder:", err);
-    }
   };
 
   const selectedHasNonEmpty = selectedForDelete.some(
@@ -329,10 +317,13 @@ export default function FoldersPage() {
             />
           </button>
 
-          {/* Delete button */}
+          {/* Delete button (opens confirm popup) */}
           <button
             className="delete-btn"
-            onClick={handleDeleteFolder}
+            onClick={() => {
+              setFoldersToConfirmDelete(selectedForDelete);
+              setShowConfirmDelete(true);
+            }}
             disabled={selectedHasNonEmpty}
             aria-label="Delete selected folders"
           >
@@ -363,6 +354,50 @@ export default function FoldersPage() {
             >
               {t("folderspage.cancel")}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Delete Popup */}
+      {showConfirmDelete && (
+        <div className="modal-overlay" onClick={() => setShowConfirmDelete(false)}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="modal-text">{t("folderspage.confirmDeleteMessage")}</p>
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowConfirmDelete(false)}
+              >
+                {t("folderspage.cancel")}
+              </button>
+              <button
+                className="delete-btn"
+                onClick={async () => {
+                  try {
+                    await Promise.all(
+                      foldersToConfirmDelete.map(async (folderId) => {
+                        const folder = folders.find((f) => f._id === folderId);
+                        if (folder && (folder.fileCount ?? 0) === 0) {
+                          await axios.delete(`http://localhost:4000/api/folders/${folderId}`);
+                        }
+                      })
+                    );
+                    setSelectedForDelete([]);
+                    setFoldersToConfirmDelete([]);
+                    setShowDeletePopup(false);
+                    setShowConfirmDelete(false);
+                    fetchFolders();
+                  } catch (err) {
+                    console.error("Failed to delete folders:", err);
+                  }
+                }}
+              >
+                {t("folderspage.delete")}
+              </button>
+            </div>
           </div>
         </div>
       )}

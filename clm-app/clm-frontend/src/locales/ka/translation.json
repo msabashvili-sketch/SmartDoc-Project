@@ -142,7 +142,9 @@
     "totalFolders": "საქაღალდეების რაოდენობა",
     "totalDocuments": "დოკუმენტების რაოდენობა",
     "no folders": "",
-    "selected": "საქაღალდე შერჩეულია"
+    "selected": "საქაღალდე შერჩეულია",
+    "delete": "წაშლა",
+    "confirmDeleteMessage": "ნამდვილად გსურს წაშლა?"
   },
 
   "folderdetailspanel": {
