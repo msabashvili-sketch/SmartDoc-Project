@@ -23,7 +23,8 @@ export default function ImportPage() {
       else if (f?._id && typeof f._id.toString === "function") id = f._id.toString();
       else id = `row-${idx}`;
 
-      const metaName = typeof f?.metadata?.filename === "string" ? f.metadata.filename.trim() : "";
+      const metaName =
+        typeof f?.metadata?.filename === "string" ? f.metadata.filename.trim() : "";
       const baseName = typeof f?.filename === "string" ? f.filename.trim() : "";
 
       const filename = metaName || baseName || "(Untitled)";
@@ -56,9 +57,9 @@ export default function ImportPage() {
       const res = await fetch("http://localhost:4000/api/folders");
       const data = await res.json();
 
-      const normalizedFolders = (data.folders || data).map(f => ({
+      const normalizedFolders = (data.folders || data).map((f) => ({
         id: f._id || f.id,
-        name: f.name || f.folderName
+        name: f.name || f.folderName,
       }));
 
       setFolders(normalizedFolders);
@@ -105,13 +106,12 @@ export default function ImportPage() {
       return alert("Please assign a folder to all selected files before sending.");
     }
 
-    // Build payload including folderName
     const filesPayload = selectedFiles.map((f) => {
-      const folder = folders.find(x => x.id === f.selectedFolder);
+      const folder = folders.find((x) => x.id === f.selectedFolder);
       return {
         id: f.id,
         folderId: folder?.id || null,
-        folderName: folder?.name || null
+        folderName: folder?.name || null,
       };
     });
 
@@ -162,6 +162,8 @@ export default function ImportPage() {
       <div className="import-page">
         <div className="import-top-space">
           <h1 className="import-title">{t("importpage.import")}</h1>
+
+          {/* Upload Button stays here */}
           <label className="upload-button" onClick={() => setIsPopupOpen(true)}>
             <img
               src="/assets/upload-button-icon.png"
@@ -174,12 +176,24 @@ export default function ImportPage() {
           </label>
         </div>
 
-        <div className="search-bar-container">
-          <input
-            type="text"
-            className="search-bar"
-            placeholder={t("importpage.search documents...")}
-          />
+        {/* Search bar and Columns button in the same row */}
+        <div className="search-bar-row">
+          <div className="search-bar-container">
+            <input
+              type="text"
+              className="search-bar"
+              placeholder={t("importpage.search documents...")}
+            />
+          </div>
+
+          <button className="columns-button">
+            <img
+              src="/assets/column-icon.png"
+              alt="Columns Icon"
+              className="columns-button-icon"
+            />
+            <span style={{ marginLeft: "6px" }}>{t("importpage.columns")}</span>
+          </button>
         </div>
 
         <div
@@ -237,7 +251,9 @@ export default function ImportPage() {
                       className="view-btn"
                       onClick={() =>
                         window.open(
-                          `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
+                          `http://localhost:4000/api/documents/view/${encodeURIComponent(
+                            file.id
+                          )}`,
                           "_blank"
                         )
                       }
