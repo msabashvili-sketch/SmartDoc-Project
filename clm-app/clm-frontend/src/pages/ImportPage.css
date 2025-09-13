@@ -33,6 +33,9 @@ html {
 }
 
 .import-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   padding-top: 35px; /* adjust to header height */
   overflow-x: hidden; /* prevent horizontal scroll on page */
 }
@@ -172,8 +175,8 @@ html {
  justify-content: flex-start;
  align-items: flex-start;
  position: relative;
- margin-bottom: 20px;
- top: -15px;
+ margin: -18px auto 2px;
+ 
 }
 
 
@@ -188,12 +191,6 @@ html {
  margin: 0;
  font-size: var(--banner-p-font, 14px);
 }
-
-
-.info-banner {
- margin: 0 auto 20px; /* top-bottom auto-left/right */
-}
-
 
 /* Container for buttons */
 .banner-buttons {
@@ -255,19 +252,61 @@ html {
   min-width: 900px;
 }
 
-.table-container {
-  width: 100%;
-  overflow-x: auto;       /* horizontal scroll */
-  overflow-y: auto;       /* vertical scroll */
-  padding: 0 16px;        /* same as search area */
+.import-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 160px); /* 100vh minus top padding/header */
+  padding-bottom: 40px; /* footer height */
   box-sizing: border-box;
 }
 
-.import-table-new thead {
-  background-color: #f7f7f7;
+/* Keep banner natural height */
+.info-banner {
+  margin-bottom: 10px; /* space between banner and table */
+  flex: 0 0 auto; /* do not shrink */
 }
 
-.import-table-new th,
+
+.table-container {
+   flex: 1 1 auto;
+  overflow-x: auto;       /* horizontal scroll */
+  overflow-y: auto;       /* vertical scroll */
+  padding: 0 16px 10px 16px;        /* same as search area */
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.page-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;              /* adjust as needed */
+  background-color: #F6FAF9; /* light background */
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 100;
+}
+
+.import-table-new th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background-color: #f7f7f7;
+  border-bottom: 2px solid #dadada;
+  font-weight: 600;
+  font-size: 14px;
+  color: #4b4b4b;
+  padding: 10px 12px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 300px;
+}
+
 .import-table-new td {
   padding: 10px 12px;
   text-align: left;
@@ -277,34 +316,47 @@ html {
   width: 300px;     
 }
 
-.import-table-new th {
-  font-weight: 600;
-  font-size: 14px;
-  color: #4b4b4b;
-  position: sticky;
-  top: 0;
-  z-index: 3;
+/* Table body rows */
+.import-table-new tbody tr {
+  position: relative;   /* needed for z-index to work */
+  z-index: 1;           /* below header (th) and sticky columns */
 }
 
-.import-table-new th.checkbox-col,
+/* Normal table cells */
+.import-table-new td {
+  z-index: 1;           /* same as row */
+}
+
 .import-table-new td.checkbox-col {
-  width: 35px;
+  width: 50px;
   text-align: center;
   position: sticky;
   left: 0;
   background-color: #fff;
-  z-index: 2;
+  z-index: 10;
   border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+.import-table-new th.checkbox-col {
+  width: 50px;               /* same as view column */
+  text-align: center;
+  position: sticky;
+  left: 0;
+  background-color: #f7f7f7; /* same as view column header */
+  z-index: 10;
+  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
 }
 
 .import-table-new th.view-col,
 .import-table-new td.view-col {
-  width: 70px;
+  width: 50px;
   text-align: center;
   position: sticky;
   left: 35px;
   background-color: #fff;
-  z-index: 2;
+  z-index: 10;
   border-right: 1px solid #ddd;
 }
 
@@ -320,45 +372,82 @@ html {
   background-color: #f0f8ff; /* light hover effect */
 }
 
-.import-table-new input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  border: 1px solid #c0c0c0;
-  border-radius: 3px;
-  appearance: none;
-  -webkit-appearance: none;
+/* Apply row hover for all cells, including sticky columns */
+.import-table-new tbody tr:hover td {
+  background-color: #f0f8ff; /* same hover color */
 }
 
-.import-table-new input[type="checkbox"]:checked {
-  background-color: #1f6e77;
+/* Header checkbox style (first column) */
+.import-table-new th.checkbox-col input[type="checkbox"] {
+  width: 17px;                 /* checkbox size */
+  height: 17px;
+  margin: 0;
+  appearance: none;            /* remove default checkbox */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;   /* white background */
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;          /* needed for pseudo-element */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Checked state for header checkbox */
+.import-table-new th.checkbox-col input[type="checkbox"]:checked {
+  background-color: #1f6e77;  /* fill color */
   border-color: #1f6e77;
 }
 
-.import-table-new input[type="checkbox"]:checked::after {
+/* White checkmark inside header checkbox */
+.import-table-new th.checkbox-col input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid #ffffff;
+  left: 5px;   /* horizontal position inside checkbox */
+  top: 2px;    /* vertical position inside checkbox */
+  width: 5px;  /* checkmark width */
+  height: 9px; /* checkmark height */
+  border: solid #ffffff;  
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
-.import-table-new .view-btn {
-  background-color: #1f6e77;
-  color: #fff;
-  border: none;
+
+/* Table body checkbox style */
+.import-table-new td.checkbox-col input[type="checkbox"] {
+  width: 17px;                 /* checkbox size */
+  height: 17px;
+  margin: 0;
+  appearance: none;            
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #ffffff;   
+  border: 1px solid #c0c0c0;
   border-radius: 3px;
-  padding: 5px 8px;
   cursor: pointer;
-  font-size: 0.8rem;
+  position: relative;          /* for pseudo-element */
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.import-table-new .view-btn:hover {
-  background-color: #3798a3;
+/* Checked state for body checkbox */
+.import-table-new td.checkbox-col input[type="checkbox"]:checked {
+  background-color: #1f6e77;  
+  border-color: #1f6e77;
+}
+
+/* White checkmark inside body checkbox */
+.import-table-new td.checkbox-col input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;   /* horizontal position inside checkbox */
+  top: 2px;    /* vertical position inside checkbox */
+  width: 5px;  
+  height: 9px; 
+  border: solid #ffffff;  
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .import-table-new select {
@@ -391,68 +480,68 @@ html {
   padding: 0;
 }
 
-/* Header checkbox style */
-.import-table thead th:first-child input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
-  margin: 0;
-  appearance: none; /* custom checkbox */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-color: #ffffff; /* white background */
-  border: 1px solid #d0d0d0;
-  border-radius: 3px;
-  cursor: pointer;
-  position: relative;
-  vertical-align: middle;
-}
-
-/* Checked state for header checkbox */
-.import-table thead th:first-child input[type="checkbox"]:checked {
-  background-color: #1f6e77; /* fill color when checked */
-  border-color: #1f6e77;
-}
-
-/* White checkmark inside header checkbox */
-.import-table thead th:first-child input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid #ffffff; /* white checkmark */
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-/* Sticky View button column (view column) */
-.import-table th.view-col,
-.import-table td.view-col {
+/* Header icon for View column */
+.import-table-new th.view-col {
   position: sticky;
-  left: 35px; /* width of checkbox column */
-  width: 70px; /* set desired width for View column */
-  min-width: 70px; /* prevent shrinking */
-  max-width: 70px; /* optional, prevent growing */
-  background-color: #ffffff; /* same as table background */
-  z-index: 2; /* above scrollable columns */
-  border-right: 1px solid #ddd; /* optional separation */
+  top: 0;
+  z-index: 10;
+  background-color: #f7f7f7;
+  border-bottom: 2px solid #dadada;
   text-align: center;
+  padding: 6px 0; /* vertical padding */
 }
 
-/* Optional: style the View button inside the table */
-.import-table .view-btn {
-  padding: 4px 8px;
-  font-size: 0.75rem;
-  background-color: #1f6e77;
-  color: #fff;
+.view-header-icon {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+
+/* View button wrapper */
+.view-btn {
+  background-color: transparent;
   border: none;
-  border-radius: 3px;
+  padding: 4px;                    /* keeps icon centered */
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  position: relative;              /* for pseudo-element */
+  box-sizing: border-box;
+  overflow: visible;               /* allow pseudo-element outside */
 }
 
-.import-table .view-btn:hover {
-  background-color: #3798a3;
+/* Icon itself */
+.view-icon {
+  width: 25px;
+  height: 25px;
+  display: block;
+  object-fit: contain;
+  z-index: 1;                      /* above hover background */
+}
+
+/* Pseudo-element for hover background */
+.view-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 35px;                     /* desired hover background size */
+  height: 35px;
+  background-color: transparent; /* default is transparent */
+  border-radius: 3px;
+  transform: translate(-50%, -50%) scale(0.8);
+   transition: transform 0.2s ease, background-color 0.2s ease;
+  z-index: 0;                       /* behind icon */
+}
+
+/* On hover, grow pseudo-element slightly */
+.view-btn:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+  background-color: #dbefff;
 }
 
 .import-table select {
@@ -484,3 +573,4 @@ html {
   background-size: 10px 5px;
   padding-right: 20px; /* space for arrow */
 }
+

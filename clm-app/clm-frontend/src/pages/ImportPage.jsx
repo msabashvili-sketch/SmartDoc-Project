@@ -139,11 +139,18 @@ export default function ImportPage() {
     }
   };
 
+  // Determine number of empty rows to fill space till footer
+  const getEmptyRowsCount = () => {
+    const minVisibleRows = 10; // adjust how many minimum rows to show if few files
+    return Math.max(minVisibleRows - files.length, 0);
+  };
+
   return (
     <>
       <DashboardHeader />
 
       <div className="import-page">
+
         {/* Top space */}
         <div className="import-top-space">
           <h1 className="import-title">{t("importpage.import")}</h1>
@@ -176,97 +183,129 @@ export default function ImportPage() {
           </button>
         </div>
 
-        {/* Banner */}
-        <div
-          className="info-banner"
-          style={{
-            backgroundImage: bannerImage ? `url(${bannerImage})` : "none",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="info-banner-text">
-            <h3>{t("importpage.import")}</h3>
-            <p>{t("importpage.upload document")}</p>
-            <div className="banner-buttons">
-              <button className="banner-send-btn" onClick={sendToRepository}>
-                {t("importpage.send to repository")}
-              </button>
-              <button className="banner-delete-btn" onClick={deleteFiles}>
-                {t("importpage.delete")}
-              </button>
+        {/* Scrollable content (banner + table) */}
+        <div className="import-content-wrapper">
+          {/* Banner */}
+          <div
+            className="info-banner"
+            style={{
+              backgroundImage: bannerImage ? `url(${bannerImage})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              marginBottom: "10px"
+            }}
+          >
+            <div className="info-banner-text">
+              <h3>{t("importpage.import")}</h3>
+              <p>{t("importpage.upload document")}</p>
+              <div className="banner-buttons">
+                <button className="banner-send-btn" onClick={sendToRepository}>
+                  {t("importpage.send to repository")}
+                </button>
+                <button className="banner-delete-btn" onClick={deleteFiles}>
+                  {t("importpage.delete")}
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Table */}
+          <div className="table-container">
+            <table className="import-table-new">
+              <thead>
+                <tr>
+                  <th className="checkbox-col">
+                    <input type="checkbox" checked={allChecked} onChange={toggleAll} />
+                  </th>
+                  <th className="view-col">
+                    <img
+                      src="/assets/view-icon4.png"
+                      alt={t("importpage.view")}
+                      className="view-header-icon"
+                    />
+                </th>
+                      
+                  <th>{t("importpage.folder")}</th>
+                  <th>{t("importpage.document title")}</th>
+                  <th>{t("importpage.counterparty")}</th>
+                  <th>{t("importpage.document type")}</th>
+                  <th>{t("importpage.agreement date")}</th>
+                  <th>{t("importpage.expiry date")}</th>
+                  <th>{t("importpage.signature name")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {files.map((file, index) => (
+                  <tr key={file.id || index}>
+                    <td className="checkbox-col">
+                      <input
+                        type="checkbox"
+                        checked={rows[index] || false}
+                        onChange={() => toggleRow(index)}
+                      />
+                    </td>
+                    <td className="view-col">
+                      <button
+                        type="button"
+                        className="view-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(
+                            `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
+                            "_blank"
+                          );
+                        }}
+                      >
+                        <img
+                          src="/assets/view-icon4.png"
+                          alt={t("importpage.view")}
+                          className="view-icon"
+                        />  
+                      </button>
+                    </td>
+                    <td>
+                      <select
+                        value={file.selectedFolder}
+                        onChange={(e) => handleFolderChange(file.id, e.target.value)}
+                      >
+                        <option value="">
+                          {loadingFolders ? "Loading folders..." : "-- Select Folder --"}
+                        </option>
+                        {folders.map((folder) => (
+                          <option key={folder.id} value={folder.id}>
+                            {folder.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>{file.filename}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                ))}
+
+                {/* Empty rows to fill space till footer */}
+                {Array.from({ length: getEmptyRowsCount() }).map((_, idx) => (
+                  <tr key={`empty-${idx}`}>
+                    {Array.from({ length: 9 }).map((__, cidx) => (
+                      <td key={cidx}>&nbsp;</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Table container */}
-        <div className="table-container">
-          <table className="import-table-new">
-            <thead>
-              <tr>
-                <th className="checkbox-col">
-                  <input type="checkbox" checked={allChecked} onChange={toggleAll} />
-                </th>
-                <th className="view-col">{t("importpage.view")}</th>
-                <th>{t("importpage.folder")}</th>
-                <th>{t("importpage.document title")}</th>
-                <th>{t("importpage.counterparty")}</th>
-                <th>{t("importpage.document type")}</th>
-                <th>{t("importpage.agreement date")}</th>
-                <th>{t("importpage.expiry date")}</th>
-                <th>{t("importpage.signature name")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {files.map((file, index) => (
-                <tr key={file.id || index}>
-                  <td className="checkbox-col">
-                    <input
-                      type="checkbox"
-                      checked={rows[index] || false}
-                      onChange={() => toggleRow(index)}
-                    />
-                  </td>
-                  <td className="view-col">
-                    <button
-                      className="view-btn"
-                      onClick={() =>
-                        window.open(
-                          `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
-                          "_blank"
-                        )
-                      }
-                    >
-                      <AiOutlineEye size={18} />
-                    </button>
-                  </td>
-                  <td>
-                    <select
-                      value={file.selectedFolder}
-                      onChange={(e) => handleFolderChange(file.id, e.target.value)}
-                    >
-                      <option value="">
-                        {loadingFolders ? "Loading folders..." : "-- Select Folder --"}
-                      </option>
-                      {folders.map((folder) => (
-                        <option key={folder.id} value={folder.id}>
-                          {folder.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>{file.filename}</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Fixed Footer */}
+        <div className="page-footer">
+            {files.length} {files.length === 1 ? "file" : "files"}
         </div>
 
+        {/* Upload Popup */}
         <UploadPopup
           isOpen={isPopupOpen}
           onClose={() => {

@@ -70,6 +70,10 @@
   cursor: pointer;
   border: 1px solid var(--upload-btn-bg);
   margin-right: 15px;
+
+  /* Shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.20);  /* subtle shadow */
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .upload-button:hover {
@@ -90,7 +94,7 @@
   background-size: var(--banner-bg-size);
   background-position: var(--banner-bg-position);
   border-radius: var(--banner-radius);
-  margin: 15px auto;
+  margin: 8px auto;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -117,7 +121,7 @@
   padding: 20px;
   /* ensure content is below the top-space (top-space already reserved by page-layout padding-top),
      but give a tiny gap so table header doesn't butt directly under the top-space */
-  padding-top: 8px;
+  padding-top: 0;
 }
 
 /* Wrapper to provide horizontal margins for the search/filter row.
