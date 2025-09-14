@@ -177,13 +177,19 @@
   flex-shrink: 0;         /* keep footer visible */
 }
 
-.cancel-btn,
-.select-btn {
+.popup-footer .cancel-btn,
+.popup-footer .select-btn {
+  display: inline-flex !important;  /* prevent block-level stretching */
+  width: auto !important;           /* prevent 100% width */
+  align-items: center;              /* vertically center text */
+  justify-content: center;
   padding: 8px 16px;
   border: none;
   border-radius: 3px;
   cursor: pointer;
   font-size: 14px;
+  flex: 0 0 auto !important;        /* don’t grow or shrink */
+  box-sizing: border-box;
 }
 
 .cancel-btn {

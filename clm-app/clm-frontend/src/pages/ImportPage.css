@@ -270,7 +270,7 @@ html {
 .table-container {
    flex: 1 1 auto;
   overflow-x: auto;       /* horizontal scroll */
-  overflow-y: auto;       /* vertical scroll */
+  overflow-y: scroll;       /* vertical scroll */
   padding: 0 16px 10px 16px;        /* same as search area */
   box-sizing: border-box;
   background-color: #fff;
@@ -287,7 +287,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
   z-index: 100;
 }
 
@@ -469,17 +469,6 @@ html {
   box-shadow: 0 0 3px rgba(55, 193, 147, 0.5);
 }
 
-/* Checkbox column header colours */
-.import-table thead th:first-child {
-  background-color: #c4c4c4; /* header background */
-  border-top: 1px solid #bdbdbd;    /* top border */
-  border-left: 1px solid #bdbdbd;   /* left border */
-  border-right: 1px solid #bdbdbd;  /* right border */
-  border-bottom: 2px solid #bdbdbd; /* bottom border, more visible */
-  text-align: center;
-  padding: 0;
-}
-
 /* Header icon for View column */
 .import-table-new th.view-col {
   position: sticky;
@@ -534,7 +523,7 @@ html {
   background-color: transparent; /* default is transparent */
   border-radius: 3px;
   transform: translate(-50%, -50%) scale(0.8);
-   transition: transform 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
   z-index: 0;                       /* behind icon */
 }
 

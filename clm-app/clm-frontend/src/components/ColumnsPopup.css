@@ -1,20 +1,32 @@
+/* Columns popup container */
 .columns-popup {
   position: absolute;
-  background: white;
+  top: 45px; /* adjust depending on button height */
+  right: 0;
+  width: 270px;
+  max-height: 300px;
+  background: #F6FAF9;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  overflow-y: auto;
+  margin-top: 88px;
+  transform: translateX(-14px); /* shift to the left */
   z-index: 1000;
-  min-width: 180px;
 }
 
+/* Popup title */
 .columns-popup h4 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: bold;
+  color: #333;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ddd;
 }
 
+/* List styles */
 .columns-popup ul {
   list-style: none;
   margin: 0;
@@ -22,5 +34,61 @@
 }
 
 .columns-popup li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+/* Toggle switch label */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  position: relative;
+  user-select: none;
+}
+
+/* Hide default checkbox */
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider */
+.toggle-switch .slider {
+  position: relative;
+  width: 36px;
+  height: 18px;
+  background-color: #ccc;
+  border-radius: 18px;
+  margin-right: 8px;
+  transition: 0.3s;
+}
+
+/* Slider circle */
+.toggle-switch .slider::before {
+  content: "";
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  top: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+/* Checked state */
+.toggle-switch input:checked + .slider {
+  background-color: #1f6e77;
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(18px);
+}
+
+/* Optional hover effect */
+.toggle-switch:hover .slider {
+  background-color: #37c193;
 }

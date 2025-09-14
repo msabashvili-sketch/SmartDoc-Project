@@ -1,19 +1,44 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import DashboardHeader from "../components/DashboardHeader";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
-import { AiOutlineEye } from "react-icons/ai";
 import "./ImportPage.css";
+import "../components/ColumnsPopup.css";
 import { useTranslation } from "react-i18next";
 
 export default function ImportPage() {
   const [bannerImage, setBannerImage] = useState(null);
   const [rows, setRows] = useState([]);
   const [allChecked, setAllChecked] = useState(false);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
+  const [isColumnsPopupOpen, setIsColumnsPopupOpen] = useState(false);
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(true);
   const { t } = useTranslation();
+  const columnsButtonRef = useRef(null);
+  const columnsPopupRef = useRef(null);
+
+  // Columns definitions
+  const columns = [
+    { key: "folder", label: t("importpage.folder") },
+    { key: "documentTitle", label: t("importpage.document title") },
+    { key: "counterparty", label: t("importpage.counterparty") },
+    { key: "documentType", label: t("importpage.document type") },
+    { key: "agreementDate", label: t("importpage.agreement date") },
+    { key: "expiryDate", label: t("importpage.expiry date") },
+    { key: "signatureName", label: t("importpage.signature name") },
+  ];
+
+  // Columns visibility state
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(col => col.key));
+
+  const handleToggleColumn = (key) => {
+    setVisibleColumns(prev =>
+      prev.includes(key)
+        ? prev.filter(k => k !== key)
+        : [...prev, key]
+    );
+  };
 
   const normalizeFiles = (raw = []) =>
     raw.map((f, idx) => {
@@ -139,11 +164,26 @@ export default function ImportPage() {
     }
   };
 
-  // Determine number of empty rows to fill space till footer
   const getEmptyRowsCount = () => {
-    const minVisibleRows = 10; // adjust how many minimum rows to show if few files
+    const minVisibleRows = 10;
     return Math.max(minVisibleRows - files.length, 0);
   };
+
+  // Close columns popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        columnsPopupRef.current &&
+        !columnsPopupRef.current.contains(e.target) &&
+        columnsButtonRef.current &&
+        !columnsButtonRef.current.contains(e.target)
+      ) {
+        setIsColumnsPopupOpen(false);
+      }
+    };
+    if (isColumnsPopupOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isColumnsPopupOpen]);
 
   return (
     <>
@@ -154,7 +194,7 @@ export default function ImportPage() {
         {/* Top space */}
         <div className="import-top-space">
           <h1 className="import-title">{t("importpage.import")}</h1>
-          <label className="upload-button" onClick={() => setIsPopupOpen(true)}>
+          <label className="upload-button" onClick={() => setIsUploadPopupOpen(true)}>
             <img
               src="/assets/upload-button-icon.png"
               alt="Upload Icon"
@@ -173,7 +213,11 @@ export default function ImportPage() {
               placeholder={t("importpage.search documents...")}
             />
           </div>
-          <button className="columns-button">
+          <button
+            className="columns-button"
+            ref={columnsButtonRef}
+            onClick={() => setIsColumnsPopupOpen(prev => !prev)}
+          >
             <img
               src="/assets/column-icon.png"
               alt="Columns Icon"
@@ -181,11 +225,31 @@ export default function ImportPage() {
             />
             <span style={{ marginLeft: "6px" }}>{t("importpage.columns")}</span>
           </button>
+
+          {isColumnsPopupOpen && (
+            <div className="columns-popup" ref={columnsPopupRef}>
+              <h4>{t("importpage.select columns")}</h4>
+              <ul>
+                {columns.map(col => (
+                  <li key={col.key}>
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(col.key)}
+                        onChange={() => handleToggleColumn(col.key)}
+                      />
+                      <span className="slider"></span>
+                      {col.label}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
-        {/* Scrollable content (banner + table) */}
+        {/* Banner + Table */}
         <div className="import-content-wrapper">
-          {/* Banner */}
           <div
             className="info-banner"
             style={{
@@ -223,15 +287,12 @@ export default function ImportPage() {
                       alt={t("importpage.view")}
                       className="view-header-icon"
                     />
-                </th>
-                      
-                  <th>{t("importpage.folder")}</th>
-                  <th>{t("importpage.document title")}</th>
-                  <th>{t("importpage.counterparty")}</th>
-                  <th>{t("importpage.document type")}</th>
-                  <th>{t("importpage.agreement date")}</th>
-                  <th>{t("importpage.expiry date")}</th>
-                  <th>{t("importpage.signature name")}</th>
+                  </th>
+                  {columns
+                    .filter(col => visibleColumns.includes(col.key))
+                    .map(col => (
+                      <th key={col.key}>{col.label}</th>
+                    ))}
                 </tr>
               </thead>
               <tbody>
@@ -260,37 +321,39 @@ export default function ImportPage() {
                           src="/assets/view-icon4.png"
                           alt={t("importpage.view")}
                           className="view-icon"
-                        />  
+                        />
                       </button>
                     </td>
-                    <td>
-                      <select
-                        value={file.selectedFolder}
-                        onChange={(e) => handleFolderChange(file.id, e.target.value)}
-                      >
-                        <option value="">
-                          {loadingFolders ? "Loading folders..." : "-- Select Folder --"}
-                        </option>
-                        {folders.map((folder) => (
-                          <option key={folder.id} value={folder.id}>
-                            {folder.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td>{file.filename}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    {columns
+                      .filter(col => visibleColumns.includes(col.key))
+                      .map(col => (
+                        <td key={col.key}>
+                          {col.key === "folder" ? (
+                            <select
+                              value={file.selectedFolder}
+                              onChange={(e) => handleFolderChange(file.id, e.target.value)}
+                            >
+                              <option value="">
+                                {loadingFolders ? "Loading..." : "-- Select Folder --"}
+                              </option>
+                              {folders.map(f => (
+                                <option key={f.id} value={f.id}>{f.name}</option>
+                              ))}
+                            </select>
+                          ) : col.key === "documentTitle" ? (
+                            file.filename
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                      ))}
                   </tr>
                 ))}
 
-                {/* Empty rows to fill space till footer */}
+                {/* Empty rows */}
                 {Array.from({ length: getEmptyRowsCount() }).map((_, idx) => (
                   <tr key={`empty-${idx}`}>
-                    {Array.from({ length: 9 }).map((__, cidx) => (
+                    {Array.from({ length: 2 + visibleColumns.length }).map((__, cidx) => (
                       <td key={cidx}>&nbsp;</td>
                     ))}
                   </tr>
@@ -300,16 +363,17 @@ export default function ImportPage() {
           </div>
         </div>
 
-        {/* Fixed Footer */}
+        {/* Footer */}
         <div className="page-footer">
-            {files.length} {files.length === 1 ? "file" : "files"}
+          {files.length}{" "}
+          {files.length === 1 ? t("importpage.file_singular") : t("importpage.files already uploaded")}
         </div>
 
         {/* Upload Popup */}
         <UploadPopup
-          isOpen={isPopupOpen}
+          isOpen={isUploadPopupOpen}
           onClose={() => {
-            setIsPopupOpen(false);
+            setIsUploadPopupOpen(false);
             fetchFiles();
           }}
         />

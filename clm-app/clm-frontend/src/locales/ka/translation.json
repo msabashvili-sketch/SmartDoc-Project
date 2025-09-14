@@ -60,7 +60,9 @@
     "signature name": "ხელმომწერის სახელი",
     "search documents...": "დოკუმენტების ძებნა...",
     "view": "ნახვა",
-    "columns": "სვეტები"
+    "columns": "სვეტები",
+    "select columns": "შეარჩიე სვეტები",
+    "files already uploaded": "დოკუმენტი უკვე ატვირთულია"
   },
 
   
