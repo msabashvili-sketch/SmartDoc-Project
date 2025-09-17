@@ -1,0 +1,166 @@
+/* ==============================
+   Archive Table Wrapper
+============================== */
+.archive-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* full viewport height */
+}
+
+/* ==============================
+   Table Container
+============================== */
+.archive-table-container {
+  flex: 1 1 auto;
+  overflow-y: auto; /* vertical scroll */
+  overflow-x: auto; /* horizontal scroll */
+  background-color: #fff;
+  margin-top: 7px; /* <-- space between header/search bar and table */
+}
+
+/* ==============================
+   Table Styles
+============================== */
+.archive-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  color: #333;
+}
+
+
+.archive-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0; /* horizontal borders */
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.archive-table th {
+  background-color: #f7f7f7;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: inset 0 -2px 0 #dadada;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.archive-table tbody tr:hover td {
+  background-color: #f0f8ff;
+}
+
+/* Column widths */
+.archive-table th.checkbox-col,
+.archive-table td.checkbox-col,
+.archive-table th.view-col,
+.archive-table td.view-col {
+  width: 50px;
+  text-align: center;
+}
+
+.archive-table th:not(.checkbox-col):not(.view-col),
+.archive-table td:not(.checkbox-col):not(.view-col) {
+  width: 300px;
+}
+
+.archive-table th.view-col {
+  vertical-align: middle;
+  padding: 4px 0;  /* adjust vertical spacing */
+}
+
+.view-header-icon {
+  width: 20px;   /* adjust size as needed */
+  height: 20px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+
+/* Footer Styles (Fixed) */
+.archive-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-color: #f6faf9;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+/* Left: file counter */
+.footer-left {
+  text-align: left;
+  flex: 1; /* take available space on the left */
+}
+
+/* Center: pagination buttons */
+.pagination-buttons {
+  position: absolute; /* center absolutely */
+  left: 50%;
+  top: 50%; 
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-buttons button {
+   width: 21px;          /* width of the button */
+  height: 21px;         /* height of the button */
+  font-size: 12px;      /* text size inside the button */
+  padding: 4px;         /* inner spacing */
+  border-radius: 3px;   /* rounded corners */
+  border: 1px solid #ccc;
+  background-color: #F6FAF9;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.pagination-buttons button.active {
+  background-color: #f6faf9;
+  color: #828282;
+  border-color: #cacaca;
+}
+
+.pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Right: rows per page dropdown */
+.footer-right {
+  text-align: right;
+  flex: 1; /* take available space on the right */
+  font-size: 13px;            /* change text size here */
+  color: #515151;
+}
+
+.footer-right select {
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid #e7efed;
+  font-size: 13px;
+  background-color: #F6FAF9;
+}
+
+/* Left side: File counter */
+.footer-left {
+  font-size: 13px;            /* change text size here */
+  color: #515151;
+}

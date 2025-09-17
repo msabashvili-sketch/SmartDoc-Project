@@ -84,6 +84,19 @@
     "export": "ექსპორტი"
   },
 
+  "archivepage": {
+    "archive": "არქივი",
+    "document title": "დოკუმენტის სათაური",
+    "counterparty": "კონტრაგენტი",
+    "document type": "დოკუმენტის ტიპი",
+    "agreement date": "გაფორმების თარიღი",
+    "expiry date": "დასრულების თარიღი",
+    "signature name": "ხელმომწერის სახელი",
+    "folder": "საქაღალდე",
+    "files already uploaded": "დოკუმენტი უკვე ატვირთულია",
+    "rows per page": "გვერდის ზომა"
+  },  
+
 
 "detailspanel": {
   "dates": "თარიღი",

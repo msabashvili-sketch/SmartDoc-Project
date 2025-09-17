@@ -15,8 +15,14 @@ export default function ImportPage() {
   const [folders, setFolders] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(true);
   const { t } = useTranslation();
+
+  // Refs for button and popup
   const columnsButtonRef = useRef(null);
   const columnsPopupRef = useRef(null);
+
+  // Popup offset (adjust for positioning)
+  const popupOffsetY = 4;   // vertical gap below button
+  const popupOffsetX = -168; // horizontal shift to the left
 
   // Columns definitions
   const columns = [
@@ -226,8 +232,18 @@ export default function ImportPage() {
             <span style={{ marginLeft: "6px" }}>{t("importpage.columns")}</span>
           </button>
 
-          {isColumnsPopupOpen && (
-            <div className="columns-popup" ref={columnsPopupRef}>
+          {/* Columns Popup with dynamic position */}
+          {isColumnsPopupOpen && columnsButtonRef.current && (
+            <div
+              className="columns-popup"
+              ref={columnsPopupRef}
+              style={{
+                position: "absolute",
+                top: columnsButtonRef.current.getBoundingClientRect().bottom + window.scrollY + popupOffsetY,
+                left: columnsButtonRef.current.getBoundingClientRect().left + window.scrollX + popupOffsetX,
+                zIndex: 1000
+              }}
+            >
               <h4>{t("importpage.select columns")}</h4>
               <ul>
                 {columns.map(col => (

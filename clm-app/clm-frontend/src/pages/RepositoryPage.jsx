@@ -38,16 +38,14 @@ export default function RepositoryPage() {
       setFiles((data.files || []).map(file => ({
         ...file,
         _id: file._id.toString(),
-        folderName: file.metadata?.folderName || "" // <-- pull folder name from metadata
+        folderName: file.metadata?.folderName || "" // pull folder name from metadata
       })));
     } catch (err) {
       console.error(err);
     }
   };
 
-  useEffect(() => {
-    fetchFiles();
-  }, []);
+  useEffect(() => { fetchFiles(); }, []);
 
   useEffect(() => {
     console.log("SelectedRows:", selectedRows);
@@ -110,7 +108,25 @@ export default function RepositoryPage() {
     }
   };
 
-  // Compute selected documents for SendModal
+  // Columns definition and toggle state
+  const columns = [
+    { key: "filename", label: t("repositorypage.document title") },
+    { key: "folderName", label: t("repositorypage.folder") },
+    { key: "counterparty", label: t("repositorypage.counterparty") },
+    { key: "documentType", label: t("repositorypage.document type") },
+    { key: "agreementDate", label: t("repositorypage.agreement date") },
+    { key: "expiryDate", label: t("repositorypage.expiry date") },
+    { key: "signatureName", label: t("repositorypage.signature name") },
+  ];
+
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(col => col.key));
+
+  const handleToggleColumn = (key) => {
+    setVisibleColumns(prev =>
+      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
+    );
+  };
+
   const selectedDocs = files.filter(file => selectedRows.includes(file._id));
 
   return (
@@ -122,6 +138,9 @@ export default function RepositoryPage() {
         onUploadClick={() => setIsPopupOpen(true)}
         onFilterClick={() => setIsFilterOpen((prev) => !prev)}
         isFilterOpen={isFilterOpen}
+        columns={columns}               // pass columns to PageLayout
+        visibleColumns={visibleColumns} // pass visibleColumns
+        onToggleColumn={handleToggleColumn} // toggle handler
       >
         <div className="repository-page-wrapper">
           <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
@@ -146,13 +165,13 @@ export default function RepositoryPage() {
                             }
                           />
                         </th>
-                        <th className="sticky-col title-col">{t("repositorypage.document title")}</th>
-                        <th>{t("repositorypage.folder")}</th>
-                        <th>{t("repositorypage.counterparty")}</th>
-                        <th>{t("repositorypage.document type")}</th>
-                        <th>{t("repositorypage.agreement date")}</th>
-                        <th>{t("repositorypage.expiry date")}</th>
-                        <th>{t("repositorypage.signature name")}</th>
+                        {columns.map(col =>
+                          visibleColumns.includes(col.key) ? (
+                            <th key={col.key} className={col.key === "filename" ? "sticky-col title-col" : ""}>
+                              {col.label}
+                            </th>
+                          ) : null
+                        )}
                       </tr>
                     </thead>
                     <tbody>
@@ -165,13 +184,15 @@ export default function RepositoryPage() {
                               onChange={() => toggleRowSelection(file._id)}
                             />
                           </td>
-                          <TooltipCell className="sticky-col title-col" text={file.filename} />
-                          <td>{file.folderName}</td>
-                          <TooltipCell text={file.metadata?.counterparty} />
-                          <TooltipCell text={file.metadata?.documentType} />
-                          <TooltipCell text={file.metadata?.agreementDate} />
-                          <TooltipCell text={file.metadata?.expiryDate} />
-                          <TooltipCell text={file.metadata?.signatureName} />
+                          {columns.map(col =>
+                            visibleColumns.includes(col.key) ? (
+                              <TooltipCell
+                                key={col.key}
+                                className={col.key === "filename" ? "sticky-col title-col" : ""}
+                                text={file[col.key] || file.metadata?.[col.key]}
+                              />
+                            ) : null
+                          )}
                         </tr>
                       ))}
 
@@ -179,13 +200,9 @@ export default function RepositoryPage() {
                         Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
                           <tr key={`empty-${i}`}>
                             <td className="sticky-col checkbox-col">&nbsp;</td>
-                            <td className="sticky-col title-col">&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
+                            {columns.map(col =>
+                              visibleColumns.includes(col.key) ? <td key={col.key}>&nbsp;</td> : null
+                            )}
                           </tr>
                         ))}
                     </tbody>

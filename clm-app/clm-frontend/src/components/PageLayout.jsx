@@ -17,6 +17,11 @@ export default function PageLayout({
   children,
   selectedDocuments = [],
   isFilterOpen = false,
+  columns = [],              // <- receive columns from page
+  visibleColumns = [],       // <- receive visibleColumns from page
+  onToggleColumn = () => {}, // <- receive toggle handler from page
+  offsetX = 0,               // 👈 NEW: default horizontal offset
+  offsetY = 4,               // 👈 NEW: default vertical offset
 }) {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
@@ -31,21 +36,6 @@ export default function PageLayout({
   // Columns popup
   const [isColumnsPopupOpen, setIsColumnsPopupOpen] = useState(false);
   const columnsButtonRef = useRef(null);
-
-  // Example columns (later you can pass this list from RepositoryPage / ArchivePage)
-  const [visibleColumns, setVisibleColumns] = useState(["name", "date", "type"]);
-  const columns = [
-    { key: "name", label: "Name" },
-    { key: "date", label: "Date" },
-    { key: "type", label: "Type" },
-    { key: "owner", label: "Owner" },
-  ];
-
-  const handleToggleColumn = (key) => {
-    setVisibleColumns((prev) =>
-      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
-    );
-  };
 
   return (
     <>
@@ -151,10 +141,12 @@ export default function PageLayout({
       <ColumnsPopup
         isOpen={isColumnsPopupOpen}
         onClose={() => setIsColumnsPopupOpen(false)}
-        columns={columns}
-        visibleColumns={visibleColumns}
-        onToggleColumn={handleToggleColumn}
+        columns={columns}               // <- use columns from props
+        visibleColumns={visibleColumns} // <- use visibleColumns from props
+        onToggleColumn={onToggleColumn} // <- use toggle handler from props
         anchorRef={columnsButtonRef}
+        offsetX={offsetX}               // 👈 pass offsetX
+        offsetY={offsetY}               // 👈 pass offsetY
       />
 
       {/* Send Modal */}

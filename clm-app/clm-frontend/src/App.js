@@ -7,6 +7,7 @@ import SuccessPage from "./pages/SuccessPage";
 import DashboardPage from "./pages/DashboardPage";
 import ImportPage from "./pages/ImportPage";
 import RepositoryPage from "./pages/RepositoryPage";
+import ArchivePage from "./pages/ArchivePage";
 import FoldersPage from "./pages/FoldersPage";
 import AdminPage from "./pages/admin/AdminPage";
 import "./i18n";
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/imports" element={<ImportPage />} />
         <Route path="/repository" element={<RepositoryPage />} />
+        <Route path="/archive" element={<ArchivePage />} />
         
         {/* Updated folder routes */}
         <Route path="/folders" element={<FoldersPage />} />
