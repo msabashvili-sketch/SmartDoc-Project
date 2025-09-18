@@ -399,7 +399,7 @@ html, body {
 
 /* Folder name */
 .folder-name {
-  font-size: 14px;  /* adjust font size here */
+  font-size: 12px;  /* adjust font size here */
   font-weight: 550;
   color: #5e5e5e;   /* adjust font color here */
   word-break: break-word;

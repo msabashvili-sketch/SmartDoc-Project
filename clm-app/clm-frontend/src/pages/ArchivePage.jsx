@@ -58,13 +58,6 @@ export default function ArchivePage({ files = [] }) {
                 <th className="checkbox-col">
                   <input type="checkbox" />
                 </th>
-                <th className="view-col">
-                  <img
-                    src="/assets/view-icon3.png"
-                    alt="View"
-                    className="view-header-icon"
-                  />
-                </th>
                 {columns
                   .filter((col) => visibleColumns.includes(col.key))
                   .map((col) => (
@@ -78,20 +71,6 @@ export default function ArchivePage({ files = [] }) {
                 <tr key={file._id || idx}>
                   <td className="checkbox-col">
                     <input type="checkbox" />
-                  </td>
-                  <td className="view-col">
-                    <button
-                      type="button"
-                      className="view-btn"
-                      onClick={() =>
-                        window.open(
-                          `/api/documents/view/${encodeURIComponent(file._id)}`,
-                          "_blank"
-                        )
-                      }
-                    >
-                      View
-                    </button>
                   </td>
                   {columns
                     .filter((col) => visibleColumns.includes(col.key))
@@ -109,7 +88,6 @@ export default function ArchivePage({ files = [] }) {
               {Array.from({ length: emptyRows }).map((_, rowIndex) => (
                 <tr key={`empty-${rowIndex}`}>
                   <td className="checkbox-col">&nbsp;</td>
-                  <td className="view-col">&nbsp;</td>
                   {columns.map((col) => (
                     <td key={col.key}>&nbsp;</td>
                   ))}
