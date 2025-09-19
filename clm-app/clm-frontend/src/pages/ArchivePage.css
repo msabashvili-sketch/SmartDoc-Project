@@ -5,17 +5,19 @@
   display: flex;
   flex-direction: column;
   height: 100vh; /* full viewport height */
+  padding: 0 7px;   /* ⬅️ left/right inner spacing */
+  box-sizing: border-box;
 }
 
 
 .archive-table-container {
-  flex: 1 1 auto;
-  overflow-y: auto; /* vertical scroll */
+  flex: flex;
+  overflow-y: scroll; /* vertical scroll */
   overflow-x: auto; /* horizontal scroll */
   background-color: #fff;
   margin-top: 7px; /* <-- space between header/search bar and table */
-  padding: 0 7px;   /* ⬅️ left/right inner spacing */
-  box-sizing: border-box;
+  padding-bottom: 10px;
+  height: calc(100vh - 190px);
 }
 
 .archive-table {
@@ -29,12 +31,15 @@
 
 
 .archive-table td {
-  padding: 8px 12px;
+  padding: 8px;
   text-align: left;
   border-bottom: 1px solid #e0e0e0; /* horizontal borders */
   word-break: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 60px; /* fixed height for rows */
+  max-height: 60px;
+  z-index: 1;
 }
 
 .archive-table th {
@@ -62,6 +67,7 @@
 .archive-table td.checkbox-col {
   width: 43px;
   text-align: center;
+  background-color: #fff;
 }
 
 /* Make second column (Document Title) sticky */
@@ -69,6 +75,7 @@
 .archive-table td:nth-child(2) {
   position: sticky;
   left: 43px; /* width of first column */
+  background-color: #fff;
 }
 
 .archive-table th:nth-child(2) {
@@ -78,6 +85,20 @@
 
 .archive-table td:nth-child(2) {
    box-shadow: inset -2px 0 0 #dadada;
+   color: #2f9dc9;
+   font-weight: 580;
+}
+
+.doc-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* space between icon and text */
+}
+
+.doc-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .archive-table td.checkbox-col {
@@ -273,4 +294,22 @@
 .footer-left {
   font-size: 13px;            /* change text size here */
   color: #515151;
+}
+
+.archive-table-container::-webkit-scrollbar {
+  height: 8px; /* height of horizontal scrollbar */
+  width: 8px; /* vertical scrollbar width */
+}
+
+.archive-table-container::-webkit-scrollbar-track {
+  background: #fcfcfc; /* track color */
+}
+
+.archive-table-container::-webkit-scrollbar-thumb {
+  background: #dadada; /* thumb color */
+  border-radius: 6px; /* rounded corners */
+}
+
+.archive-table-container::-webkit-scrollbar-thumb:hover {
+  background: #b3b3b3; /* thumb hover color */
 }

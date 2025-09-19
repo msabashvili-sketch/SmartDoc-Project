@@ -258,6 +258,7 @@ html {
   height: calc(100vh - 160px); /* 100vh minus top padding/header */
   padding-bottom: 40px; /* footer height */
   box-sizing: border-box;
+  padding: 0 16px 10px 16px;        /* same as search area */
 }
 
 /* Keep banner natural height */
@@ -271,8 +272,6 @@ html {
   flex: 1 1 auto;
   overflow-x: auto;       /* horizontal scroll */
   overflow-y: scroll;       /* vertical scroll */
-  padding: 0 16px 10px 16px;        /* same as search area */
-  box-sizing: border-box;
   background-color: #fff;
 }
 

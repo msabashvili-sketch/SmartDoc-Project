@@ -31,6 +31,50 @@
   border-radius: 3px;
 }
 
+/* Container for the two buttons */
+.folder-header-buttons {
+  display: flex;
+  position: absolute;
+  right: 1px; /* Align to far right like back button is left */
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  overflow: hidden; /* ensures buttons fit inside rounded corners */
+  background-color: #f0f0f0;
+}
+
+/* Individual buttons */
+.folder-header-buttons button {
+  flex: 1; /* each button takes half of the container */
+  padding: 4px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  background-color: #FFFFFF;
+  border: none; /* remove default border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background-color 0.2s;
+}
+
+/* Divider between buttons */
+.folder-header-buttons button:first-child {
+  border-right: 1px solid #ccc;
+}
+
+/* Hover effect */
+.folder-header-buttons button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Active button */
+.folder-header-buttons button.active {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
 .folder-title-container {
   display: flex;
   align-items: center;
@@ -45,7 +89,7 @@
 }
 
 .folder-title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   color: #555555;
 }

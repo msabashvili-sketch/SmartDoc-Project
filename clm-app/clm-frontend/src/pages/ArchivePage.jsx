@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "../components/PageLayout";
 import { useTranslation } from "react-i18next";
 import "./ArchivePage.css";
 
-export default function ArchivePage({ files = [] }) {
+export default function ArchivePage() {
   const { t } = useTranslation();
 
+  const [files, setFiles] = useState([]);
   const [visibleColumns] = useState([
     "documentTitle",
     "folder",
@@ -29,14 +30,20 @@ export default function ArchivePage({ files = [] }) {
     { key: "signatureName", label: t("archivepage.signature name") },
   ];
 
+  // Fetch archived files on mount
+  useEffect(() => {
+    fetch("http://localhost:4000/api/documents/archive")
+      .then((res) => res.json())
+      .then((data) => setFiles(data.files || []))
+      .catch((err) => console.error("Error fetching archived files:", err));
+  }, []);
+
   // Pagination calculations
   const totalRows = files.length;
   const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
-
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const filesOnPage = files.slice(startIndex, endIndex);
-
   const emptyRows = rowsPerPage - filesOnPage.length;
 
   const handlePageChange = (page) => {
@@ -45,7 +52,7 @@ export default function ArchivePage({ files = [] }) {
 
   const handleRowsPerPageChange = (e) => {
     setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
 
   return (
@@ -76,15 +83,25 @@ export default function ArchivePage({ files = [] }) {
                     .filter((col) => visibleColumns.includes(col.key))
                     .map((col) => (
                       <td key={col.key}>
-                        {col.key === "documentTitle"
-                          ? file.filename
-                          : file.metadata?.[col.key] || ""}
+                        {col.key === "documentTitle" ? (
+                          <div className="doc-cell">
+                            <img
+                              src="/assets/document-icon.png"
+                              alt="doc"
+                              className="doc-icon"
+                            />
+                            <span>{file.filename}</span>
+                          </div>
+                        ) : col.key === "folder" ? (
+                          file.metadata?.folderName || ""
+                        ) : (
+                          file.metadata?.[col.key] || ""
+                        )}
                       </td>
                     ))}
                 </tr>
               ))}
 
-              {/* Empty rows to fill page */}
               {Array.from({ length: emptyRows }).map((_, rowIndex) => (
                 <tr key={`empty-${rowIndex}`}>
                   <td className="checkbox-col">&nbsp;</td>
@@ -97,7 +114,6 @@ export default function ArchivePage({ files = [] }) {
           </table>
         </div>
 
-        {/* Footer with pagination and rows per page */}
         <div className="archive-footer">
           <div className="footer-left">
             {totalRows}{" "}

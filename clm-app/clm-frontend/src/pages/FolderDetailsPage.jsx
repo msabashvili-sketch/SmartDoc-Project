@@ -9,6 +9,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
   const [documents, setDocuments] = useState([]);
   const [folderName, setFolderName] = useState("");
   const [folders, setFolders] = useState([]);
+  const [filterType, setFilterType] = useState("repository"); // filter state
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteDocId, setDeleteDocId] = useState(null);
@@ -17,21 +18,10 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
   const [moveDocId, setMoveDocId] = useState(null);
   const [targetFolderId, setTargetFolderId] = useState("");
 
-  const [selectedDocId, setSelectedDocId] = useState(null); // NEW: selected row
+  const [selectedDocId, setSelectedDocId] = useState(null);
 
-  // Fetch documents in folder
+  // Fetch folder name
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:4000/api/documents/by-folder/${folderId}`
-        );
-        setDocuments(res.data.files || []);
-      } catch (err) {
-        console.error("Error fetching documents:", err);
-      }
-    };
-
     const fetchFolderName = async () => {
       try {
         const res = await axios.get(`http://localhost:4000/api/folders`);
@@ -43,11 +33,24 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
       }
     };
 
-    if (folderId) {
-      fetchDocuments();
-      fetchFolderName();
-    }
+    if (folderId) fetchFolderName();
   }, [folderId, t]);
+
+  // Fetch documents whenever folderId or filterType changes
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:4000/api/documents/by-folder/${folderId}?page=${filterType}`
+        );
+        setDocuments(res.data.files || []);
+      } catch (err) {
+        console.error("Error fetching documents:", err);
+      }
+    };
+
+    if (folderId) fetchDocuments();
+  }, [folderId, filterType]);
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -71,7 +74,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
       setDocuments((prev) => prev.filter((doc) => doc._id !== deleteDocId));
     } catch (err) {
       console.error("Delete failed:", err);
-      alert(t("detailspanel.deleteFailed"));
+      alert(t("detailspananel.deleteFailed"));
     } finally {
       setShowDeleteConfirm(false);
       setDeleteDocId(null);
@@ -101,7 +104,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
       setDocuments((prev) => prev.filter((doc) => doc._id !== moveDocId));
     } catch (err) {
       console.error("Move failed:", err);
-      alert(t("detailspanel.moveFailed"));
+      alert(t("folderdetailspanel.moveFailed"));
     } finally {
       setShowMovePopup(false);
       setMoveDocId(null);
@@ -116,6 +119,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
         <button className="back-button" onClick={onBack}>
           ← {t("folderdetailspanel.back")}
         </button>
+
         <div className="folder-title-container">
           <img
             src="/assets/folder-big-icon5.png"
@@ -123,6 +127,22 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
             className="folder-header-icon"
           />
           <h2 className="folder-title">{folderName}</h2>
+        </div>
+
+        {/* Filter buttons */}
+        <div className="folder-header-buttons">
+          <button
+            className={filterType === "repository" ? "active" : ""}
+            onClick={() => setFilterType("repository")}
+          >
+            Repository
+          </button>
+          <button
+            className={filterType === "archive" ? "active" : ""}
+            onClick={() => setFilterType("archive")}
+          >
+            Archive
+          </button>
         </div>
       </div>
 
@@ -164,7 +184,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
                   </td>
                   <td className="td-actions">
                     <div className="actions-container">
-                      {/* View button opens in new tab */}
+                      {/* View */}
                       <button
                         className="action-button"
                         onClick={(e) => {
@@ -182,7 +202,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
                         />
                       </button>
 
-                      {/* Move button */}
+                      {/* Move */}
                       <button
                         className="action-button"
                         onClick={(e) => {
@@ -197,7 +217,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
                         />
                       </button>
 
-                      {/* Delete button */}
+                      {/* Delete */}
                       <button
                         className="action-button"
                         onClick={(e) => {

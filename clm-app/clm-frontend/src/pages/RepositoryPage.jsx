@@ -38,7 +38,7 @@ export default function RepositoryPage() {
       setFiles((data.files || []).map(file => ({
         ...file,
         _id: file._id.toString(),
-        folderName: file.metadata?.folderName || "" // pull folder name from metadata
+        folderName: file.metadata?.folderName || ""
       })));
     } catch (err) {
       console.error(err);
@@ -48,7 +48,6 @@ export default function RepositoryPage() {
   useEffect(() => { fetchFiles(); }, []);
 
   useEffect(() => {
-    console.log("SelectedRows:", selectedRows);
     const selectedDocs = files.filter(file => selectedRows.includes(file._id));
     console.log("SelectedDocs for SendModal:", selectedDocs);
   }, [selectedRows, files]);
@@ -138,9 +137,9 @@ export default function RepositoryPage() {
         onUploadClick={() => setIsPopupOpen(true)}
         onFilterClick={() => setIsFilterOpen((prev) => !prev)}
         isFilterOpen={isFilterOpen}
-        columns={columns}               // pass columns to PageLayout
-        visibleColumns={visibleColumns} // pass visibleColumns
-        onToggleColumn={handleToggleColumn} // toggle handler
+        columns={columns}
+        visibleColumns={visibleColumns}
+        onToggleColumn={handleToggleColumn}
       >
         <div className="repository-page-wrapper">
           <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
@@ -248,6 +247,12 @@ export default function RepositoryPage() {
           file={selectedFile}
           onClose={() => setIsDetailsOpen(false)}
           onDelete={handleDeleteDocument}
+          onArchive={(archivedFileId) => {
+            // Remove archived file locally
+            setFiles(prev => prev.filter(file => file._id !== archivedFileId));
+            setIsDetailsOpen(false);
+            setSelectedFile(null);
+          }}
         />
 
         {/* Send button */}

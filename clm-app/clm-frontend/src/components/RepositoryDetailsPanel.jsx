@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import "./RepositoryDetailsPanel.css";
 import { useTranslation } from "react-i18next";
 
-export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete }) {
+export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete, onArchive }) {
   const { t } = useTranslation();
   const [selectedSection, setSelectedSection] = useState(null);
   const [showTextPopup, setShowTextPopup] = useState(false);
@@ -16,23 +16,15 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
   useEffect(() => {
     if (showTextPopup && file?.metadata?.textDocId) {
       const textId = file.metadata.textDocId;
-      console.log("Fetching text content for textDocId:", textId);
       setLoadingText(true);
 
       fetch(`http://localhost:4000/api/documents/view/${textId}`)
         .then(res => {
-          console.log("Fetch response status:", res.status);
           if (!res.ok) throw new Error(`HTTP error ${res.status}`);
           return res.text();
         })
-        .then(data => {
-          console.log("Fetched text length:", data.length);
-          setTextContent(data);
-        })
-        .catch(err => {
-          console.error("Error fetching text content:", err);
-          setTextContent(t("detailspanel.notAvailable"));
-        })
+        .then(data => setTextContent(data))
+        .catch(() => setTextContent(t("detailspanel.notAvailable")))
         .finally(() => setLoadingText(false));
     } else {
       setTextContent("");
@@ -63,6 +55,29 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
         ))}
       </div>
     ));
+  };
+
+  // --- Send to Archive ---
+  const handleSendToArchive = async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/documents/send-to-archive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileIds: [file._id] }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      await res.json();
+
+      // Notify parent to remove file from repo table
+      if (onArchive) onArchive(file._id);
+
+      alert(t("detailspanel.archiveSuccess") || "File sent to archive successfully!");
+      onClose(); // Close panel after archiving
+    } catch (err) {
+      console.error("❌ Error archiving file:", err);
+      alert(t("detailspanel.archiveError") || "Error sending file to archive.");
+    }
   };
 
   return (
@@ -97,10 +112,7 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
             {/* Text Version */}
             <div
               className={`details-field-section ${selectedSection === "text" ? "selected" : ""}`}
-              onClick={() => {
-                setSelectedSection("text");
-                setShowTextPopup(true);
-              }}
+              onClick={() => { setSelectedSection("text"); setShowTextPopup(true); }}
             >
               <span className="details-field-section-label">{t("detailspanel.textVersion")}</span>
               <span className="details-field-section-value">
@@ -141,7 +153,9 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
 
         {/* Footer */}
         <div className="details-panel-footer">
-          <button className="archive-btn">{t("detailspanel.Send to Archive")}</button>
+          <button className="archive-btn" onClick={handleSendToArchive}>
+            {t("detailspanel.Send to Archive")}
+          </button>
           <button className="delete-btn" onClick={() => setShowDeleteConfirm(true)}>
             {t("detailspanel.Delete")}
           </button>
