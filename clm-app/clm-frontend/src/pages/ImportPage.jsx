@@ -16,15 +16,12 @@ export default function ImportPage() {
   const [loadingFolders, setLoadingFolders] = useState(true);
   const { t } = useTranslation();
 
-  // Refs for button and popup
   const columnsButtonRef = useRef(null);
   const columnsPopupRef = useRef(null);
 
-  // Popup offset (adjust for positioning)
-  const popupOffsetY = 4;   // vertical gap below button
-  const popupOffsetX = -168; // horizontal shift to the left
+  const popupOffsetY = 4;
+  const popupOffsetX = -168;
 
-  // Columns definitions
   const columns = [
     { key: "folder", label: t("importpage.folder") },
     { key: "documentTitle", label: t("importpage.document title") },
@@ -35,14 +32,11 @@ export default function ImportPage() {
     { key: "signatureName", label: t("importpage.signature name") },
   ];
 
-  // Columns visibility state
   const [visibleColumns, setVisibleColumns] = useState(columns.map(col => col.key));
 
   const handleToggleColumn = (key) => {
     setVisibleColumns(prev =>
-      prev.includes(key)
-        ? prev.filter(k => k !== key)
-        : [...prev, key]
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
   };
 
@@ -175,7 +169,7 @@ export default function ImportPage() {
     return Math.max(minVisibleRows - files.length, 0);
   };
 
-  // Close columns popup when clicking outside
+  // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -196,43 +190,28 @@ export default function ImportPage() {
       <DashboardHeader />
 
       <div className="import-page">
-
-        {/* Top space */}
         <div className="import-top-space">
           <h1 className="import-title">{t("importpage.import")}</h1>
           <label className="upload-button" onClick={() => setIsUploadPopupOpen(true)}>
-            <img
-              src="/assets/upload-button-icon.png"
-              alt="Upload Icon"
-              className="upload-button-icon"
-            />
+            <img src="/assets/upload-button-icon.png" alt="Upload Icon" className="upload-button-icon" />
             <span style={{ marginLeft: "6px" }}>{t("importpage.upload document")}</span>
           </label>
         </div>
 
-        {/* Search bar row */}
+        {/* Search bar + columns toggle */}
         <div className="search-bar-row">
           <div className="search-bar-container">
-            <input
-              type="text"
-              className="search-bar"
-              placeholder={t("importpage.search documents...")}
-            />
+            <input type="text" className="search-bar" placeholder={t("importpage.search documents...")} />
           </div>
           <button
             className="columns-button"
             ref={columnsButtonRef}
             onClick={() => setIsColumnsPopupOpen(prev => !prev)}
           >
-            <img
-              src="/assets/column-icon.png"
-              alt="Columns Icon"
-              className="columns-button-icon"
-            />
+            <img src="/assets/column-icon.png" alt="Columns Icon" className="columns-button-icon" />
             <span style={{ marginLeft: "6px" }}>{t("importpage.columns")}</span>
           </button>
 
-          {/* Columns Popup with dynamic position */}
           {isColumnsPopupOpen && columnsButtonRef.current && (
             <div
               className="columns-popup"
@@ -264,7 +243,7 @@ export default function ImportPage() {
           )}
         </div>
 
-        {/* Banner + Table */}
+        {/* Banner + table */}
         <div className="import-content-wrapper">
           <div
             className="info-banner"
@@ -289,60 +268,49 @@ export default function ImportPage() {
             </div>
           </div>
 
-          {/* Table */}
           <div className="table-container">
             <table className="import-table-new">
               <thead>
                 <tr>
-                  <th className="checkbox-col">
+                  <th className="checkbox-col sticky">
                     <input type="checkbox" checked={allChecked} onChange={toggleAll} />
                   </th>
-                  <th className="view-col">
-                    <img
-                      src="/assets/view-icon4.png"
-                      alt={t("importpage.view")}
-                      className="view-header-icon"
-                    />
+                  <th className="view-col sticky">
+                    <img src="/assets/view-icon4.png" alt={t("importpage.view")} className="view-header-icon" />
                   </th>
-                  {columns
-                    .filter(col => visibleColumns.includes(col.key))
-                    .map(col => (
-                      <th key={col.key}>{col.label}</th>
-                    ))}
+                  {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
+                    <th key={col.key}>{col.label}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {files.map((file, index) => (
-                  <tr key={file.id || index}>
-                    <td className="checkbox-col">
-                      <input
-                        type="checkbox"
-                        checked={rows[index] || false}
-                        onChange={() => toggleRow(index)}
-                      />
-                    </td>
-                    <td className="view-col">
-                      <button
-                        type="button"
-                        className="view-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(
-                            `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
-                            "_blank"
-                          );
-                        }}
-                      >
-                        <img
-                          src="/assets/view-icon4.png"
-                          alt={t("importpage.view")}
-                          className="view-icon"
+                {files.map((file, index) => {
+                  const isSelected = rows[index];
+                  return (
+                    <tr key={file.id || index} className={isSelected ? "selected-row" : ""}>
+                      <td className="checkbox-col sticky">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleRow(index)}
                         />
-                      </button>
-                    </td>
-                    {columns
-                      .filter(col => visibleColumns.includes(col.key))
-                      .map(col => (
+                      </td>
+                      <td className="view-col sticky">
+                        <button
+                          type="button"
+                          className="view-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(
+                              `http://localhost:4000/api/documents/view/${encodeURIComponent(file.id)}`,
+                              "_blank"
+                            );
+                          }}
+                        >
+                          <img src="/assets/view-icon4.png" alt={t("importpage.view")} className="view-icon" />
+                        </button>
+                      </td>
+                      {columns.filter(col => visibleColumns.includes(col.key)).map(col => (
                         <td key={col.key}>
                           {col.key === "folder" ? (
                             <select
@@ -363,10 +331,10 @@ export default function ImportPage() {
                           )}
                         </td>
                       ))}
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
 
-                {/* Empty rows */}
                 {Array.from({ length: getEmptyRowsCount() }).map((_, idx) => (
                   <tr key={`empty-${idx}`}>
                     {Array.from({ length: 2 + visibleColumns.length }).map((__, cidx) => (
@@ -379,13 +347,11 @@ export default function ImportPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="page-footer">
           {files.length}{" "}
           {files.length === 1 ? t("importpage.file_singular") : t("importpage.files already uploaded")}
         </div>
 
-        {/* Upload Popup */}
         <UploadPopup
           isOpen={isUploadPopupOpen}
           onClose={() => {

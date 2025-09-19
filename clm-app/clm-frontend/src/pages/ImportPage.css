@@ -366,8 +366,21 @@ html {
 }
 
 /* Apply row hover for all cells, including sticky columns */
+/* Hover highlight */
 .import-table-new tbody tr:hover td {
-  background-color: #f0f8ff; /* same hover color */
+  background-color: #f0f8ff;
+  z-index: 2;
+}
+
+/* Selected row highlight */
+.import-table-new tbody tr.selected-row {
+  background-color: #f0f8ff;
+}
+
+/* Keep sticky cells in sync if you add sticky cols later */
+.import-table-new tbody tr.selected-row th,
+.import-table-new tbody tr.selected-row td.sticky {
+  background-color: #f0f8ff;
 }
 
 /* Header checkbox style (first column) */

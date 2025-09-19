@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
 import { useTranslation } from "react-i18next";
 import "./ArchivePage.css";
@@ -7,19 +7,12 @@ export default function ArchivePage() {
   const { t } = useTranslation();
 
   const [files, setFiles] = useState([]);
-  const [visibleColumns] = useState([
-    "documentTitle",
-    "folder",
-    "counterparty",
-    "documentType",
-    "agreementDate",
-    "expiryDate",
-    "signatureName",
-  ]);
-
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [visibleColumns, setVisibleColumns] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
+  // Columns definition
   const columns = [
     { key: "documentTitle", label: t("archivepage.document title") },
     { key: "folder", label: t("archivepage.folder") },
@@ -30,15 +23,32 @@ export default function ArchivePage() {
     { key: "signatureName", label: t("archivepage.signature name") },
   ];
 
-  // Fetch archived files on mount
+  // Initialize visibleColumns on first render
+  useEffect(() => {
+    setVisibleColumns(columns.map(c => c.key));
+  }, [t]);
+
+  const handleToggleColumn = (key) => {
+    setVisibleColumns(prev =>
+      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
+    );
+  };
+
+  // Fetch archived files
   useEffect(() => {
     fetch("http://localhost:4000/api/documents/archive")
-      .then((res) => res.json())
-      .then((data) => setFiles(data.files || []))
-      .catch((err) => console.error("Error fetching archived files:", err));
+      .then(res => res.json())
+      .then(data => {
+        setFiles((data.files || []).map(f => ({
+          ...f,
+          _id: f._id.toString(),
+          folderName: f.metadata?.folderName || ""
+        })));
+      })
+      .catch(err => console.error("Error fetching archived files:", err));
   }, []);
 
-  // Pagination calculations
+  // Pagination
   const totalRows = files.length;
   const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -55,65 +65,109 @@ export default function ArchivePage() {
     setCurrentPage(1);
   };
 
+  // Row selection
+  const toggleRow = (id) => {
+    setSelectedFiles(prev =>
+      prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (areAllSelected) {
+      setSelectedFiles([]);
+    } else {
+      const pageIds = filesOnPage.map(f => f._id);
+      setSelectedFiles([...new Set([...selectedFiles, ...pageIds])]);
+    }
+  };
+
+  const areAllSelected = filesOnPage.length > 0 && filesOnPage.every(f => selectedFiles.includes(f._id));
+
   return (
-    <PageLayout title={t("archivepage.archive")}>
+    <PageLayout
+      title={t("archivepage.archive")}
+      columns={columns}               // pass columns
+      visibleColumns={visibleColumns} // pass visible columns
+      onToggleColumn={handleToggleColumn} // toggle handler
+    >
       <div className="archive-table-wrapper">
         <div className="archive-table-container">
           <table className="archive-table">
             <thead>
               <tr>
-                <th className="checkbox-col">
-                  <input type="checkbox" />
+                <th className="checkbox-col sticky">
+                  <input
+                    type="checkbox"
+                    checked={areAllSelected}
+                    onChange={toggleSelectAll}
+                  />
                 </th>
                 {columns
-                  .filter((col) => visibleColumns.includes(col.key))
-                  .map((col) => (
-                    <th key={col.key}>{col.label}</th>
+                  .filter(col => visibleColumns.includes(col.key))
+                  .map((col, idx) => (
+                    <th key={col.key} className={idx === 0 ? "sticky" : ""}>
+                      {col.label}
+                    </th>
                   ))}
               </tr>
             </thead>
 
             <tbody>
-              {filesOnPage.map((file, idx) => (
-                <tr key={file._id || idx}>
-                  <td className="checkbox-col">
-                    <input type="checkbox" />
-                  </td>
-                  {columns
-                    .filter((col) => visibleColumns.includes(col.key))
-                    .map((col) => (
-                      <td key={col.key}>
-                        {col.key === "documentTitle" ? (
-                          <div className="doc-cell">
-                            <img
-                              src="/assets/document-icon.png"
-                              alt="doc"
-                              className="doc-icon"
-                            />
-                            <span>{file.filename}</span>
-                          </div>
-                        ) : col.key === "folder" ? (
-                          file.metadata?.folderName || ""
-                        ) : (
-                          file.metadata?.[col.key] || ""
-                        )}
-                      </td>
-                    ))}
-                </tr>
-              ))}
+              {filesOnPage.map((file, idx) => {
+                const isSelected = selectedFiles.includes(file._id);
+                return (
+                  <tr key={file._id || idx} className={isSelected ? "selected-row" : ""}>
+                    <td className="checkbox-col sticky">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleRow(file._id)}
+                      />
+                    </td>
 
+                    {columns
+                      .filter(col => visibleColumns.includes(col.key))
+                      .map((col, colIdx) => {
+                        const isSticky = colIdx === 0;
+                        return (
+                          <td key={col.key} className={isSticky ? "sticky" : ""}>
+                            {col.key === "documentTitle" ? (
+                              <div className="doc-cell">
+                                <img
+                                  src="/assets/document-icon.png"
+                                  alt="doc"
+                                  className="doc-icon"
+                                />
+                                <span>{file.filename}</span>
+                              </div>
+                            ) : col.key === "folder" ? (
+                              file.folderName
+                            ) : (
+                              file.metadata?.[col.key] || ""
+                            )}
+                          </td>
+                        );
+                      })}
+                  </tr>
+                );
+              })}
+
+              {/* Empty rows */}
               {Array.from({ length: emptyRows }).map((_, rowIndex) => (
                 <tr key={`empty-${rowIndex}`}>
                   <td className="checkbox-col">&nbsp;</td>
-                  {columns.map((col) => (
-                    <td key={col.key}>&nbsp;</td>
-                  ))}
+                  {columns
+                    .filter(col => visibleColumns.includes(col.key))
+                    .map(col => (
+                      <td key={col.key}>&nbsp;</td>
+                    ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
+        {/* Footer */}
         <div className="archive-footer">
           <div className="footer-left">
             {totalRows}{" "}
@@ -126,10 +180,8 @@ export default function ArchivePage() {
             <label>
               {t("archivepage.rows per page")}:
               <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
-                {[25, 50, 100].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
+                {[25, 50, 100].map(n => (
+                  <option key={n} value={n}>{n}</option>
                 ))}
               </select>
             </label>
