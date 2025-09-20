@@ -4,7 +4,15 @@ import ReactDOM from "react-dom";
 import "./RepositoryDetailsPanel.css";
 import { useTranslation } from "react-i18next";
 
-export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete, onArchive }) {
+export default function RepositoryDetailsPanel({
+  isOpen,
+  file,
+  onClose,
+  onDelete,
+  onArchive,
+  showSendButton = true, // ✅ control "Send to Archive" button
+  footerButtonClass = "", // ✅ class for footer buttons (small size)
+}) {
   const { t } = useTranslation();
   const [selectedSection, setSelectedSection] = useState(null);
   const [showTextPopup, setShowTextPopup] = useState(false);
@@ -35,11 +43,11 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
 
   const getScannedDocUrl = () => {
     if (file.metadata?.scannedDocUrl) return file.metadata.scannedDocUrl;
-    if (file.metadata?.scannedDocId) return `http://localhost:4000/api/documents/view/${file.metadata.scannedDocId}`;
+    if (file.metadata?.scannedDocId)
+      return `http://localhost:4000/api/documents/view/${file.metadata.scannedDocId}`;
     return null;
   };
 
-  // Split text into pages (~50 lines per page)
   const renderPages = () => {
     if (!textContent) return null;
     const lines = textContent.split("\n");
@@ -57,7 +65,6 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
     ));
   };
 
-  // --- Send to Archive ---
   const handleSendToArchive = async () => {
     try {
       const res = await fetch("http://localhost:4000/api/documents/send-to-archive", {
@@ -69,11 +76,9 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       await res.json();
 
-      // Notify parent to remove file from repo table
       if (onArchive) onArchive(file._id);
-
       alert(t("detailspanel.archiveSuccess") || "File sent to archive successfully!");
-      onClose(); // Close panel after archiving
+      onClose();
     } catch (err) {
       console.error("❌ Error archiving file:", err);
       alert(t("detailspanel.archiveError") || "Error sending file to archive.");
@@ -109,7 +114,6 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
           {/* Document Section */}
           <div className="repository-details-secondsubtitle">{t("detailspanel.document")}</div>
           <div className="stacked-documents">
-            {/* Text Version */}
             <div
               className={`details-field-section ${selectedSection === "text" ? "selected" : ""}`}
               onClick={() => { setSelectedSection("text"); setShowTextPopup(true); }}
@@ -120,7 +124,6 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
               </span>
             </div>
 
-            {/* Scanned Document */}
             <div
               className={`details-field-section ${selectedSection === "scanned" ? "selected" : ""}`}
               onClick={() => {
@@ -153,10 +156,12 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
 
         {/* Footer */}
         <div className="details-panel-footer">
-          <button className="archive-btn" onClick={handleSendToArchive}>
-            {t("detailspanel.Send to Archive")}
-          </button>
-          <button className="delete-btn" onClick={() => setShowDeleteConfirm(true)}>
+          {showSendButton && (
+            <button className={`archive-btn ${footerButtonClass}`} onClick={handleSendToArchive}>
+              {t("detailspanel.Send to Archive")}
+            </button>
+          )}
+          <button className={`delete-btn ${footerButtonClass}`} onClick={() => setShowDeleteConfirm(true)}>
             {t("detailspanel.Delete")}
           </button>
         </div>
@@ -186,25 +191,16 @@ export default function RepositoryDetailsPanel({ isOpen, file, onClose, onDelete
         )}
       </div>
 
-      {/* Text Popup with pages */}
+      {/* Text Popup */}
       {showTextPopup &&
         ReactDOM.createPortal(
           <div className="text-popup-overlay" onClick={() => setShowTextPopup(false)}>
             <div className="text-popup-content" onClick={(e) => e.stopPropagation()}>
               <button className="popup-close" onClick={() => setShowTextPopup(false)}>X</button>
-
-              {/* Split layout */}
               <div className="split-layout">
-                {/* Left: Text content */}
                 <div className="popup-left">
-                  {loadingText ? (
-                    <div className="loading">{t("detailspanel.loading") || "Loading..."}</div>
-                  ) : (
-                    renderPages()
-                  )}
+                  {loadingText ? <div className="loading">{t("detailspanel.loading") || "Loading..."}</div> : renderPages()}
                 </div>
-
-                {/* Right: AI tags */}
                 <div className="popup-right">
                   <h3>{t("detailspanel.tags")}</h3>
                   <ul>

@@ -231,7 +231,7 @@
 
 .details-panel-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: auto; /* Push footer to bottom */
   padding: 15px;
   border-top: 0px solid #ddd;
@@ -264,6 +264,12 @@
   background-color: #ff6358;
   color: white;
   font-size: 14px;
+}
+
+.details-panel-footer .small-btn {
+  width: 180px; /* match repo page size */
+  flex: unset;  /* prevent stretching */
+  min-width: unset;
 }
 
 .delete-btn:hover {

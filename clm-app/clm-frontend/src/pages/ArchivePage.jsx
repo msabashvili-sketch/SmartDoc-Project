@@ -220,7 +220,7 @@ export default function ArchivePage() {
         </div>
       </div>
 
-      {/* RepositoryDetailsPanel */}
+      {/* RepositoryDetailsPanel (Send to Archive hidden) */}
       {selectedFile && (
         <RepositoryDetailsPanel
           isOpen={isDetailsOpen}
@@ -234,6 +234,8 @@ export default function ArchivePage() {
             setFiles(prev => prev.filter(f => f._id !== fileId));
             setIsDetailsOpen(false);
           }}
+          showSendButton={false} // ⬅️ hide "Send to Archive"
+          footerButtonClass="small-btn"
         />
       )}
     </PageLayout>
