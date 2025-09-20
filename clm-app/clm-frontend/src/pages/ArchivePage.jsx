@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
+import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel"; // import details panel
 import { useTranslation } from "react-i18next";
 import "./ArchivePage.css";
 
@@ -9,10 +10,12 @@ export default function ArchivePage() {
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null); // for details panel
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false); // panel open state
+
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
-  // Columns definition
   const columns = [
     { key: "documentTitle", label: t("archivepage.document title") },
     { key: "folder", label: t("archivepage.folder") },
@@ -23,16 +26,10 @@ export default function ArchivePage() {
     { key: "signatureName", label: t("archivepage.signature name") },
   ];
 
-  // Initialize visibleColumns on first render
+  // Initialize visible columns
   useEffect(() => {
     setVisibleColumns(columns.map(c => c.key));
   }, [t]);
-
-  const handleToggleColumn = (key) => {
-    setVisibleColumns(prev =>
-      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
-    );
-  };
 
   // Fetch archived files
   useEffect(() => {
@@ -47,6 +44,12 @@ export default function ArchivePage() {
       })
       .catch(err => console.error("Error fetching archived files:", err));
   }, []);
+
+  const handleToggleColumn = (key) => {
+    setVisibleColumns(prev =>
+      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
+    );
+  };
 
   // Pagination
   const totalRows = files.length;
@@ -86,9 +89,9 @@ export default function ArchivePage() {
   return (
     <PageLayout
       title={t("archivepage.archive")}
-      columns={columns}               // pass columns
-      visibleColumns={visibleColumns} // pass visible columns
-      onToggleColumn={handleToggleColumn} // toggle handler
+      columns={columns}
+      visibleColumns={visibleColumns}
+      onToggleColumn={handleToggleColumn}
     >
       <div className="archive-table-wrapper">
         <div className="archive-table-container">
@@ -116,7 +119,14 @@ export default function ArchivePage() {
               {filesOnPage.map((file, idx) => {
                 const isSelected = selectedFiles.includes(file._id);
                 return (
-                  <tr key={file._id || idx} className={isSelected ? "selected-row" : ""}>
+                  <tr
+                    key={file._id || idx}
+                    className={isSelected ? "selected-row" : ""}
+                    onDoubleClick={() => {
+                      setSelectedFile(file);
+                      setIsDetailsOpen(true); // open panel
+                    }}
+                  >
                     <td className="checkbox-col sticky">
                       <input
                         type="checkbox"
@@ -152,15 +162,12 @@ export default function ArchivePage() {
                 );
               })}
 
-              {/* Empty rows */}
               {Array.from({ length: emptyRows }).map((_, rowIndex) => (
                 <tr key={`empty-${rowIndex}`}>
                   <td className="checkbox-col">&nbsp;</td>
                   {columns
                     .filter(col => visibleColumns.includes(col.key))
-                    .map(col => (
-                      <td key={col.key}>&nbsp;</td>
-                    ))}
+                    .map(col => <td key={col.key}>&nbsp;</td>)}
                 </tr>
               ))}
             </tbody>
@@ -212,6 +219,23 @@ export default function ArchivePage() {
           </div>
         </div>
       </div>
+
+      {/* RepositoryDetailsPanel */}
+      {selectedFile && (
+        <RepositoryDetailsPanel
+          isOpen={isDetailsOpen}
+          file={selectedFile}
+          onClose={() => setIsDetailsOpen(false)}
+          onDelete={(fileId) => {
+            setFiles(prev => prev.filter(f => f._id !== fileId));
+            setIsDetailsOpen(false);
+          }}
+          onArchive={(fileId) => {
+            setFiles(prev => prev.filter(f => f._id !== fileId));
+            setIsDetailsOpen(false);
+          }}
+        />
+      )}
     </PageLayout>
   );
 }
