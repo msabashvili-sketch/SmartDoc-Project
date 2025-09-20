@@ -323,3 +323,15 @@
 .archive-table-container::-webkit-scrollbar-thumb:hover {
   background: #b3b3b3; /* thumb hover color */
 }
+
+
+/* Highlight all cells in a row, including sticky columns */
+.highlighted-row td,
+.highlighted-row th {
+  background-color: #f0f8ff !important; /* light blue */
+}
+
+/* If you have sticky columns */
+.sticky.highlighted {
+  background-color: #f0f8ff !important;
+}

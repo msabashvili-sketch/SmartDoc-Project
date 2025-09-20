@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
-import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel"; // import details panel
+import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
 import { useTranslation } from "react-i18next";
 import "./ArchivePage.css";
 
@@ -10,8 +10,9 @@ export default function ArchivePage() {
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [visibleColumns, setVisibleColumns] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null); // for details panel
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false); // panel open state
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [highlightedRowId, setHighlightedRowId] = useState(null); // ✅ highlighted row
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
@@ -26,12 +27,10 @@ export default function ArchivePage() {
     { key: "signatureName", label: t("archivepage.signature name") },
   ];
 
-  // Initialize visible columns
   useEffect(() => {
     setVisibleColumns(columns.map(c => c.key));
   }, [t]);
 
-  // Fetch archived files
   useEffect(() => {
     fetch("http://localhost:4000/api/documents/archive")
       .then(res => res.json())
@@ -68,7 +67,6 @@ export default function ArchivePage() {
     setCurrentPage(1);
   };
 
-  // Row selection
   const toggleRow = (id) => {
     setSelectedFiles(prev =>
       prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
@@ -118,13 +116,16 @@ export default function ArchivePage() {
             <tbody>
               {filesOnPage.map((file, idx) => {
                 const isSelected = selectedFiles.includes(file._id);
+                const isHighlighted = highlightedRowId === file._id;
+
                 return (
                   <tr
                     key={file._id || idx}
-                    className={isSelected ? "selected-row" : ""}
+                    className={`${isSelected ? "selected-row" : ""} ${isHighlighted ? "highlighted-row" : ""}`}
                     onDoubleClick={() => {
                       setSelectedFile(file);
-                      setIsDetailsOpen(true); // open panel
+                      setIsDetailsOpen(true);
+                      setHighlightedRowId(file._id); // ✅ highlight row
                     }}
                   >
                     <td className="checkbox-col sticky">
@@ -225,16 +226,16 @@ export default function ArchivePage() {
         <RepositoryDetailsPanel
           isOpen={isDetailsOpen}
           file={selectedFile}
-          onClose={() => setIsDetailsOpen(false)}
+          onClose={() => {
+            setIsDetailsOpen(false);
+            setHighlightedRowId(null); // ✅ remove highlight on cancel
+          }}
           onDelete={(fileId) => {
             setFiles(prev => prev.filter(f => f._id !== fileId));
             setIsDetailsOpen(false);
+            setHighlightedRowId(null); // ✅ remove highlight after delete
           }}
-          onArchive={(fileId) => {
-            setFiles(prev => prev.filter(f => f._id !== fileId));
-            setIsDetailsOpen(false);
-          }}
-          showSendButton={false} // ⬅️ hide "Send to Archive"
+          showSendButton={false}
           footerButtonClass="small-btn"
         />
       )}
