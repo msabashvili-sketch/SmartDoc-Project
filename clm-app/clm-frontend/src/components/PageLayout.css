@@ -171,6 +171,7 @@
   font-size: 14px;
   outline: none;
   transition: max-width 0.3s ease, flex 0.3s ease;
+  color: #5a5a5a !important
 }
 .search-bar:focus {
   border-color: #37c193;
