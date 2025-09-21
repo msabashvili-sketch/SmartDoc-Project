@@ -137,9 +137,14 @@
 
 /* Sections */
 .stacked-documents .details-field-section {
-  padding: 20px 20px; /* padding inside each field */
+  height: 80px;              /* choose the height you want */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;    /* center text vertically */
+  padding: 15px 25px;         /* adjust padding */
   position: relative;
   z-index: 1;
+  font-size: 15px; 
 }
 
 /* Middle divider */

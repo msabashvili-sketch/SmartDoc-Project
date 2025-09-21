@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import DashboardHeader from "./DashboardHeader";
 import "./PageLayout.css";
 import { useTranslation } from "react-i18next";
@@ -17,24 +17,25 @@ export default function PageLayout({
   children,
   selectedDocuments = [],
   isFilterOpen = false,
-  columns = [],              // <- receive columns from page
-  visibleColumns = [],       // <- receive visibleColumns from page
-  onToggleColumn = () => {}, // <- receive toggle handler from page
-  offsetX = 0,               // 👈 NEW: default horizontal offset
-  offsetY = 4,               // 👈 NEW: default vertical offset
+  columns = [],
+  visibleColumns = [],
+  onToggleColumn = () => {},
+  offsetX = 0,
+  offsetY = 4,
+  searchText = "",            // 👈 pass from page
+  onSearchChange = () => {},  // 👈 pass from page
 }) {
   const { t } = useTranslation();
-  const [searchText, setSearchText] = useState("");
 
   // Send modal
-  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [isSendModalOpen, setIsSendModalOpen] = React.useState(false);
   const handleSendClick = () => {
     if (onSendClick) onSendClick();
     setIsSendModalOpen(true);
   };
 
   // Columns popup
-  const [isColumnsPopupOpen, setIsColumnsPopupOpen] = useState(false);
+  const [isColumnsPopupOpen, setIsColumnsPopupOpen] = React.useState(false);
   const columnsButtonRef = useRef(null);
 
   return (
@@ -42,7 +43,6 @@ export default function PageLayout({
       <DashboardHeader />
 
       <div className="page-layout">
-        {/* Top space */}
         <div className="top-space">
           <h1 className="top-space-title">{title}</h1>
           {showUploadButton && (
@@ -59,7 +59,6 @@ export default function PageLayout({
           )}
         </div>
 
-        {/* Optional Banner */}
         {showBanner && bannerImage && (
           <div
             className="page-banner"
@@ -72,21 +71,12 @@ export default function PageLayout({
           </div>
         )}
 
-        {/* Wrapper for search + table */}
         <div className={`content-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
           {/* Search bar */}
-          <div
-            className={`search-bar-wrapper ${
-              isFilterOpen ? "filter-open" : ""
-            }`}
-          >
+          <div className={`search-bar-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
             <div className="search-filter-bar">
               <button className="filter-button" onClick={onFilterClick}>
-                <img
-                  src="/assets/filter-icon.png"
-                  alt="Filter"
-                  className="button-icon"
-                />
+                <img src="/assets/filter-icon.png" alt="Filter" className="button-icon" />
               </button>
 
               <input
@@ -94,7 +84,7 @@ export default function PageLayout({
                 className="search-bar"
                 placeholder={t("repositorypage.search documents...")}
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={(e) => onSearchChange(e.target.value)}
               />
 
               <div className="search-buttons">
@@ -103,53 +93,38 @@ export default function PageLayout({
                   onClick={() => setIsColumnsPopupOpen((prev) => !prev)}
                   ref={columnsButtonRef}
                 >
-                  <img
-                    src="/assets/column-icon.png"
-                    alt="Columns"
-                    className="button-icon"
-                  />
+                  <img src="/assets/column-icon.png" alt="Columns" className="button-icon" />
                   {t("repositorypage.columns")}
                 </button>
 
                 <button className="send-button" onClick={handleSendClick}>
-                  <img
-                    src="/assets/email-icon.png"
-                    alt="Send"
-                    className="button-icon"
-                  />
+                  <img src="/assets/email-icon.png" alt="Send" className="button-icon" />
                   {t("repositorypage.send")}
                 </button>
 
                 <button className="export-button" onClick={onExportClick}>
-                  <img
-                    src="/assets/export-icon.png"
-                    alt="Export"
-                    className="button-icon"
-                  />
+                  <img src="/assets/export-icon.png" alt="Export" className="button-icon" />
                   {t("repositorypage.export")}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Table / children content */}
           <div className="table-content">{children}</div>
         </div>
       </div>
 
-      {/* Columns Popup */}
       <ColumnsPopup
         isOpen={isColumnsPopupOpen}
         onClose={() => setIsColumnsPopupOpen(false)}
-        columns={columns}               // <- use columns from props
-        visibleColumns={visibleColumns} // <- use visibleColumns from props
-        onToggleColumn={onToggleColumn} // <- use toggle handler from props
+        columns={columns}
+        visibleColumns={visibleColumns}
+        onToggleColumn={onToggleColumn}
         anchorRef={columnsButtonRef}
-        offsetX={offsetX}               // 👈 pass offsetX
-        offsetY={offsetY}               // 👈 pass offsetY
+        offsetX={offsetX}
+        offsetY={offsetY}
       />
 
-      {/* Send Modal */}
       {isSendModalOpen && (
         <SendModal
           isOpen={isSendModalOpen}

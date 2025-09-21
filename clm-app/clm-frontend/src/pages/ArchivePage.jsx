@@ -7,16 +7,18 @@ import "./ArchivePage.css";
 export default function ArchivePage() {
   const { t } = useTranslation();
 
+  // Files and pagination
   const [files, setFiles] = useState([]);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [visibleColumns, setVisibleColumns] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [highlightedRowId, setHighlightedRowId] = useState(null); // ✅ highlighted row
-
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
+  // Selected rows
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [highlightedRowId, setHighlightedRowId] = useState(null);
+
+  // Columns and toggling
   const columns = [
     { key: "documentTitle", label: t("archivepage.document title") },
     { key: "folder", label: t("archivepage.folder") },
@@ -26,11 +28,12 @@ export default function ArchivePage() {
     { key: "expiryDate", label: t("archivepage.expiry date") },
     { key: "signatureName", label: t("archivepage.signature name") },
   ];
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(c => c.key));
 
-  useEffect(() => {
-    setVisibleColumns(columns.map(c => c.key));
-  }, [t]);
+  // Search
+  const [searchText, setSearchText] = useState("");
 
+  // Fetch archived files
   useEffect(() => {
     fetch("http://localhost:4000/api/documents/archive")
       .then(res => res.json())
@@ -44,18 +47,29 @@ export default function ArchivePage() {
       .catch(err => console.error("Error fetching archived files:", err));
   }, []);
 
+  // Toggle column visibility
   const handleToggleColumn = (key) => {
     setVisibleColumns(prev =>
       prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
     );
   };
 
+  // Filter files based on search
+  const filteredFiles = files.filter(file =>
+    columns.some(col => {
+      const value = col.key === "documentTitle" ? file.filename
+                    : col.key === "folder" ? file.folderName
+                    : file.metadata?.[col.key];
+      return value?.toString().toLowerCase().includes(searchText.toLowerCase());
+    })
+  );
+
   // Pagination
-  const totalRows = files.length;
+  const totalRows = filteredFiles.length;
   const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const filesOnPage = files.slice(startIndex, endIndex);
+  const filesOnPage = filteredFiles.slice(startIndex, endIndex);
   const emptyRows = rowsPerPage - filesOnPage.length;
 
   const handlePageChange = (page) => {
@@ -67,22 +81,18 @@ export default function ArchivePage() {
     setCurrentPage(1);
   };
 
+  // Row selection
   const toggleRow = (id) => {
     setSelectedFiles(prev =>
       prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
     );
   };
 
-  const toggleSelectAll = () => {
-    if (areAllSelected) {
-      setSelectedFiles([]);
-    } else {
-      const pageIds = filesOnPage.map(f => f._id);
-      setSelectedFiles([...new Set([...selectedFiles, ...pageIds])]);
-    }
-  };
-
   const areAllSelected = filesOnPage.length > 0 && filesOnPage.every(f => selectedFiles.includes(f._id));
+  const toggleSelectAll = () => {
+    if (areAllSelected) setSelectedFiles([]);
+    else setSelectedFiles([...new Set([...selectedFiles, ...filesOnPage.map(f => f._id)])]);
+  };
 
   return (
     <PageLayout
@@ -90,6 +100,8 @@ export default function ArchivePage() {
       columns={columns}
       visibleColumns={visibleColumns}
       onToggleColumn={handleToggleColumn}
+      searchText={searchText}          // ✅ Pass search state
+      onSearchChange={setSearchText}   // ✅ Pass search handler
     >
       <div className="archive-table-wrapper">
         <div className="archive-table-container">
@@ -125,7 +137,7 @@ export default function ArchivePage() {
                     onDoubleClick={() => {
                       setSelectedFile(file);
                       setIsDetailsOpen(true);
-                      setHighlightedRowId(file._id); // ✅ highlight row
+                      setHighlightedRowId(file._id);
                     }}
                   >
                     <td className="checkbox-col sticky">
@@ -221,19 +233,19 @@ export default function ArchivePage() {
         </div>
       </div>
 
-      {/* RepositoryDetailsPanel (Send to Archive hidden) */}
+      {/* RepositoryDetailsPanel */}
       {selectedFile && (
         <RepositoryDetailsPanel
           isOpen={isDetailsOpen}
           file={selectedFile}
           onClose={() => {
             setIsDetailsOpen(false);
-            setHighlightedRowId(null); // ✅ remove highlight on cancel
+            setHighlightedRowId(null);
           }}
           onDelete={(fileId) => {
             setFiles(prev => prev.filter(f => f._id !== fileId));
             setIsDetailsOpen(false);
-            setHighlightedRowId(null); // ✅ remove highlight after delete
+            setHighlightedRowId(null);
           }}
           showSendButton={false}
           footerButtonClass="small-btn"

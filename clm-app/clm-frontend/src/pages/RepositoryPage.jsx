@@ -28,9 +28,11 @@ export default function RepositoryPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [searchText, setSearchText] = useState(""); // 👈 search state
 
   const { t } = useTranslation();
 
+  // Fetch files from backend
   const fetchFiles = async () => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents/repository?_=${Date.now()}`);
@@ -52,10 +54,41 @@ export default function RepositoryPage() {
     console.log("SelectedDocs for SendModal:", selectedDocs);
   }, [selectedRows, files]);
 
+  // Columns definition
+  const columns = [
+    { key: "filename", label: t("repositorypage.document title") },
+    { key: "folderName", label: t("repositorypage.folder") },
+    { key: "counterparty", label: t("repositorypage.counterparty") },
+    { key: "documentType", label: t("repositorypage.document type") },
+    { key: "agreementDate", label: t("repositorypage.agreement date") },
+    { key: "expiryDate", label: t("repositorypage.expiry date") },
+    { key: "signatureName", label: t("repositorypage.signature name") },
+  ];
+
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(col => col.key));
+
+  const handleToggleColumn = (key) => {
+    setVisibleColumns(prev =>
+      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
+    );
+  };
+
+  // ====== Filter files by search text ======
+  const filteredFiles = files.filter(file => {
+    if (!searchText) return true;
+    const lowerSearch = searchText.toLowerCase();
+
+    // Check all columns including hidden ones
+    return columns.some(col => {
+      const value = file[col.key] || file.metadata?.[col.key] || "";
+      return value.toString().toLowerCase().includes(lowerSearch);
+    });
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredFiles.length / rowsPerPage));
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = files.slice(indexOfFirstRow, indexOfLastRow);
-  const totalPages = Math.max(1, Math.ceil(files.length / rowsPerPage));
+  const currentRows = filteredFiles.slice(indexOfFirstRow, indexOfLastRow);
 
   const goToPage = (pageNumber) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
@@ -63,12 +96,10 @@ export default function RepositoryPage() {
   };
 
   const handleApplyFilters = () => setIsFilterOpen(false);
-
   const handleRowClick = (file) => {
     setSelectedFile(file);
     setIsDetailsOpen(true);
   };
-
   const handleDeleteDocument = async (docId) => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents/delete`, {
@@ -107,25 +138,6 @@ export default function RepositoryPage() {
     }
   };
 
-  // Columns definition and toggle state
-  const columns = [
-    { key: "filename", label: t("repositorypage.document title") },
-    { key: "folderName", label: t("repositorypage.folder") },
-    { key: "counterparty", label: t("repositorypage.counterparty") },
-    { key: "documentType", label: t("repositorypage.document type") },
-    { key: "agreementDate", label: t("repositorypage.agreement date") },
-    { key: "expiryDate", label: t("repositorypage.expiry date") },
-    { key: "signatureName", label: t("repositorypage.signature name") },
-  ];
-
-  const [visibleColumns, setVisibleColumns] = useState(columns.map(col => col.key));
-
-  const handleToggleColumn = (key) => {
-    setVisibleColumns(prev =>
-      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
-    );
-  };
-
   const selectedDocs = files.filter(file => selectedRows.includes(file._id));
 
   return (
@@ -140,6 +152,8 @@ export default function RepositoryPage() {
         columns={columns}
         visibleColumns={visibleColumns}
         onToggleColumn={handleToggleColumn}
+        searchText={searchText}            // 👈 pass search text
+        onSearchChange={setSearchText}     // 👈 pass search setter
       >
         <div className="repository-page-wrapper">
           <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
@@ -213,13 +227,9 @@ export default function RepositoryPage() {
 
           <div className="repository-footer">
             <div className="pagination-controls">
-              <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-                Prev
-              </button>
+              <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
               <span>Page {currentPage} of {totalPages}</span>
-              <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                Next
-              </button>
+              <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
             </div>
             <div className="rows-per-page">
               <label>
@@ -248,14 +258,12 @@ export default function RepositoryPage() {
           onClose={() => setIsDetailsOpen(false)}
           onDelete={handleDeleteDocument}
           onArchive={(archivedFileId) => {
-            // Remove archived file locally
             setFiles(prev => prev.filter(file => file._id !== archivedFileId));
             setIsDetailsOpen(false);
             setSelectedFile(null);
           }}
         />
 
-        {/* Send button */}
         <button
           className="send-btn"
           onClick={() => {
@@ -269,7 +277,6 @@ export default function RepositoryPage() {
           Send
         </button>
 
-        {/* Send Modal */}
         {isSendModalOpen && (
           <SendModal
             selectedDocs={selectedDocs}
