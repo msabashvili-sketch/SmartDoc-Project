@@ -274,6 +274,13 @@ td:hover .cell-tooltip {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
+/* Make checkboxes appear above hover background */
+.repository-table tbody tr td.checkbox-col input[type="checkbox"] {
+  position: relative;
+  z-index: 2; /* higher than td hover */
+  background-color: white; /* optional: to mask hover behind */
+}
+
 /* Other columns */
 .repository-table th:not(.sticky-col),
 .repository-table td:not(.sticky-col) {
@@ -359,4 +366,14 @@ td:hover .cell-tooltip {
   width: 15px;
   height: 15px;
   flex-shrink: 0;
+}
+
+/* Highlight hovered rows (all cells including sticky and checkbox columns) */
+.repository-table tbody tr:hover td,
+.repository-table tbody tr:hover td.sticky,
+.repository-table tbody tr:hover td.title-col,
+.repository-table tbody tr:hover td.checkbox-col {
+  background-color: #f0f8ff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }

@@ -135,13 +135,13 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
             className={filterType === "repository" ? "active" : ""}
             onClick={() => setFilterType("repository")}
           >
-            Repository
+            {t("folderdetailspanel.repository")}
           </button>
           <button
             className={filterType === "archive" ? "active" : ""}
             onClick={() => setFilterType("archive")}
           >
-            Archive
+            {t("folderdetailspanel.archive")}
           </button>
         </div>
       </div>

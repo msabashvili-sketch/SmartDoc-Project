@@ -40,7 +40,7 @@
     "dashboard": "მთავარი",
     "import": "იმპორტი",
     "folders": "საქაღალდეები",
-    "repository": "რეესტრი",
+    "repository": "საცავი",
     "archive": "არქივი",
     "user name": "მომხმარებლის სახელი"
 
@@ -49,13 +49,13 @@
   "importpage": {
     "import": "იმპორტი",
     "upload document": "დოკუმენტის ატვირთვა",
-    "send to repository": "რეესტრში გადატანა",
+    "send to repository": "საცავში გადატანა",
     "delete": "წაშლა",
     "folder": "საქაღალდე",
     "document title": "დოკუმენტის სათაური",
     "counterparty": "კონტრაგენტი",
     "document type": "დოკუმენტის ტიპი",
-    "agreement date": "გაფორმების თარიღი",
+    "agreement date": "დაწყების თარიღი",
     "expiry date": "დასრულების თარიღი",
     "signature name": "ხელმომწერის სახელი",
     "search documents...": "დოკუმენტების ძებნა...",
@@ -67,7 +67,7 @@
 
   
   "repositorypage": {
-    "repository": "რეესტრი",
+    "repository": "საცავი",
     "upload document": "დოკუმენტის ატვირთვა",
     "search documents...": "დოკუმენტების ძიება...",
     "folder": "საქაღალდე",
@@ -81,7 +81,9 @@
     "filters": "ფილტრი",
     "columns": "სვეტები",
     "send": "გაგზავნა",
-    "export": "ექსპორტი"
+    "export": "ექსპორტი",
+    "files already uploaded":"დოკუმენტი უკვე ატვირთულია",
+    "rows per page": "გვერდის ზომა"
   },
 
   "archivepage": {
@@ -89,7 +91,7 @@
     "document title": "დოკუმენტის სათაური",
     "counterparty": "კონტრაგენტი",
     "document type": "დოკუმენტის ტიპი",
-    "agreement date": "გაფორმების თარიღი",
+    "agreement date": "დაწყების თარიღი",
     "expiry date": "დასრულების თარიღი",
     "signature name": "ხელმომწერის სახელი",
     "folder": "საქაღალდე",
@@ -176,7 +178,9 @@
     "deleteFailed": "ფაილის წაშლა ვერ მოხერხდა. გთხოვთ, სცადეთ ხელახლა.",
     "noDocuments": "",
     "folderDocuments": "საქაღალდის დოკუმენტები",
-    "selectFolder": "აირჩიეთ საქაღალდე"
+    "selectFolder": "აირჩიეთ საქაღალდე",
+    "repository": "საცავი",
+    "archive": "არქივი"
   }
 
 }

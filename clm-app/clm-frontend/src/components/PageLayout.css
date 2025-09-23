@@ -173,9 +173,16 @@
   transition: max-width 0.3s ease, flex 0.3s ease;
   color: #5a5a5a !important
 }
+
+/* Hover effect */
+.search-bar:hover {
+  border-color: #3dd799 !important;
+  box-shadow: 0 0 2px rgba(55, 193, 147, 0.4) !important;
+}
+
 .search-bar:focus {
-  border-color: #37c193;
-  box-shadow: 0 0 2px rgba(55,193,147,0.5);
+  border-color: #3dd799 !important;
+  box-shadow: 0 0 2px rgba(55,193,147,0.5) !important;
 }
 
 /* Buttons container on right */

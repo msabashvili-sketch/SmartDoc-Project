@@ -225,21 +225,53 @@ export default function RepositoryPage() {
             </div>
           </div>
 
+          {/* Footer (same style as Archive page) */}
           <div className="repository-footer">
-            <div className="pagination-controls">
-              <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>Prev</button>
-              <span>Page {currentPage} of {totalPages}</span>
-              <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>Next</button>
+            <div className="footer-left">
+              {files.length}{" "}
+              {files.length === 1
+                ? t("repositorypage.file_singular")
+                : t("repositorypage.files already uploaded")}
             </div>
-            <div className="rows-per-page">
+
+            <div className="footer-right">
               <label>
-                Rows per page:
-                <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))}>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
+                {t("repositorypage.rows per page")}:
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                >
+                  {[25, 50, 100].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
                 </select>
               </label>
+
+              <div className="pagination-buttons">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  {"<"}
+                </button>
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    className={currentPage === i + 1 ? "active" : ""}
+                    onClick={() => goToPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  {">"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
