@@ -60,6 +60,7 @@
   text-overflow: ellipsis;
   padding: 8px 12px;
   text-align: left;
+  height: 40px;
   z-index: 5;
 }
 

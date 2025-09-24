@@ -7,7 +7,6 @@ import ColumnsPopup from "./ColumnsPopup";
 
 // ✅ new imports
 import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
 
 export default function PageLayout({
   title,
@@ -17,7 +16,7 @@ export default function PageLayout({
   onUploadClick = () => {},
   onFilterClick = () => {},
   onSendClick = () => {},
-  onExportClick, // keep existing prop
+  onExportClick, // existing prop
   children,
   selectedDocuments = [],
   isFilterOpen = false,
@@ -42,10 +41,9 @@ export default function PageLayout({
   const [isColumnsPopupOpen, setIsColumnsPopupOpen] = React.useState(false);
   const columnsButtonRef = useRef(null);
 
-  // ✅ handle Excel export
-  const handleExportClick = () => {
+  // ✅ handle Excel export with "Save As" dialog
+  const handleExportClick = async () => {
     try {
-      // Extract table data (children contains table element)
       const table = document.querySelector(".table-content table");
       if (!table) {
         console.warn("No table found for export");
@@ -58,14 +56,47 @@ export default function PageLayout({
         type: "array",
       });
       const blob = new Blob([excelBuffer], {
-        type: "application/octet-stream",
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(blob, "documents.xlsx");
-    } catch (error) {
-      console.error("Export failed:", error);
-    }
 
-    if (onExportClick) onExportClick(); // keep existing behavior
+      // Generate dynamic file name
+      const date = new Date();
+      const formattedDate = date.toISOString().split("T")[0]; // yyyy-mm-dd
+      const safeTitle = title.replace(/\s+/g, "_");
+      const suggestedName = `${safeTitle}_${formattedDate}.xlsx`;
+
+      // File System Access API (Chrome/Edge)
+      if (window.showSaveFilePicker) {
+        const options = {
+          types: [
+            {
+              description: "Excel Files",
+              accept: {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+              },
+            },
+          ],
+          suggestedName,
+        };
+
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        // Fallback for other browsers
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = suggestedName;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      if (onExportClick) onExportClick(); // existing callback
+    } catch (err) {
+      console.error("Export failed:", err);
+    }
   };
 
   return (

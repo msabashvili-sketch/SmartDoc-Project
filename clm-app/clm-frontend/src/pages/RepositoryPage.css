@@ -98,7 +98,7 @@ html, body {
   padding: 5px;
   padding-left: 10px;
   padding-right: 10px;
-  height: 35px;
+  height: 40px;
   font-size: 13px;
   font-weight: 550;
   text-align: left;
@@ -107,6 +107,18 @@ html, body {
   overflow: hidden;
   vertical-align: middle;
   position: relative;
+}
+
+/* ✅ Multi-line ellipsis for all table cells */
+.repository-table td .cell-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;  /* limit to 2 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  white-space: normal;    /* allow wrapping */
+  word-break: break-word; /* handle long words */
 }
 
 .repository-table th {
@@ -189,8 +201,20 @@ td:hover .cell-tooltip {
   max-width: 43px;
   text-align: center;
   padding: 0;
-  box-shadow: inset -1px 0 0 #dadada, inset 1px 0 0 #dadada, inset 0 -2px 0 #dadada;
+  box-shadow: inset -1px 0 0 #dadada, inset 1px 0 0 #dadada, inset 0 -2px 0 #dadada, inset 0 1px 0 #dadada;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
+
+/* Target the checkbox itself */
+.repository-table th.checkbox-col input[type="checkbox"] {
+  display: block;
+  margin: auto;               /* centers both horizontally & vertically */
+  position: relative;
+  top: 50%;                   /* push down half */
+  transform: translateY(-120%);/* pull up half -> perfect vertical centering */
+}
+
 
 /* Only add bottom border to body rows */
 .repository-table tbody tr {
@@ -257,7 +281,7 @@ td:hover .cell-tooltip {
 }
 
 .repository-table input[type="checkbox"]:checked {
-  background-color: #1f6e77;
+  background-color: #1f6e77 !important;
   border-color: #1f6e77;
 }
 
@@ -270,15 +294,14 @@ td:hover .cell-tooltip {
   height: 10px;
   border: solid #ffffff;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  transform: translate(-50%, -50%) rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg); /* single clean transform */
 }
 
 /* Make checkboxes appear above hover background */
 .repository-table tbody tr td.checkbox-col input[type="checkbox"] {
   position: relative;
   z-index: 2; /* higher than td hover */
-  background-color: white; /* optional: to mask hover behind */
+  background-color: rgb(255, 255, 255); /* optional: to mask hover behind */
 }
 
 /* Other columns */
@@ -374,6 +397,16 @@ td:hover .cell-tooltip {
 .repository-table tbody tr:hover td.title-col,
 .repository-table tbody tr:hover td.checkbox-col {
   background-color: #f0f8ff;
-  cursor: pointer;
   transition: background-color 0.2s ease;
 }
+
+/* Highlight checked rows same as hover */
+.repository-table tbody tr.selected td,
+.repository-table tbody tr.selected td.sticky,
+.repository-table tbody tr.selected td.title-col,
+.repository-table tbody tr.selected td.checkbox-col {
+  background-color: #f0f8ff;
+}
+
+
+
