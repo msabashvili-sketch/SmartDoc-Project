@@ -49,7 +49,6 @@ export default function RepositoryPage() {
 
   useEffect(() => { fetchFiles(); }, []);
 
-  // Columns definition
   const columns = [
     { key: "filename", label: t("repositorypage.document title") },
     { key: "folderName", label: t("repositorypage.folder") },
@@ -68,7 +67,6 @@ export default function RepositoryPage() {
     );
   };
 
-  // Filter files
   const filteredFiles = files.filter(file => {
     if (!searchText) return true;
     const lowerSearch = searchText.toLowerCase();
@@ -214,6 +212,9 @@ export default function RepositoryPage() {
                       ))}
                   </tbody>
                 </table>
+
+                {/* Bottom shadow under header */}
+                <div className="header-bottom-shadow"></div>
               </div>
             </div>
           </div>

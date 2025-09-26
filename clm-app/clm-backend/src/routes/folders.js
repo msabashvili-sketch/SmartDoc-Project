@@ -1,3 +1,4 @@
+// src/routes/folders.js
 const express = require("express");
 const Folder = require("../models/Folder");
 const { getBucket } = require("../gridfs");
@@ -54,7 +55,9 @@ router.post("/", async (req, res) => {
 router.get("/:folderId/documents", async (req, res) => {
   try {
     const { folderId } = req.params;
-    if (!ObjectId.isValid(folderId)) return res.status(400).send("Invalid folder ID");
+    if (!ObjectId.isValid(folderId)) {
+      return res.status(400).send("Invalid folder ID");
+    }
 
     const bucket = getBucket();
     const files = await bucket
@@ -66,6 +69,40 @@ router.get("/:folderId/documents", async (req, res) => {
   } catch (err) {
     console.error("Error fetching folder documents:", err);
     res.status(500).send("Server error");
+  }
+});
+
+// --- Delete a folder by ID (only if empty) ---
+router.delete("/:folderId", async (req, res) => {
+  try {
+    const { folderId } = req.params;
+    if (!ObjectId.isValid(folderId)) {
+      return res.status(400).json({ error: "Invalid folder ID" });
+    }
+
+    const bucket = getBucket();
+
+    // Check if folder has files
+    const fileCount = await bucket
+      .find({ "metadata.folderId": folderId })
+      .count();
+
+    if (fileCount > 0) {
+      return res
+        .status(400)
+        .json({ error: "Cannot delete folder: it still contains files." });
+    }
+
+    // Delete folder
+    const deleted = await Folder.findByIdAndDelete(folderId);
+    if (!deleted) {
+      return res.status(404).json({ error: "Folder not found" });
+    }
+
+    res.json({ message: "Folder deleted successfully", folderId });
+  } catch (err) {
+    console.error("Error deleting folder:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

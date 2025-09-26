@@ -162,7 +162,10 @@
     "no folders": "",
     "selected": "საქაღალდე შერჩეულია",
     "delete": "წაშლა",
-    "confirmDeleteMessage": "ნამდვილად გსურს წაშლა?"
+    "confirmDeleteMessage": "ნამდვილად გსურს წაშლა?",
+    "selectTargetFolder": "შეარჩიე საქაღალდე",
+    "move folders": "გადაიტანე დოკუმენტები სხვა საქაღალდეში",
+    "move": "გადატანა"
   },
 
   "folderdetailspanel": {

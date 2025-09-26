@@ -365,6 +365,13 @@ html, body {
   display: block;
 }
 
+.move-popup-title {
+  text-align: center;
+  font-size: 15px; /* change to whatever size you want */
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+
 .popup-icon {
   width: 27px;    /* same size as delete icon */
   height: 27px;

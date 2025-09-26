@@ -40,6 +40,7 @@ export default function FoldersPage() {
 
   // Move popup state
   const [isMovePopupOpen, setIsMovePopupOpen] = useState(false);
+  const [targetFolderId, setTargetFolderId] = useState("");
 
   // Confirm delete modal state
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -150,6 +151,29 @@ export default function FoldersPage() {
   const selectedHasNonEmpty = selectedForDelete.some(
     (id) => folders.find((f) => f._id === id)?.fileCount > 0
   );
+
+  // --- Move folders logic ---
+  const handleMoveFolders = async () => {
+    if (!targetFolderId) return alert(t("folderspage.selectTargetFolder"));
+
+    try {
+      for (let folderId of selectedForDelete) {
+        await axios.post("http://localhost:4000/api/folders/move", {
+          folderId,
+          targetFolderId,
+        });
+      }
+
+      fetchFolders();
+      setSelectedForDelete([]);
+      setTargetFolderId("");
+      setIsMovePopupOpen(false);
+      setShowDeletePopup(false);
+    } catch (err) {
+      console.error("Failed to move folders:", err);
+      alert(t("folderspage.moveFailed"));
+    }
+  };
 
   return (
     <div className="page-layout">
@@ -294,7 +318,7 @@ export default function FoldersPage() {
         </div>
       </div>
 
-      {/* Wide horizontal delete popup with Move button */}
+      {/* Bottom popup with Move/Delete */}
       {selectedForDelete.length > 0 && (
         <div
           className={`bottom-popup wide-popup ${showDeletePopup ? "show" : ""}`}
@@ -304,7 +328,6 @@ export default function FoldersPage() {
             {selectedForDelete.length} {t("folderspage.selected")}
           </div>
 
-          {/* Move button */}
           <button
             className="move-btn"
             onClick={() => setIsMovePopupOpen(true)}
@@ -317,7 +340,6 @@ export default function FoldersPage() {
             />
           </button>
 
-          {/* Delete button (opens confirm popup) */}
           <button
             className="delete-btn"
             onClick={() => {
@@ -330,7 +352,6 @@ export default function FoldersPage() {
             <img src="/assets/trash-icon2.png" alt="Delete" className="delete-icon" />
           </button>
 
-          {/* Cancel button */}
           <button
             className="cancel-btn"
             onClick={() => {
@@ -343,17 +364,40 @@ export default function FoldersPage() {
         </div>
       )}
 
-      {/* Move Popup */}
+      {/* Move Popup (using same style as FolderDetailsPage) */}
       {isMovePopupOpen && (
-        <div className="center-popup">
-          <div className="move-popup-content">
-            <h3>{t("folderspage.move folders")}</h3>
-            <button
-              className="cancel-btn"
-              onClick={() => setIsMovePopupOpen(false)}
+        <div className="confirm-overlay" onClick={() => setIsMovePopupOpen(false)}>
+          <div
+            className="new-folder-popup move-popup"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="move-popup-title">{t("folderspage.move folders")}</h3>
+
+            <select
+              value={targetFolderId}
+              onChange={(e) => setTargetFolderId(e.target.value)}
             >
-              {t("folderspage.cancel")}
-            </button>
+              <option value="">{t("folderspage.selectTargetFolder")}</option>
+              {folders
+                .filter((f) => !selectedForDelete.includes(f._id))
+                .map((f) => (
+                  <option key={f._id} value={f._id}>
+                    {f.name}
+                  </option>
+                ))}
+            </select>
+
+            <div className="new-folder-popup-buttons">
+              <button
+                className="cancel-btn"
+                onClick={() => setIsMovePopupOpen(false)}
+              >
+                {t("folderspage.cancel")}
+              </button>
+              <button className="create-btn" onClick={handleMoveFolders}>
+                {t("folderspage.move")}
+              </button>
+            </div>
           </div>
         </div>
       )}
