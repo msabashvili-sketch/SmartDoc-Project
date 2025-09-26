@@ -179,19 +179,6 @@ html {
  
 }
 
-
-/* Banner text */
-.info-banner-text h3 {
- margin: 0 0 4px;
- font-size: var(--banner-h3-font, 16px);
-}
-
-
-.info-banner-text p {
- margin: 0;
- font-size: var(--banner-p-font, 14px);
-}
-
 /* Container for buttons */
 .banner-buttons {
  display: flex;

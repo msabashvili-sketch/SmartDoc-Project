@@ -87,7 +87,8 @@ export default function ImportPage() {
   }, []);
 
   useEffect(() => {
-    setBannerImage("/images/banner-placeholder.jpg");
+    // Set banner from public/assets folder
+    setBannerImage("/assets/import-page-banner3.jpg");
     fetchFiles();
     fetchFolders();
   }, [fetchFiles, fetchFolders]);
@@ -243,30 +244,30 @@ export default function ImportPage() {
           )}
         </div>
 
-        {/* Banner + table */}
+        {/* Custom banner + table */}
         <div className="import-content-wrapper">
-          <div
-            className="info-banner"
-            style={{
-              backgroundImage: bannerImage ? `url(${bannerImage})` : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              marginBottom: "10px"
-            }}
-          >
-            <div className="info-banner-text">
-              <h3>{t("importpage.import")}</h3>
-              <p>{t("importpage.upload document")}</p>
-              <div className="banner-buttons">
-                <button className="banner-send-btn" onClick={sendToRepository}>
-                  {t("importpage.send to repository")}
-                </button>
-                <button className="banner-delete-btn" onClick={deleteFiles}>
-                  {t("importpage.delete")}
-                </button>
+          {bannerImage && (
+            <div
+              className="info-banner"
+              style={{
+                backgroundImage: `url(${bannerImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <div className="info-banner-text">
+                <div className="banner-buttons">
+                  <button className="banner-send-btn" onClick={sendToRepository}>
+                    {t("importpage.send to repository")}
+                  </button>
+                  <button className="banner-delete-btn" onClick={deleteFiles}>
+                    {t("importpage.delete")}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="table-container">
             <table className="import-table-new">
