@@ -14,7 +14,10 @@ export default function ImportPage() {
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(""); // ← Added search state
+  const [searchQuery, setSearchQuery] = useState(""); // Search bar state
+  const [message, setMessage] = useState("");         // Custom popup text
+  const [messageType, setMessageType] = useState(""); // "success" | "error"
+  const [showMessage, setShowMessage] = useState(false); // Toggle popup
   const { t } = useTranslation();
 
   const columnsButtonRef = useRef(null);
@@ -121,10 +124,22 @@ export default function ImportPage() {
 
   const sendToRepository = async () => {
     const selectedFiles = files.filter((_, idx) => rows[idx]);
-    if (selectedFiles.length === 0) return alert("Please select at least one file");
+    if (selectedFiles.length === 0) {
+      setMessage(t("importpage.Please select at least one file"));
+      setMessageType("error");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
+      return;
+    }
 
     const missingFolders = selectedFiles.filter(f => !f.selectedFolder);
-    if (missingFolders.length > 0) return alert("Assign a folder to all selected files");
+    if (missingFolders.length > 0) {
+      setMessage(t("importpage.Assign a folder to all selected files"));
+      setMessageType("error");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
+      return;
+    }
 
     const filesPayload = selectedFiles.map(f => {
       const folder = folders.find(x => x.id === f.selectedFolder);
@@ -142,18 +157,31 @@ export default function ImportPage() {
         body: JSON.stringify({ files: filesPayload }),
       });
       if (!res.ok) throw new Error("Failed to send files");
-      alert("Selected files sent to repository successfully!");
+
+      setMessage(t("importpage.Selected files sent to repository successfully!"));
+      setMessageType("success");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
+
       await fetchFiles();
     } catch (err) {
       console.error(err);
-      alert("Error sending files");
+      setMessage("Error sending files");
+      setMessageType("error");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
     }
   };
 
   const deleteFiles = async () => {
     const selectedIds = files.filter((_, idx) => rows[idx]).map(f => f.id);
-    if (selectedIds.length === 0) return alert("Select at least one file");
-    if (!window.confirm("Are you sure you want to delete selected files?")) return;
+    if (selectedIds.length === 0) {
+      setMessage(t("importpage.Please select at least one file"));
+      setMessageType("error");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
+      return;
+    }
 
     try {
       const res = await fetch("http://localhost:4000/api/documents/delete", {
@@ -162,11 +190,19 @@ export default function ImportPage() {
         body: JSON.stringify({ fileIds: selectedIds }),
       });
       if (!res.ok) throw new Error("Failed to delete files");
-      alert("Selected files deleted successfully!");
+
+      setMessage(t("importpage.Selected files deleted successfully!"));
+      setMessageType("success");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
+
       await fetchFiles();
     } catch (err) {
       console.error(err);
-      alert("Error deleting files");
+      setMessage("Error deleting files");
+      setMessageType("error");
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000);
     }
   };
 
@@ -191,7 +227,7 @@ export default function ImportPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isColumnsPopupOpen]);
 
-  // --------- NEW: Filter files based on search ---------
+  // Filter files based on search query
   const filteredFiles = files.filter(file => {
     const query = searchQuery.toLowerCase();
     return Object.keys(file).some(key => {
@@ -205,6 +241,13 @@ export default function ImportPage() {
   return (
     <>
       <DashboardHeader />
+
+      {/* ===== Custom Message Popup ===== */}
+      {showMessage && (
+        <div className={`custom-message ${messageType}`}>
+          {message}
+        </div>
+      )}
 
       <div className="import-page">
         <div className="import-top-space">
@@ -222,8 +265,8 @@ export default function ImportPage() {
               type="text"
               className="search-bar"
               placeholder={t("importpage.search documents...")}
-              value={searchQuery} // ← bind input to state
-              onChange={(e) => setSearchQuery(e.target.value)} // ← update search state
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <button
@@ -350,7 +393,7 @@ export default function ImportPage() {
                           ) : col.key === "documentTitle" ? (
                             file.filename
                           ) : (
-                            file[col.key] || "" // show other fields dynamically
+                            file[col.key] || ""
                           )}
                         </td>
                       ))}

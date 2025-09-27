@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import "./UploadPopup.css";
 import UploadFilesPopup from "./UploadFilesPopup";
 
-export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedImage }) {
+export default function UploadPopup({ isOpen, onClose, handleUpload }) {
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState(null);
   const [isFilesPopupOpen, setIsFilesPopupOpen] = useState(false);
@@ -12,15 +12,15 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
 
   // Cancel main popup and reset selected option
   const handleMainCancel = () => {
-    setSelectedOption(null); // reset selected option
-    onClose(); // close main popup
+    setSelectedOption(null); 
+    onClose(); 
   };
 
   // Cancel both popups
   const handleCancelBoth = () => {
-    setSelectedOption(null); // reset selected option
+    setSelectedOption(null); 
     setIsFilesPopupOpen(false);
-    onClose(); // close main popup
+    onClose(); 
   };
 
   // Close only files popup
@@ -49,18 +49,13 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
                 {t("uploadpopup.smart_import_description")}
               </p>
 
-              <div className="logo-upload" onClick={handleUpload}>
-                {uploadedImage ? (
-                  <img
-                    src={uploadedImage}
-                    alt={t("uploadpopup.brand_logo_preview")}
-                    className="logo-preview"
-                  />
-                ) : (
-                  <div className="logo-placeholder">
-                    {t("uploadpopup.click_upload_brand_logo")}
-                  </div>
-                )}
+              {/* Custom Banner replaces logo upload */}
+              <div className="logo-upload">
+                <img
+                  src="/assets/upload-popup-banner2.jpg"
+                  alt="Smart Import Banner"
+                  className="banner-image"
+                />
               </div>
             </div>
 
@@ -100,8 +95,8 @@ export default function UploadPopup({ isOpen, onClose, handleUpload, uploadedIma
       {/* UploadFilesPopup */}
       <UploadFilesPopup
         isOpen={isFilesPopupOpen}
-        onCancel={handleCancelBoth} // closes both popups
-        onBack={handleBack} // closes only files popup
+        onCancel={handleCancelBoth} 
+        onBack={handleBack} 
       />
     </>
   );
