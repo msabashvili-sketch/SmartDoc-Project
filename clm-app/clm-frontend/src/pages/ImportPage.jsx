@@ -14,6 +14,7 @@ export default function ImportPage() {
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const [loadingFolders, setLoadingFolders] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); // ← Added search state
   const { t } = useTranslation();
 
   const columnsButtonRef = useRef(null);
@@ -53,6 +54,11 @@ export default function ImportPage() {
         contentType: f?.contentType || "",
         uploadDate: f?.uploadDate ? String(f.uploadDate) : "",
         selectedFolder: f?.folderId || "",
+        documentType: f?.documentType || "",
+        counterparty: f?.counterparty || "",
+        agreementDate: f?.agreementDate || "",
+        expiryDate: f?.expiryDate || "",
+        signatureName: f?.signatureName || "",
       };
     });
 
@@ -87,8 +93,7 @@ export default function ImportPage() {
   }, []);
 
   useEffect(() => {
-    // Set banner from public/assets folder
-    setBannerImage("/assets/import-page-banner3.jpg");
+    setBannerImage("/assets/import-page-banner5.jpg");
     fetchFiles();
     fetchFolders();
   }, [fetchFiles, fetchFolders]);
@@ -186,6 +191,17 @@ export default function ImportPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isColumnsPopupOpen]);
 
+  // --------- NEW: Filter files based on search ---------
+  const filteredFiles = files.filter(file => {
+    const query = searchQuery.toLowerCase();
+    return Object.keys(file).some(key => {
+      if (typeof file[key] === "string") {
+        return file[key].toLowerCase().includes(query);
+      }
+      return false;
+    });
+  });
+
   return (
     <>
       <DashboardHeader />
@@ -202,7 +218,13 @@ export default function ImportPage() {
         {/* Search bar + columns toggle */}
         <div className="search-bar-row">
           <div className="search-bar-container">
-            <input type="text" className="search-bar" placeholder={t("importpage.search documents...")} />
+            <input
+              type="text"
+              className="search-bar"
+              placeholder={t("importpage.search documents...")}
+              value={searchQuery} // ← bind input to state
+              onChange={(e) => setSearchQuery(e.target.value)} // ← update search state
+            />
           </div>
           <button
             className="columns-button"
@@ -285,7 +307,7 @@ export default function ImportPage() {
                 </tr>
               </thead>
               <tbody>
-                {files.map((file, index) => {
+                {filteredFiles.map((file, index) => {
                   const isSelected = rows[index];
                   return (
                     <tr key={file.id || index} className={isSelected ? "selected-row" : ""}>
@@ -319,7 +341,7 @@ export default function ImportPage() {
                               onChange={(e) => handleFolderChange(file.id, e.target.value)}
                             >
                               <option value="">
-                                {loadingFolders ? "Loading..." : "-- Select Folder --"}
+                                 {loadingFolders ? t("importpage.loading...") : t("importpage.select folder")}
                               </option>
                               {folders.map(f => (
                                 <option key={f.id} value={f.id}>{f.name}</option>
@@ -328,7 +350,7 @@ export default function ImportPage() {
                           ) : col.key === "documentTitle" ? (
                             file.filename
                           ) : (
-                            ""
+                            file[col.key] || "" // show other fields dynamically
                           )}
                         </td>
                       ))}
