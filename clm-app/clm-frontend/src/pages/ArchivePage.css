@@ -2,28 +2,25 @@
    Archive Table Wrapper
 ============================== */
 .archive-table-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* full viewport height */
-  padding: 0 7px;   /* ⬅️ left/right inner spacing */
+  position: relative;
+  padding: 0 7px;
   box-sizing: border-box;
+  height: calc(100vh - 310px); /* subtract top banner/search + footer height */
+  overflow: hidden; /* prevent double scrollbars */
 }
 
-
 .archive-table-container {
-  flex: flex;
-  overflow-y: scroll; /* vertical scroll */
-  overflow-x: auto; /* horizontal scroll */
-  background-color: #fff;
-  margin-top: 7px; /* <-- space between header/search bar and table */
-  padding-bottom: 10px;
-  height: calc(100vh - 190px);
+  max-height: 100%;
+  overflow-y: auto;   /* vertical scroll */
+  overflow-x: auto;   /* horizontal scroll */
+  background-color: #fff; /* table remains white */
 }
 
 .archive-table {
-  width: 100%;
+  width: max-content; /* natural width, not shrunk */
+  min-width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 13px;
   color: #333;

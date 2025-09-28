@@ -87,10 +87,7 @@ export default function RepositoryPage() {
   };
 
   const handleApplyFilters = () => setIsFilterOpen(false);
-  const handleRowClick = (file) => {
-    setSelectedFile(file);
-    setIsDetailsOpen(true);
-  };
+  const handleRowClick = (file) => { setSelectedFile(file); setIsDetailsOpen(true); };
   const handleDeleteDocument = async (docId) => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents/delete`, {
@@ -122,11 +119,8 @@ export default function RepositoryPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedRows.length === currentRows.length) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(currentRows.map(file => file._id));
-    }
+    if (selectedRows.length === currentRows.length) setSelectedRows([]);
+    else setSelectedRows(currentRows.map(file => file._id));
   };
 
   const selectedDocs = files.filter(file => selectedRows.includes(file._id));
@@ -135,7 +129,10 @@ export default function RepositoryPage() {
     <PageLayout
       title={t("repositorypage.repository")}
       showUploadButton
-      showBanner={false}
+      showBanner={true}
+      bannerImage="/assets/repository-page-banner.jpg"
+      bannerHeight="120px" // repository page custom height
+      bannerBelowSearch // ✅ banner will render below search bar
       onUploadClick={() => setIsPopupOpen(true)}
       onFilterClick={() => setIsFilterOpen(prev => !prev)}
       isFilterOpen={isFilterOpen}
@@ -213,14 +210,12 @@ export default function RepositoryPage() {
                   </tbody>
                 </table>
 
-                {/* Bottom shadow under header */}
                 <div className="header-bottom-shadow"></div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="repository-footer">
           <div className="footer-left">
             {files.length} {files.length === 1 ? t("repositorypage.file_singular") : t("repositorypage.files already uploaded")}

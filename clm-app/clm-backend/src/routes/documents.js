@@ -274,4 +274,39 @@ router.get("/by-folder/:folderId", async (req, res) => {
   }
 });
 
+// --- Move file(s) to another folder (folder only, no repo/archive changes) ---
+router.post("/move-folder", async (req, res) => {
+  try {
+    const { files } = req.body; // Expecting [{ id, folderId, folderName }]
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ message: "No files provided" });
+    }
+
+    const bucket = getBucket();
+    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
+
+    await Promise.all(
+      files.map(async ({ id, folderId, folderName }) => {
+        if (!ObjectId.isValid(id)) return;
+        const _id = new ObjectId(id);
+
+        await filesCollection.updateOne(
+          { _id },
+          {
+            $set: {
+              "metadata.folderId": folderId || null,
+              "metadata.folderName": folderName || null,
+            },
+          }
+        );
+      })
+    );
+
+    res.json({ message: "Files moved to folder successfully!" });
+  } catch (err) {
+    console.error("❌ Move folder error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;

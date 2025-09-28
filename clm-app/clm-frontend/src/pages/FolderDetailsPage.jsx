@@ -1,5 +1,5 @@
 // src/pages/FolderDetailsPage.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import "./FolderDetailsPage.css";
 import { useTranslation } from "react-i18next";
@@ -9,7 +9,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
   const [documents, setDocuments] = useState([]);
   const [folderName, setFolderName] = useState("");
   const [folders, setFolders] = useState([]);
-  const [filterType, setFilterType] = useState("repository"); // filter state
+  const [filterType, setFilterType] = useState("repository");
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteDocId, setDeleteDocId] = useState(null);
@@ -20,7 +20,10 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
 
   const [selectedDocId, setSelectedDocId] = useState(null);
 
-  // Fetch folder name
+  // New: show success inside the move popup
+  const [showMoveSuccess, setShowMoveSuccess] = useState(false);
+
+  // Fetch folder name + folders list
   useEffect(() => {
     const fetchFolderName = async () => {
       try {
@@ -36,21 +39,21 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
     if (folderId) fetchFolderName();
   }, [folderId, t]);
 
-  // Fetch documents whenever folderId or filterType changes
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:4000/api/documents/by-folder/${folderId}?page=${filterType}`
-        );
-        setDocuments(res.data.files || []);
-      } catch (err) {
-        console.error("Error fetching documents:", err);
-      }
-    };
-
-    if (folderId) fetchDocuments();
+  // Fetch documents
+  const fetchDocuments = useCallback(async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:4000/api/documents/by-folder/${folderId}?page=${filterType}`
+      );
+      setDocuments(res.data.files || []);
+    } catch (err) {
+      console.error("Error fetching documents:", err);
+    }
   }, [folderId, filterType]);
+
+  useEffect(() => {
+    if (folderId) fetchDocuments();
+  }, [folderId, filterType, fetchDocuments]);
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -71,7 +74,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
       await axios.post("http://localhost:4000/api/documents/delete", {
         fileIds: [deleteDocId],
       });
-      setDocuments((prev) => prev.filter((doc) => doc._id !== deleteDocId));
+      await fetchDocuments(); // Refresh after delete
     } catch (err) {
       console.error("Delete failed:", err);
       alert(t("detailspananel.deleteFailed"));
@@ -85,6 +88,7 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
   const handleMoveClick = (docId) => {
     setMoveDocId(docId);
     setTargetFolderId("");
+    setShowMoveSuccess(false);
     setShowMovePopup(true);
   };
 
@@ -92,7 +96,8 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
     if (!targetFolderId) return;
 
     try {
-      await axios.post("http://localhost:4000/api/documents/send-to-repository", {
+      // NOTE: keep your existing move API - this uses /move-folder as in your working code.
+      await axios.post("http://localhost:4000/api/documents/move-folder", {
         files: [
           {
             id: moveDocId,
@@ -101,11 +106,21 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
           },
         ],
       });
-      setDocuments((prev) => prev.filter((doc) => doc._id !== moveDocId));
+
+      // show success message in the same popup
+      setShowMoveSuccess(true);
+
+      // keep the success message visible for a short time, then close popup and refresh
+      setTimeout(async () => {
+        setShowMovePopup(false);
+        setShowMoveSuccess(false);
+        setMoveDocId(null);
+        setTargetFolderId("");
+        await fetchDocuments();
+      }, 2000);
     } catch (err) {
       console.error("Move failed:", err);
       alert(t("folderdetailspanel.moveFailed"));
-    } finally {
       setShowMovePopup(false);
       setMoveDocId(null);
       setTargetFolderId("");
@@ -264,31 +279,40 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
       {showMovePopup && (
         <div className="confirm-overlay">
           <div className="new-folder-popup move-popup">
-            <input type="text" value={folderName} disabled />
-            <select
-              value={targetFolderId}
-              onChange={(e) => setTargetFolderId(e.target.value)}
-            >
-              <option value="">{t("folderdetailspanel.selectFolder")}</option>
-              {folders
-                .filter((f) => f._id !== folderId)
-                .map((f) => (
-                  <option key={f._id} value={f._id}>
-                    {f.name}
-                  </option>
-                ))}
-            </select>
-            <div className="new-folder-popup-buttons">
-              <button
-                className="cancel-btn"
-                onClick={() => setShowMovePopup(false)}
-              >
-                {t("folderdetailspanel.cancel")}
-              </button>
-              <button className="create-btn" onClick={handleConfirmMove}>
-                {t("folderdetailspanel.move")}
-              </button>
-            </div>
+            {showMoveSuccess ? (
+              /* Success message shown inside same popup container */
+              <div className="success-message">
+                {t("folderdetailspanel.moveSuccess") || "Moved successfully!"}
+              </div>
+            ) : (
+              <>
+                <input type="text" value={folderName} disabled />
+                <select
+                  value={targetFolderId}
+                  onChange={(e) => setTargetFolderId(e.target.value)}
+                >
+                  <option value="">{t("folderdetailspanel.selectFolder")}</option>
+                  {folders
+                    .filter((f) => f._id !== folderId)
+                    .map((f) => (
+                      <option key={f._id} value={f._id}>
+                        {f.name}
+                      </option>
+                    ))}
+                </select>
+                <div className="new-folder-popup-buttons">
+                  <button
+                    className="cancel-btn"
+                    onClick={() => setShowMovePopup(false)}
+                  >
+                    {t("folderdetailspanel.cancel")}
+                  </button>
+                  <button className="create-btn" onClick={handleConfirmMove}>
+                    {t("folderdetailspanel.move")}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

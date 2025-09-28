@@ -4,8 +4,6 @@ import "./PageLayout.css";
 import { useTranslation } from "react-i18next";
 import SendModal from "./SendModal";
 import ColumnsPopup from "./ColumnsPopup";
-
-// ✅ new imports
 import * as XLSX from "xlsx";
 
 export default function PageLayout({
@@ -13,10 +11,12 @@ export default function PageLayout({
   showUploadButton = false,
   showBanner = false,
   bannerImage = null,
+  bannerContent = null,
+  bannerHeight = "200px", // ✅ default banner height
   onUploadClick = () => {},
   onFilterClick = () => {},
   onSendClick = () => {},
-  onExportClick, // existing prop
+  onExportClick,
   children,
   selectedDocuments = [],
   isFilterOpen = false,
@@ -30,25 +30,19 @@ export default function PageLayout({
 }) {
   const { t } = useTranslation();
 
-  // Send modal
   const [isSendModalOpen, setIsSendModalOpen] = React.useState(false);
   const handleSendClick = () => {
     if (onSendClick) onSendClick();
     setIsSendModalOpen(true);
   };
 
-  // Columns popup
   const [isColumnsPopupOpen, setIsColumnsPopupOpen] = React.useState(false);
   const columnsButtonRef = useRef(null);
 
-  // ✅ handle Excel export with "Save As" dialog
   const handleExportClick = async () => {
     try {
       const table = document.querySelector(".table-content table");
-      if (!table) {
-        console.warn("No table found for export");
-        return;
-      }
+      if (!table) return;
 
       const workbook = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
       const excelBuffer = XLSX.write(workbook, {
@@ -59,13 +53,11 @@ export default function PageLayout({
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
-      // Generate dynamic file name
       const date = new Date();
-      const formattedDate = date.toISOString().split("T")[0]; // yyyy-mm-dd
+      const formattedDate = date.toISOString().split("T")[0];
       const safeTitle = title.replace(/\s+/g, "_");
       const suggestedName = `${safeTitle}_${formattedDate}.xlsx`;
 
-      // File System Access API (Chrome/Edge)
       if (window.showSaveFilePicker) {
         const options = {
           types: [
@@ -78,13 +70,11 @@ export default function PageLayout({
           ],
           suggestedName,
         };
-
         const handle = await window.showSaveFilePicker(options);
         const writable = await handle.createWritable();
         await writable.write(blob);
         await writable.close();
       } else {
-        // Fallback for other browsers
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -93,7 +83,7 @@ export default function PageLayout({
         URL.revokeObjectURL(url);
       }
 
-      if (onExportClick) onExportClick(); // existing callback
+      if (onExportClick) onExportClick();
     } catch (err) {
       console.error("Export failed:", err);
     }
@@ -120,15 +110,16 @@ export default function PageLayout({
           )}
         </div>
 
-        {showBanner && bannerImage && (
+        {/* Banner section */}
+        {showBanner && (
           <div
             className="page-banner"
-            style={{ backgroundImage: `url(${bannerImage})` }}
+            style={{
+              backgroundImage: bannerImage ? `url(${bannerImage})` : "none",
+              height: bannerHeight, // ✅ apply custom height
+            }}
           >
-            <div className="banner-text">
-              <h3>{title}</h3>
-              <p>{t("repositorypage.upload your documents here")}</p>
-            </div>
+            {bannerContent && <>{bannerContent}</>}
           </div>
         )}
 

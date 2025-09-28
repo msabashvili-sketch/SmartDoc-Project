@@ -1,24 +1,21 @@
 .filter-panel {
   position: fixed;
-  top: var(--header-height); /* start below header */
-  left: -250px; /* hidden by default */
-  width: 250px;
+  top: var(--header-height); /* below header */
+  left: 0;
+  width: 300px; /* adjust width */
   height: calc(100vh - var(--header-height));
   background: #f6faf9;
   border-right: 1px solid #ebebeb;
-  transition: left 0.3s ease;
-  z-index: 200; /* above search + table */
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 200; /* overlay above table/search */
   display: flex;
   flex-direction: column;
   padding: 15px;
 }
 
 .filter-panel.open {
-  left: 0;
-}
-
-.filter-panel.closed {
-  transform: translateX(-100%); /* smoothly slide out */
+  transform: translateX(0);
 }
 
 /* Header row inside panel */

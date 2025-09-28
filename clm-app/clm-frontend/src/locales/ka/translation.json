@@ -89,7 +89,8 @@
     "send": "გაგზავნა",
     "export": "ექსპორტი",
     "files already uploaded":"დოკუმენტი უკვე ატვირთულია",
-    "rows per page": "გვერდის ზომა"
+    "rows per page": "გვერდის ზომა",
+    "upload your documents here": ""
   },
 
   "archivepage": {
@@ -189,7 +190,8 @@
     "folderDocuments": "საქაღალდის დოკუმენტები",
     "selectFolder": "აირჩიეთ საქაღალდე",
     "repository": "საცავი",
-    "archive": "არქივი"
+    "archive": "არქივი",
+    "moveSuccess": "გადატანა შესრულებულია"
   }
 
 }
