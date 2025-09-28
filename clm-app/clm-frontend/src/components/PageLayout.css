@@ -276,19 +276,13 @@
   padding: 0 7px; /* space on left & right */
 }
 
-/* When filter is open → remove left padding */
-.content-wrapper.filter-open {
-  padding: 0 7px 0 0; /* keep right padding only */
-  margin-left: -7px;
-}
-
 .search-bar-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
-  transition: margin-left 0.32s ease; /* same as table */
-  margin-left: 0
+  margin-left: 0;
+  transition: none; /* no shifting */
 }
 
 /* Search bar input */
@@ -302,11 +296,6 @@
   font-size: 14px;
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Shrink search bar when filter panel is open */
-.search-bar-wrapper.filter-open {
-  margin-left: 207px; /* match your table’s margin-left */
 }
 
 .search-filter-bar {

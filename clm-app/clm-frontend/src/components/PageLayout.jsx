@@ -12,14 +12,13 @@ export default function PageLayout({
   showBanner = false,
   bannerImage = null,
   bannerContent = null,
-  bannerHeight = "200px", // ✅ default banner height
+  bannerHeight = "200px",
   onUploadClick = () => {},
-  onFilterClick = () => {},
+  onFilterClick = () => {},   // ✅ keep filter button handler
   onSendClick = () => {},
   onExportClick,
   children,
   selectedDocuments = [],
-  isFilterOpen = false,
   columns = [],
   visibleColumns = [],
   onToggleColumn = () => {},
@@ -116,19 +115,18 @@ export default function PageLayout({
             className="page-banner"
             style={{
               backgroundImage: bannerImage ? `url(${bannerImage})` : "none",
-              height: bannerHeight, // ✅ apply custom height
+              height: bannerHeight,
             }}
           >
             {bannerContent && <>{bannerContent}</>}
           </div>
         )}
 
-        <div className={`content-wrapper ${isFilterOpen ? "filter-open" : ""}`}>
+        <div className="content-wrapper">
           {/* Search bar */}
-          <div
-            className={`search-bar-wrapper ${isFilterOpen ? "filter-open" : ""}`}
-          >
+          <div className="search-bar-wrapper">
             <div className="search-filter-bar">
+              {/* ✅ filter button still here */}
               <button className="filter-button" onClick={onFilterClick}>
                 <img
                   src="/assets/filter-icon.png"

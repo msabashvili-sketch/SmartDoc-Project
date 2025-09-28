@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
 import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
-import FilterPanel from "../components/FilterPanel"; // ✅ import filter panel
 import { useTranslation } from "react-i18next";
 import "./ArchivePage.css";
 
@@ -18,9 +17,6 @@ export default function ArchivePage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [highlightedRowId, setHighlightedRowId] = useState(null);
-
-  // Filter panel
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Columns and toggling
   const columns = [
@@ -98,15 +94,8 @@ export default function ArchivePage() {
     else setSelectedFiles([...new Set([...selectedFiles, ...filesOnPage.map(f => f._id)])]);
   };
 
-  // Filter panel apply handler
-  const handleApplyFilters = () => {
-    // TODO: implement filter logic here if needed
-    setIsFilterOpen(false);
-  };
-
   return (
     <>
-      {/* ⚡ PageLayout */}
       <PageLayout
         title={t("archivepage.archive")}
         columns={columns}
@@ -117,8 +106,6 @@ export default function ArchivePage() {
         showBanner={true}
         bannerImage="/assets/archive-page-banner.jpg"
         bannerHeight="120px"
-        showFilterButton={true}
-        onFilterClick={() => setIsFilterOpen(prev => !prev)}
       >
         {/* Archive Table */}
         <div className="archive-table-wrapper">
@@ -270,13 +257,6 @@ export default function ArchivePage() {
           />
         )}
       </PageLayout>
-
-      {/* ⚡ Filter Panel OUTSIDE PageLayout */}
-      <FilterPanel
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        onApply={handleApplyFilters}
-      />
     </>
   );
 }

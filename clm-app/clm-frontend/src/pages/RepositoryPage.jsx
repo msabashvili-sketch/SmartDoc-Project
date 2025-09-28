@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
-import FilterPanel from "../components/FilterPanel";
+// ❌ Removed FilterPanel import
 import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
 import SendModal from "../components/SendModal";
@@ -23,7 +23,6 @@ export default function RepositoryPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -86,7 +85,6 @@ export default function RepositoryPage() {
     setCurrentPage(pageNumber);
   };
 
-  const handleApplyFilters = () => setIsFilterOpen(false);
   const handleRowClick = (file) => { setSelectedFile(file); setIsDetailsOpen(true); };
   const handleDeleteDocument = async (docId) => {
     try {
@@ -131,11 +129,10 @@ export default function RepositoryPage() {
       showUploadButton
       showBanner={true}
       bannerImage="/assets/repository-page-banner.jpg"
-      bannerHeight="120px" // repository page custom height
-      bannerBelowSearch // ✅ banner will render below search bar
+      bannerHeight="120px"
+      bannerBelowSearch
       onUploadClick={() => setIsPopupOpen(true)}
-      onFilterClick={() => setIsFilterOpen(prev => !prev)}
-      isFilterOpen={isFilterOpen}
+      onFilterClick={() => alert("Filter panel will be implemented later")} // ✅ Filter button kept
       columns={columns}
       visibleColumns={visibleColumns}
       onToggleColumn={handleToggleColumn}
@@ -143,12 +140,8 @@ export default function RepositoryPage() {
       onSearchChange={setSearchText}
     >
       <div className="repository-page-wrapper">
-        <div className={`repository-content ${isFilterOpen ? "filter-open" : ""}`}>
-          <FilterPanel
-            isOpen={isFilterOpen}
-            onClose={() => setIsFilterOpen(false)}
-            onApply={handleApplyFilters}
-          />
+        <div className="repository-content">
+          {/* ❌ Removed FilterPanel completely */}
 
           <div className="content-wrapper">
             <div className="table-wrapper">
