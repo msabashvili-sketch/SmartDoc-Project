@@ -264,7 +264,11 @@ export default function RepositoryPage() {
       </button>
 
       {isSendModalOpen && (
-        <SendModal selectedDocs={selectedDocs} onClose={() => setIsSendModalOpen(false)} />
+         <SendModal
+           selectedRows={selectedRows} // IDs of selected files
+           files={files}
+           onClose={() => setIsSendModalOpen(false)}  
+        />        
       )}
     </PageLayout>
   );

@@ -101,21 +101,6 @@
   position: relative;
 }
 
-.banner-text {
-  padding: 20px;
-  color: var(--banner-text-color);
-}
-
-.banner-text h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
-}
-
-.banner-text p {
-  margin: 0;
-  font-size: 14px;
-}
-
 /* Main content area */
 .page-content {
   padding: 20px;

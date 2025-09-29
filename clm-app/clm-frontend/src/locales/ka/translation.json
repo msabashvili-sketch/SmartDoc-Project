@@ -62,7 +62,7 @@
     "view": "ნახვა",
     "columns": "სვეტები",
     "select columns": "შეარჩიე სვეტები",
-    "files already uploaded": "დოკუმენტი უკვე ატვირთულია",
+    "files_already_uploaded": "დოკუმენტი უკვე ატვირთულია",
     "loading...": "იტვირთება...",
     "select folder": "-- შეარჩიე საქაღალდე --",
     "Please select at least one file": "მონიშნეთ მინიმუმ ერთი დოკუმენტი",

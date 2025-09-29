@@ -400,23 +400,14 @@ export default function ImportPage() {
                     </tr>
                   );
                 })}
-
-                {Array.from({ length: getEmptyRowsCount() }).map((_, idx) => (
-                  <tr key={`empty-${idx}`}>
-                    {Array.from({ length: 2 + visibleColumns.length }).map((__, cidx) => (
-                      <td key={cidx}>&nbsp;</td>
-                    ))}
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>
         </div>
 
         <div className="page-footer">
-          {files.length}{" "}
-          {files.length === 1 ? t("importpage.file_singular") : t("importpage.files already uploaded")}
-        </div>
+          {files.length} {t("importpage.files_already_uploaded")}
+         </div>
 
         <UploadPopup
           isOpen={isUploadPopupOpen}
