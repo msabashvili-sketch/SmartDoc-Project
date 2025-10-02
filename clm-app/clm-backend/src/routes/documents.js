@@ -63,27 +63,27 @@ router.get("/view/:id", async (req, res) => {
     const db = bucket.s.db;
     const _id = new ObjectId(fileId);
 
+    // Check in GridFS
     const files = await bucket.find({ _id }).toArray();
     if (files.length > 0) {
       const file = files[0];
       console.log("Serving PDF from GridFS:", file.filename);
 
+      // Only use filename*=UTF-8'' to support Georgian
       const encodedFilename = encodeURIComponent(file.filename);
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="${file.filename}"; filename*=UTF-8''${encodedFilename}`
-      );
+      res.setHeader("Content-Disposition", `inline; filename*=UTF-8''${encodedFilename}`);
       res.setHeader("Content-Type", file.contentType || "application/pdf");
 
       const downloadStream = bucket.openDownloadStream(_id);
       downloadStream.on("error", (err) => {
         console.error("❌ Stream error:", err);
-        res.status(500).send("Error streaming file");
+        if (!res.headersSent) res.status(500).send("Error streaming file");
       });
 
       return downloadStream.pipe(res);
     }
 
+    // Check in TextDocuments
     const textCollection = db.collection("TextDocuments");
     const textDoc = await textCollection.findOne({ _id });
     if (!textDoc) {
@@ -92,11 +92,13 @@ router.get("/view/:id", async (req, res) => {
     }
 
     console.log("Serving text document:", textDoc.filename);
+
+    // Serve text document with UTF-8 charset
     res.setHeader(
       "Content-Disposition",
-      `inline; filename="${textDoc.filename}"; filename*=UTF-8''${encodeURIComponent(textDoc.filename)}`
+      `inline; filename*=UTF-8''${encodeURIComponent(textDoc.filename)}`
     );
-    res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
 
     res.send(textDoc.text);
   } catch (err) {

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import "./SendModal.css";
+import { useTranslation } from "react-i18next";
 
 export default function SendModal({ selectedDocs = [], onClose }) {
+  const { t } = useTranslation();
+
   const [emails, setEmails] = useState([]);
   const [input, setInput] = useState("");
   const [subject, setSubject] = useState("");
@@ -22,7 +25,7 @@ export default function SendModal({ selectedDocs = [], onClose }) {
         setEmails([...emails, email]);
         setInput("");
       } else {
-        alert("Invalid email address");
+        alert(t("SendModal.invalidEmail"));
       }
     }
   };
@@ -31,11 +34,11 @@ export default function SendModal({ selectedDocs = [], onClose }) {
 
   const handleSend = async () => {
     if (!selectedDocs || selectedDocs.length === 0) {
-      alert("No files selected to send");
+      alert(t("SendModal.noFiles"));
       return;
     }
     if (emails.length === 0) {
-      alert("Please enter at least one recipient email");
+      alert(t("SendModal.noRecipient"));
       return;
     }
 
@@ -73,14 +76,14 @@ export default function SendModal({ selectedDocs = [], onClose }) {
       });
       const result = await res.json();
       if (result.success) {
-        alert("Email sent successfully!");
+        alert(t("SendModal.success"));
         onClose();
       } else {
-        alert("Failed to send email: " + result.message);
+        alert(t("SendModal.fail") + ": " + result.message);
       }
     } catch (err) {
       console.error(err);
-      alert("Error sending email");
+      alert(t("SendModal.error"));
     } finally {
       setIsSending(false);
     }
@@ -89,17 +92,23 @@ export default function SendModal({ selectedDocs = [], onClose }) {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h3 className="modal-title">Send Documents</h3>
+        <h3 className="modal-title">{t("SendModal.title")}</h3>
         <div className="modal-underline"></div>
 
-        <div className="modal-label">Selected Files</div>
+        {/* Files info */}
+        <div className="modal-label">
+          {selectedDocs.length === 0
+            ? t("SendModal.noFiles")
+            : t("SendModal.filesSelected", { count: selectedDocs.length })}
+        </div>
+
         <ul>
-          {selectedDocs.length > 0
-            ? selectedDocs.map((doc) => <li key={doc._id}>{doc.filename}</li>)
-            : <li>No files selected</li>}
+          {selectedDocs.map((doc) => (
+            <li key={doc._id}>{doc.filename}</li>
+          ))}
         </ul>
 
-        <div className="modal-label">Send To</div>
+        <div className="modal-label">{t("SendModal.recipient")}</div>
         <div className="email-chips-container">
           {emails.map((email, index) => (
             <div className="email-chip" key={index}>
@@ -110,14 +119,14 @@ export default function SendModal({ selectedDocs = [], onClose }) {
           <input
             type="text"
             className="email-chips-input"
-            placeholder={emails.length === 0 ? "Recipient Email" : ""}
+            placeholder={emails.length === 0 ? t("SendModal.recipientPlaceholder") : ""}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
           />
         </div>
 
-        <div className="modal-label">Document Type</div>
+        <div className="modal-label">{t("SendModal.docType")}</div>
         <div className="modal-checkbox-group">
           <label>
             <input
@@ -125,7 +134,7 @@ export default function SendModal({ selectedDocs = [], onClose }) {
               checked={contractChecked}
               onChange={() => setContractChecked(!contractChecked)}
             />
-            Contract
+            {t("SendModal.contract")}
           </label>
           <label>
             <input
@@ -134,22 +143,22 @@ export default function SendModal({ selectedDocs = [], onClose }) {
               onChange={() => setSummaryChecked(!summaryChecked)}
               disabled
             />
-            Summary (Coming Soon)
+            {t("SendModal.summary")}
           </label>
         </div>
 
-        <div className="modal-label">Subject</div>
+        <div className="modal-label">{t("SendModal.subject")}</div>
         <textarea
           className="modal-textarea subject-textarea"
-          placeholder="Subject"
+          placeholder={t("SendModal.subjectPlaceholder")}
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
         />
 
-        <div className="modal-label">Message</div>
+        <div className="modal-label">{t("SendModal.message")}</div>
         <textarea
           className="modal-textarea message-textarea"
-          placeholder="Write your message..."
+          placeholder={t("SendModal.messagePlaceholder")}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
@@ -160,14 +169,14 @@ export default function SendModal({ selectedDocs = [], onClose }) {
             onClick={onClose}
             disabled={isSending}
           >
-            Cancel
+            {t("SendModal.cancel")}
           </button>
           <button
             className="modal-btn modal-btn-send"
             onClick={handleSend}
             disabled={isSending}
           >
-            {isSending ? "Sending..." : "Send"}
+            {isSending ? t("SendModal.sending") : t("SendModal.send")}
           </button>
         </div>
       </div>

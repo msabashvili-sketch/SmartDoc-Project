@@ -51,6 +51,9 @@ export default function RepositoryPage() {
   const columns = [
     { key: "filename", label: t("repositorypage.document title") },
     { key: "folderName", label: t("repositorypage.folder") },
+    { key: "uploadDateTime", label: t("repositorypage.upload date & time") },
+    { key: "autoRenew", label: t("repositorypage.auto renew if not terminated") },
+    { key: "breachNotification", label: t("repositorypage.contract breach notification") },
     { key: "counterparty", label: t("repositorypage.counterparty") },
     { key: "documentType", label: t("repositorypage.document type") },
     { key: "agreementDate", label: t("repositorypage.agreement date") },

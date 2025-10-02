@@ -83,6 +83,10 @@
     "agreement date": "დაწყების თარიღი",
     "expiry date": "ვადის გასვლის თარიღი",
     "signature name": "ხელმომწერის სახელი",
+    "upload date & time": "ატვირთვის დრო და თარიღი",
+    "auto renew if not terminated": "ავტომატური განახლება",
+    "contract breach notification": "კონტრაქტის მოშლა",
+    "contract type": "კონტრაქტის ტიპი",
     "view": "ნახვა",
     "filters": "ფილტრი",
     "columns": "სვეტები",
@@ -192,6 +196,30 @@
     "repository": "საცავი",
     "archive": "არქივი",
     "moveSuccess": "გადატანა შესრულებულია"
+  },
+
+  
+  "SendModal": {
+    "title": "დოკუმენტების გაგზავნა",
+    "noFiles": "ფაილი არ არის არჩეული",
+    "filesSelected": "{{count}} ფაილი არჩეულია",
+    "recipient": "მიმღები",
+    "recipientPlaceholder": "მიმღების ელ.ფოსტა",
+    "docType": "დოკუმენტის ტიპი",
+    "contract": "ხელშეკრულება",
+    "summary": "რეზიუმე (მალე)",
+    "subject": "თემა",
+    "subjectPlaceholder": "შეიყვანეთ თემა",
+    "message": "შეტყობინება",
+    "messagePlaceholder": "შეიყვანეთ ტექსტი...",
+    "cancel": "გაუქმება",
+    "send": "გაგზავნა",
+    "sending": "იგზავნება...",
+    "invalidEmail": "არასწორი ელ.ფოსტის მისამართი",
+    "noRecipient": "გთხოვთ შეიყვანოთ მინიმუმ ერთი მიმღების ელ.ფოსტა",
+    "success": "წარმატებით გაიგზავნა!",
+    "fail": "გაგზავნა ვერ მოხერხდა",
+    "error": "შეცდომა გაგზავნისას"
   }
 
 }
