@@ -33,9 +33,11 @@ html, body {
 
 /* Repository content wrapper */
 .repository-page-wrapper {
+  position: relative;
+  box-sizing: border-box;  
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--header-height));
+  height: calc(100vh - 161px);
 }
 
 /* Container for filter + table */
@@ -395,25 +397,6 @@ td:hover .cell-tooltip {
   transition: background-color 0.2s ease;
 }
 
-/* Content wrapper for table + search bar */
-.content-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  transition: margin-left 0.3s ease, padding 0.3s ease;
-}
-
-/* Push content when filter is open */
-.repository-content.filter-open .content-wrapper {
-  margin-left: 250px; /* same width as filter panel */
-}
-
-/* Adjust search bar width when pushed */
-.repository-content.filter-open .search-bar {
-  width: calc(var(--search-width) - 250px);
-  transition: width 0.3s ease;
-}
-
 .cell-content {
   display: flex;
   align-items: center;
@@ -446,5 +429,21 @@ td:hover .cell-tooltip {
   background-color: #f0f8ff;
 }
 
+/* Scrollbar design for repository page */
+.table-scroll-wrapper::-webkit-scrollbar {
+  height: 8px; /* horizontal scrollbar height */
+  width: 8px;  /* vertical scrollbar width */
+}
 
+.table-scroll-wrapper::-webkit-scrollbar-track {
+  background: #fcfcfc; /* track color */
+}
 
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: #dadada; /* thumb color */
+  border-radius: 6px;  /* rounded corners */
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #b3b3b3; /* hover color */
+}
