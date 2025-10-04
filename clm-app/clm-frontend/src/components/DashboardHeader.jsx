@@ -1,38 +1,54 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+
+// Import SVG as React component
+import { ReactComponent as SettingsIcon } from "../assets/settings-icon2.svg";
+
 import "./DashboardHeader.css";
 
 export default function DashboardHeader() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [logo, setLogo] = useState(null);
-  const [email, setEmail] = useState(""); // ✅ store user email
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     const storedLogo = localStorage.getItem("brandLogo");
     if (storedLogo) setLogo(storedLogo);
-
-    // Fetch user info from backend
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("authToken"); // assume JWT token stored
-        const res = await fetch("http://localhost:4000/api/me", {
-          headers: {
-            "Authorization": `Bearer ${token}`
-          }
-        });
-
-        if (!res.ok) throw new Error("Failed to fetch user info");
-        const data = await res.json();
-        setEmail(data.email || "user@example.com"); // ✅ show email
-      } catch (err) {
-        console.error(err);
-        setEmail("user@example.com"); // fallback
-      }
-    };
-
-    fetchUser();
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost:4000/api/auth/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.user?.email) {
+          setUserEmail(data.user.email);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user:", err);
+        localStorage.removeItem("token");
+        navigate("/"); // redirect to login if token invalid
+      });
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  const handleSettings = () => {
+    navigate("/settings");
+  };
 
   return (
     <header className="dashboard-header">
@@ -40,32 +56,44 @@ export default function DashboardHeader() {
       <div className="dashboard-header-left">
         <div className="logo">
           {logo ? (
-            <img src={logo} alt="Brand Logo" style={{ maxHeight: "30px" }} />
+            <img src={logo} alt="Brand Logo" className="header-logo" />
           ) : (
             "CLM"
           )}
         </div>
 
         <nav className="nav">
-          <NavLink to="/dashboard" className="navLink">{t("dashboardheader.dashboard")}</NavLink>
-          <NavLink to="/imports" className="navLink">{t("dashboardheader.import")}</NavLink>
-          <NavLink to="/folders" className="navLink">{t("dashboardheader.folders")}</NavLink>
-          <NavLink to="/repository" className="navLink">{t("dashboardheader.repository")}</NavLink>
-          <NavLink to="/archive" className="navLink">{t("dashboardheader.archive")}</NavLink>
+          <NavLink to="/dashboard" className="navLink">
+            {t("dashboardheader.dashboard")}
+          </NavLink>
+          <NavLink to="/imports" className="navLink">
+            {t("dashboardheader.import")}
+          </NavLink>
+          <NavLink to="/folders" className="navLink folders-link">
+            {t("dashboardheader.folders")}
+          </NavLink>
+          <NavLink to="/repository" className="navLink">
+            {t("dashboardheader.repository")}
+          </NavLink>
+          <NavLink to="/archive" className="navLink">
+            {t("dashboardheader.archive")}
+          </NavLink>
         </nav>
       </div>
 
-      {/* Right: User Email */}
+      {/* Right: User Profile */}
       <div className="dashboard-header-right">
         <div className="profile">
-          <span>{email}</span> {/* ✅ display email */}
-          <div className="profile-dropdown">
-            <ul>
-              <li>Profile</li>
-              <li>Settings</li>
-              <li>Logout</li>
-            </ul>
-          </div>
+          {userEmail && <span className="user-email">{userEmail}</span>}
+
+          {/* Settings button using SVG component */}
+          <button className="settings-btn" onClick={handleSettings}>
+            <SettingsIcon className="settings-icon" />
+          </button>
+
+          <button onClick={handleLogout} className="logout-btn">
+            {t("dashboardheader.logout") || "Logout"}
+          </button>
         </div>
       </div>
     </header>

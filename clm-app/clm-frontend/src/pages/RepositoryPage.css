@@ -318,6 +318,23 @@ td:hover .cell-tooltip {
   width: 300px;
 }
 
+/* Short vertical "border" inside table cells + headers */
+.repository-table th::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;                  /* push down 25% */
+  height: 50%;               /* shorter than full height */
+  width: 2px;
+  background-color: #e6e6e6; /* border color */
+}
+
+/* Remove pseudo-borders from first and last column */
+.repository-table th:first-child::after,
+.repository-table th:last-child::after {
+  display: none;
+}
+
 /* Alternate row colors */
 .repository-table tbody tr:nth-child(odd) {
   background-color: #ffffff;

@@ -13,8 +13,6 @@ const isEmail = (v) =>
 // --- Registration ---
 router.post('/register', async (req, res) => {
   try {
-    console.log('POST /api/auth/register body:', req.body);
-
     let { email, password } = req.body || {};
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
@@ -40,8 +38,9 @@ router.post('/register', async (req, res) => {
 
     const user = await User.create({ email, password: hashed });
 
-    // token
-    const token = generateToken({ userId: user._id });
+    // ✅ include email in token
+    const token = generateToken({ userId: user._id, email: user.email });
+
     return res.status(201).json({
       token,
       user: { id: user._id, email: user.email },
@@ -55,45 +54,31 @@ router.post('/register', async (req, res) => {
 // --- Login ---
 router.post('/login', async (req, res) => {
   try {
-    console.log('POST /api/auth/login body:', req.body);
-
     let { email, password } = req.body || {};
     if (!email || !password) {
-      console.log("Login failed: missing email or password");
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
     email = String(email).trim().toLowerCase();
-    console.log("Normalized email:", email);
-
-    console.log("Searching user in MongoDB...");
     const user = await User.findOne({ email });
-    console.log("Found user:", user);
-
     if (!user) {
-      console.log("Login failed: user not found");
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    console.log("Comparing password...");
     const ok = await bcrypt.compare(String(password), user.password);
-    console.log("Password match result:", ok);
-
     if (!ok) {
-      console.log("Login failed: password mismatch");
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    console.log("Generating JWT token...");
-    const token = generateToken({ userId: user._id });
-    console.log("Token generated:", token);
+    // ✅ include email in token
+    const token = generateToken({ userId: user._id, email: user.email });
 
     return res.json({
       token,
       user: { id: user._id, email: user.email },
     });
   } catch (err) {
-    console.error('Login error caught in catch:', err);
+    console.error('Login error:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 });
@@ -115,20 +100,5 @@ router.get('/me', async (req, res) => {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 });
-
-// quick health check
-router.get('/health', (req, res) => res.json({ ok: true }));
-
-
-const { protect } = require('../middleware/authMiddleware');
-
-// Example protected route
-router.get('/profile', protect, (req, res) => {
-  res.json({
-    message: 'Protected route accessed successfully',
-    user: req.user, // will contain the payload from JWT
-  });
-});
-
 
 module.exports = router;

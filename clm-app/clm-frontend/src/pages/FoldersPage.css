@@ -64,6 +64,9 @@ html, body {
 
 /* New folder button */
 .new-folder-btn {
+  display: flex;
+  align-items: center; 
+  gap: 6px;  
   color: #2085cc;
   border: none;
   border-radius: 3px;
@@ -74,6 +77,11 @@ html, body {
 }
 .new-folder-btn:hover {
   background-color: rgba(32, 133, 204, 0.1);
+}
+
+.btn-icon {
+  width: 15px;
+  height: 15px;
 }
 
 /* -------------------- Sidebar Body -------------------- */

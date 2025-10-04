@@ -225,7 +225,12 @@ export default function FoldersPage() {
                 onClick={handleNewFolderClick}
                 ref={newFolderBtnRef}
               >
-                + {t("folderspage.new folder")}
+                <img
+                  src="/assets/plus-icon.png"
+                  alt="Folder Icon"
+                  className="btn-icon"
+                />  
+                {t("folderspage.new folder")}
               </button>
 
               {isNewFolderPopupOpen && (

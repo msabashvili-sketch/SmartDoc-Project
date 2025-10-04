@@ -8,7 +8,8 @@
   height: 35px; /* use variable if needed */
   padding: 0px 20px;
   position: fixed;
-  width: 100vw;
+  width: 100%;
+  box-sizing: border-box;
   overflow-x: hidden;
   top: 0;
   left: 0;
@@ -22,115 +23,90 @@
 }
 
 /* Brand logo image */
-.brand-logo {
+.header-logo {
   height: 30px; /* fits header height */
   width: 100px;
   object-fit: contain;
-}
-
-/* Logo upload button (small pencil icon) */
-.logo-upload-btn {
-  position: absolute;
-  bottom: -2px;
-  right: -4px;
-  background: #3dd799;
-  color: #fff;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.logo-upload-btn:hover {
-  background: #47f0ad;
-}
-
-.nav {
-  display: flex;
 }
 
 /* Base link style */
 .navLink {
   position: relative;
   text-decoration: none;
-  color: #4b3f40; /* Always black */
-  padding: 10px 0;
-  margin: 0 1px; /* ჰედერის კომპონენტებს შორის დაშორება */
-  font-weight: bold;
+  color: #707070; /* Always black */
+  padding: 10px 0 5px 0; /* remove horizontal padding for accurate underline */
+  margin: 0 1px;
+  font-weight: 600;
   display: inline-block;
-
   font-size: 0.8rem;
 }
 
-/* Hover effect: bold + underline */
+/* Hover effect */
 .navLink:hover {
   font-weight: bold;
-  color: #000;
+  color: #4c4c4c;
 }
 
-/* Active link: stays bold + underline */
-.navLink.active {
-  font-weight: bold;
-}
-
+/* Active link underline */
 .navLink.active::after {
   content: "";
   position: absolute;
-  left: -9px;  /* ქვედა მწვანე ზოლის მარცხნივ/მარჯვნივ გაწევა */
+  left: 0;   /* start exactly at left */
   bottom: 1px;
-  width: 130%;  /* ქვედა მწვანე ზოლის სიდიდე */
-  height: 4px;  /* ქვედა მწვანე ზოლის სისქე */
+  width: 100%;  /* default underline size */
+  height: 2px;
   background-color: #3aba87;
-  color: #000
 }
 
-.dashboard-header-right {
+.profile {
+  display: flex;
+  align-items: center; /* vertically center all items */
+  gap: 4px; /* distance between username, settings, logout */
+}
+
+/* Email style */
+.user-email {
+  font-size: 12px;     /* smaller font */
+  color: #707070;      /* light gray */
+  margin-right: 13px;  /* spacing before logout button */
+  font-weight: 600;    /* normal weight */
+  font-size: 0.8rem;
+  margin-right: 4px;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: #707070;       /* same as email color */
+  font-size: 13px;
+  font-weight: 600; 
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.logout-btn:hover {
+  color: #4c4c4c;       /* light blue on hover */
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0 8px;
   display: flex;
   align-items: center;
 }
 
-.profile {
-  position: relative;
-  cursor: pointer;
-  padding: 0 8px;
-  font-weight: bold;
+.settings-icon {
+  width: 20px;
+  height: 20px;
+  fill: #4b3f40; /* default color */
+  transition: fill 0.2s ease;
 }
 
-/* Dropdown hidden by default */
-.profile-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: #fff;
-  border: 1px solid #e1dfdf;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  display: none;
-  min-width: 120px;
-  z-index: 100;
-}
-
-.profile-dropdown ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.profile-dropdown li {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 0.8rem;
-}
-
-.profile-dropdown li:hover {
-  background-color: #f0f0f0;
-}
-
-/* Show dropdown on hover */
-.profile:hover .profile-dropdown {
-  display: block;
+.settings-btn:hover .settings-icon {
+  fill: #2b996d; /* color on hover */
 }
