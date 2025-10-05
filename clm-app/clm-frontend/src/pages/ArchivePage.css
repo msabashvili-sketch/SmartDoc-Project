@@ -5,7 +5,7 @@
   position: relative;
   padding: 7px 7px;
   box-sizing: border-box;
-  height: calc(100vh - 301px); /* subtract top banner/search + footer height */
+  height: calc(100vh - 300px); /* subtract top banner/search + footer height */
   overflow: hidden; /* prevent double scrollbars */
 }
 
@@ -281,7 +281,7 @@
   border-top: 1px solid #ddd;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 20px;
   z-index: 100;
   box-sizing: border-box;
 }
