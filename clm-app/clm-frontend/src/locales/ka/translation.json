@@ -43,7 +43,9 @@
     "repository": "საცავი",
     "archive": "არქივი",
     "user name": "მომხმარებლის სახელი",
-    "logout": "გასვლა"
+    "logout": "გასვლა",
+    "profile": "პროფილი",
+    "settings": "პარამეტრები"
 
   },
 
@@ -221,6 +223,20 @@
     "success": "წარმატებით გაიგზავნა!",
     "fail": "გაგზავნა ვერ მოხერხდა",
     "error": "შეცდომა გაგზავნისას"
+  },
+
+  "profilePage": {
+    "personalInformation": "პერსონალური ინფორმაცია",
+    "fullName": "სახელი და გვარი",
+    "fullNamePlaceholder": "სახელი და გვარი",
+    "emailAddress": "ელ. ფოსტა",
+    "newPassword": "ახალი პაროლი",
+    "newPasswordPlaceholder": "შეიყვანეთ ახალი პაროლი",
+    "repeatNewPassword": "გაიმეორეთ პაროლი",
+    "repeatNewPasswordPlaceholder": "გაიმეორეთ ახალი პაროლი"
   }
 
 }
+
+
+

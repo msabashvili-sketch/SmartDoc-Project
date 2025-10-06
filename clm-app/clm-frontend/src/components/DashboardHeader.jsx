@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
-// Import SVG as React component
-import { ReactComponent as SettingsIcon } from "../assets/settings-icon2.svg";
 
 import "./DashboardHeader.css";
 
@@ -12,6 +9,8 @@ export default function DashboardHeader() {
   const navigate = useNavigate();
   const [logo, setLogo] = useState(null);
   const [userEmail, setUserEmail] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const storedLogo = localStorage.getItem("brandLogo");
@@ -50,6 +49,19 @@ export default function DashboardHeader() {
     navigate("/settings");
   };
 
+  // close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="dashboard-header">
       {/* Left: Logo & Navigation */}
@@ -81,19 +93,46 @@ export default function DashboardHeader() {
         </nav>
       </div>
 
-      {/* Right: User Profile */}
-      <div className="dashboard-header-right">
+      {/* Right: User Profile Dropdown */}
+      <div className="dashboard-header-right" ref={menuRef}>
         <div className="profile">
-          {userEmail && <span className="user-email">{userEmail}</span>}
+          {userEmail && (
+            <button
+              className="user-email-btn"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              {userEmail}
+            </button>
+          )}
 
-          {/* Settings button using SVG component */}
-          <button className="settings-btn" onClick={handleSettings}>
-            <SettingsIcon className="settings-icon" />
-          </button>
-
-          <button onClick={handleLogout} className="logout-btn">
-            {t("dashboardheader.logout") || "Logout"}
-          </button>
+          {menuOpen && (
+            <div className="profile-dropdown">
+              <button onClick={() => navigate("/profile")}>
+                <img
+                  src="/assets/profile-icon.png"
+                  alt="Profile"
+                  className="dropdown-icon"
+                />
+                {t("dashboardheader.profile") || "Profile"}
+              </button>
+              <button onClick={handleSettings}>
+                <img
+                  src="/assets/settings-icon7.png"
+                  alt="Settings"
+                  className="dropdown-icon"
+                />
+                {t("dashboardheader.settings") || "Settings"}
+              </button>
+              <button onClick={handleLogout}>
+                <img
+                  src="/assets/logout-icon.png"
+                  alt="Logout"
+                  className="dropdown-icon"
+                />
+                {t("dashboardheader.logout") || "Logout"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

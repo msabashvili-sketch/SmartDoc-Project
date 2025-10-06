@@ -10,6 +10,7 @@ import RepositoryPage from "./pages/RepositoryPage";
 import ArchivePage from "./pages/ArchivePage";
 import FoldersPage from "./pages/FoldersPage";
 import AdminPage from "./pages/admin/AdminPage";
+import ProfilePage from "./pages/ProfilePage";
 import "./i18n";
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/imports" element={<ImportPage />} />
         <Route path="/repository" element={<RepositoryPage />} />
         <Route path="/archive" element={<ArchivePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         
         {/* Updated folder routes */}
         <Route path="/folders" element={<FoldersPage />} />

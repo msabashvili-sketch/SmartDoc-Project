@@ -69,7 +69,7 @@
   font-weight: 400;
   cursor: pointer;
   border: 1px solid var(--upload-btn-bg);
-  margin-right: 15px;
+  margin-right: 20px;
 
   /* Shadow */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.20);  /* subtle shadow */

@@ -58,55 +58,74 @@
   background-color: #3dd799;
 }
 
-.profile {
-  display: flex;
-  align-items: center; /* vertically center all items */
-  gap: 4px; /* distance between username, settings, logout */
-}
-
-/* Email style */
-.user-email {
-  font-size: 12px;     /* smaller font */
-  color: #707070;      /* light gray */
-  margin-right: 13px;  /* spacing before logout button */
-  font-weight: 600;    /* normal weight */
-  font-size: 0.8rem;
-  margin-right: 4px;
-}
-
-.logout-btn {
+.user-email-btn {
   background: none;
   border: none;
-  color: #707070;       /* same as email color */
-  font-size: 13px;
-  font-weight: 600; 
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  text-decoration: none;
-  transition: color 0.2s ease;
+  padding: 5px 12px;
+  font-size: 14px;
+  color:#707070
 }
 
-.logout-btn:hover {
-  color: #4c4c4c;       /* light blue on hover */
+.profile-dropdown {
+  position: fixed;       /* take it out of header flow */
+  right: 10px;           /* stick to the right side */
+  top: 37px;             /* below the header bar */
+  background: #F9F9F7;
+  border: 1px solid #f5f5f5;
+  border-radius: 1px;
+  min-width: 250px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  overflow: hidden;
+  padding: 0px 0;
+  z-index: 2000;         /* make sure it’s above all content */
 }
 
-.settings-btn {
+.profile-dropdown button {
+  display: flex;
+  align-items: center;  /* vertically center icon & text */
+  gap: 10px;             /* space between icon and text */
+  padding: 10px 15px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
-  margin: 0 8px;
-  display: flex;
-  align-items: center;
+  width: 100%;
+  text-align: left;
+  font-size: 15px;
+  color: #4f4f4f;
+  font-weight: 550;
+  margin: 0;
+  line-height: 1; 
 }
 
-.settings-icon {
-  width: 20px;
-  height: 20px;
-  fill: #4b3f40; /* default color */
-  transition: fill 0.2s ease;
+/* space between items */
+.profile-dropdown button + button {
+  margin-top: 2px;          /* tiny space between buttons */
 }
 
-.settings-btn:hover .settings-icon {
-  fill: #2b996d; /* color on hover */
+.profile-dropdown button:hover {
+  background: #f0f0f0;
+}
+
+.dropdown-icon {
+  width: 18px;   /* adjust size as needed */
+  height: 18px;
+}
+
+.profile-dropdown button:last-child {
+  border-top: 1px solid #ddd;  /* thin line above Logout */
+  margin-top: 0px;             /* small spacing */
+  padding-top: 18px;            /* extra padding above text */
+  padding-bottom: 18px;         /* extra padding below text */
+}
+
+/* First two buttons inside dropdown */
+.profile-dropdown button:nth-child(1),
+.profile-dropdown button:nth-child(2) {
+  padding-top: 15px;    /* adjust as needed */
+  padding-bottom: 15px; /* adjust as needed */
 }

@@ -264,7 +264,7 @@ export default function FoldersPage() {
                     <div className="folder-item" key={folder._id}>
                       <div className="folder-icon-wrapper">
                         <img
-                          src="/assets/folder-big-icon7.png"
+                          src="/assets/folder-big-icon10.png"
                           alt="Folder"
                           className="folder-grid-icon"
                           onClick={() => handleFolderClick(folder)}

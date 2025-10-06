@@ -1,0 +1,49 @@
+/* src/pages/ProfilePage.css */
+.profile-page-wrapper {
+  margin-top: 70px; /* adjust to match header height */
+  padding: 20px;
+}
+
+.profile-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  color: #565656;
+}
+
+/* Grid layout: 2 columns, 2 rows */
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 30px; /* row-gap 20px, column-gap 30px */
+  max-width: 700px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-field label {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: #565656;
+}
+
+.profile-field input {
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  transition: border 0.2s ease; 
+}
+
+.profile-field input:hover {
+  border: 1px solid #1fad9c;          /* border on hover */
+}
+
+.profile-field input:focus {
+  border: 1px solid #1fad9c;       /* border when focused */
+  outline: none;                    /* remove default focus outline */
+}
