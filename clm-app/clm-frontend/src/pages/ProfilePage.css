@@ -8,7 +8,7 @@
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 30px;
-  color: #565656;
+  color: #494949;
 }
 
 /* Grid layout: 2 columns, 2 rows */
@@ -46,4 +46,121 @@
 .profile-field input:focus {
   border: 1px solid #1fad9c;       /* border when focused */
   outline: none;                    /* remove default focus outline */
+}
+
+/* Logo Upload Section */
+.logo-upload-section {
+  margin-top: 40px;
+}
+
+.logo-upload-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #494949;
+}
+
+/* Container for logo and buttons side by side */
+.logo-upload-container {
+  display: flex;
+  align-items: center;
+  gap: 30px; /* space between logo and buttons */
+}
+
+/* Logo preview or placeholder */
+.logo-preview, .logo-placeholder {
+  width: 350px;
+  height: 115px;
+  border-radius: 8px;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  background: #f5f5f5;
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 25px;
+}
+
+/* Buttons container */
+.logo-buttons {
+  display: flex;
+  flex-direction: row; /* horizontal */
+  gap: 15px; /* distance between buttons */
+  margin-top: 15px;
+}
+
+/* Upload button */
+.upload-btn {
+  padding: 10px 30px;
+  border: 1px solid #3dd799;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  background: #FDFDFD;
+  color: #3dd799;
+  transition: all 0.2s ease-in-out;
+}
+
+.upload-btn:hover {
+  background: #f6fefb;
+}
+
+/* Delete button */
+.delete-button {
+  padding: 10px 30px;
+  border: 1px solid #4c5258;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  background: #4c5258;
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+}
+
+.delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-button:hover:not(:disabled) {
+  background: #303337;
+}
+
+/* Instruction text above buttons */
+.logo-instruction {
+  font-size: 14px;
+  font-weight: 580;
+  color: #555;       /* softer gray than labels */
+  margin-bottom: 8px;
+}
+
+.logo-recommendation {
+  margin-top: 15px;   /* space above text */
+  font-size: 13px;    /* smaller font */
+  color: #666;        /* softer gray text */
+}
+
+.save-button-container {
+  margin-top: 70px;
+  text-align: left;
+}
+
+.save-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 3px;
+  background: #1f6e77;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.save-btn:hover {
+  background: #26858f;
 }

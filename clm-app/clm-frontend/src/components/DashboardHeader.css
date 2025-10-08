@@ -129,3 +129,21 @@
   padding-top: 15px;    /* adjust as needed */
   padding-bottom: 15px; /* adjust as needed */
 }
+
+.logos-container {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  height: 30px; /* adjust size */
+  width: auto;
+  margin-right: 10px;
+}
+
+.vertical-divider {
+  width: 3px;
+  height: 35px;
+  background-color: #ccc;
+  margin: 0 10px;
+}

@@ -233,7 +233,13 @@
     "newPassword": "ახალი პაროლი",
     "newPasswordPlaceholder": "შეიყვანეთ ახალი პაროლი",
     "repeatNewPassword": "გაიმეორეთ პაროლი",
-    "repeatNewPasswordPlaceholder": "გაიმეორეთ ახალი პაროლი"
+    "repeatNewPasswordPlaceholder": "გაიმეორეთ ახალი პაროლი",
+    "merchantLogo": "ბრენდინგი",
+    "uploadLogo": "ლოგოს ატვირთვა",
+    "deleteLogo": "წაშლა",
+    "uploadInstruction": "ატვირთეთ თქვენი კომპანიის ლოგო",
+    "uploadRecommendation": "ჩვენ რეკომენდაციას გაძლევთ ბრენდის ლოგოსთვის გამოიყენოთ ფოტო რეზოლუციით 30X100 px.",
+    "saveChanges": "შენახვა"
   }
 
 }

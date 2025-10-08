@@ -7,14 +7,28 @@ import "./DashboardHeader.css";
 export default function DashboardHeader() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [logo, setLogo] = useState(null);
+  const [brandLogo, setBrandLogo] = useState(null);
+  const [userLogo, setUserLogo] = useState(null);
   const [userEmail, setUserEmail] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
-    const storedLogo = localStorage.getItem("brandLogo");
-    if (storedLogo) setLogo(storedLogo);
+    const storedBrandLogo = localStorage.getItem("brandLogo");
+    if (storedBrandLogo) setBrandLogo(storedBrandLogo);
+
+    const storedUserLogo = localStorage.getItem("userLogo");
+    if (storedUserLogo) setUserLogo(storedUserLogo);
+
+    // Listen for changes in localStorage (for reactive update)
+    const handleStorageChange = (e) => {
+      if (e.key === "userLogo") {
+        setUserLogo(e.newValue);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   useEffect(() => {
@@ -29,14 +43,16 @@ export default function DashboardHeader() {
         return res.json();
       })
       .then((data) => {
-        if (data.user?.email) {
-          setUserEmail(data.user.email);
+        if (data.user?.email) setUserEmail(data.user.email);
+        if (data.user?.logoUrl) {
+          setUserLogo(data.user.logoUrl);
+          localStorage.setItem("userLogo", data.user.logoUrl);
         }
       })
       .catch((err) => {
         console.error("Failed to fetch user:", err);
         localStorage.removeItem("token");
-        navigate("/"); // redirect to login if token invalid
+        navigate("/");
       });
   }, [navigate]);
 
@@ -49,7 +65,6 @@ export default function DashboardHeader() {
     navigate("/settings");
   };
 
-  // close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -64,13 +79,18 @@ export default function DashboardHeader() {
 
   return (
     <header className="dashboard-header">
-      {/* Left: Logo & Navigation */}
       <div className="dashboard-header-left">
-        <div className="logo">
-          {logo ? (
-            <img src={logo} alt="Brand Logo" className="header-logo" />
+        <div className="logos-container">
+          {brandLogo ? (
+            <img src={brandLogo} alt="Brand Logo" className="header-logo" />
           ) : (
             "CLM"
+          )}
+
+          {userLogo && <div className="vertical-divider" />}
+
+          {userLogo && (
+            <img src={userLogo} alt="User Logo" className="header-logo" />
           )}
         </div>
 
@@ -93,7 +113,6 @@ export default function DashboardHeader() {
         </nav>
       </div>
 
-      {/* Right: User Profile Dropdown */}
       <div className="dashboard-header-right" ref={menuRef}>
         <div className="profile">
           {userEmail && (
