@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./UploadFilesPopup.css";
 
-export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
+export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImport }) {
   const { t } = useTranslation();
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -25,7 +25,7 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
     event.preventDefault();
     const droppedFiles = Array.from(event.dataTransfer.files);
     setFiles((prev) => [...prev, ...droppedFiles]);
-    setIsDragging(false); // reset dragging state
+    setIsDragging(false);
   };
 
   const handleBrowse = (event) => {
@@ -35,12 +35,12 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
   const handleDragOver = (event) => {
     event.preventDefault();
-    setIsDragging(true); // show upload effect
+    setIsDragging(true);
   };
 
   const handleDragLeave = (event) => {
     event.preventDefault();
-    setIsDragging(false); // hide upload effect
+    setIsDragging(false);
   };
 
   // Upload function
@@ -59,6 +59,9 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack }) {
 
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
+
+    // <-- Send isSmartImport flag to backend
+    formData.append("isSmartImport", isSmartImport);
 
     try {
       const res = await fetch("http://localhost:4000/api/documents/upload", {

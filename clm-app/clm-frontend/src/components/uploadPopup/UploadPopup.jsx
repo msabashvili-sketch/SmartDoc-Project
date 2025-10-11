@@ -5,7 +5,7 @@ import UploadFilesPopup from "./UploadFilesPopup";
 
 export default function UploadPopup({ isOpen, onClose, handleUpload }) {
   const { t } = useTranslation();
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null); // smart or import
   const [isFilesPopupOpen, setIsFilesPopupOpen] = useState(false);
 
   if (!isOpen) return null;
@@ -97,6 +97,7 @@ export default function UploadPopup({ isOpen, onClose, handleUpload }) {
         isOpen={isFilesPopupOpen}
         onCancel={handleCancelBoth} 
         onBack={handleBack} 
+        isSmartImport={selectedOption === "smart"} // <-- pass flag to popup
       />
     </>
   );
