@@ -1,43 +1,137 @@
-/* Filter panel */
 .filter-panel {
+  background: #f6faf9 !important;
+  width: 270px !important;
+  height: calc(100% - 100px);
+  box-shadow: 4px 0 8px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
   position: fixed;
-  top: var(--header-height);  /* adjust to your header */
-  left: -250px;               /* hidden by default */
-  width: 250px;
-  height: calc(100vh - var(--header-height));
-  background-color: #F6FAF9;
-  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
-  padding: 15px;
-  box-sizing: border-box;
-  transition: left 0.3s ease;
-  z-index: 100;
+  top: 35px;
+  left: 250;
+  z-index: 80;
+
+  transform: translateX(-100%);       /* panel off-screen initially */
+  opacity: 0;                          /* invisible initially */
+  pointer-events: none;                /* disable clicks initially */
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.filter-panel.show {
+  opacity: 1;                          /* make panel visible */
 }
 
 .filter-panel.open {
-  left: 0; /* slide in */
+  transform: translateX(0);            /* slide panel in */
+  pointer-events: auto;                /* enable clicks */
 }
 
-/* Push table when filter is open */
-.repository-page.filter-open .table-wrapper {
-  margin-left: 250px; /* same width as panel */
-  transition: margin-left 0.3s ease;
+.filter-panel.closing {
+  transform: translateX(-100%);
+  pointer-events: auto;
 }
 
-/* Filter toggle button */
-.filter-btn {
-  position: fixed;
-  top: var(--header-height);
-  left: 10px;
-  z-index: 200;
-  padding: 6px 12px;
-  border: none;
-  background-color: #1f6e77;
-  color: #fff;
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ebebeb;
+  height: 40px;
+  padding: 0 12px;
+}
+
+.filter-header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.clear-btn {
+  background: transparent;
+  color: #545454;
+  padding: 3px 20px;
   cursor: pointer;
   border-radius: 3px;
-  transition: background-color 0.2s ease;
+  font-size: 13px;
 }
 
-.filter-btn:hover {
-  background-color: #14545a;
+.filter-btn {
+  display: flex;
+  align-items: center;  
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  color: #545454;
+  padding: 3px 20px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 13px;
+  gap: 4px; /* space between icon and text */
+}
+
+.filter-btn-icon {
+  width: 11px;
+  height: 11px;
+}
+
+.filter-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #545454;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-field {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.filter-field label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #545454
+}
+
+.filter-field select {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  margin-bottom: 7px;
+}
+
+
+.expire-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 1px 0 10px 0; /* top 4px, bottom 10px */
+  font-size: 12px;
+  color: #545454;
+  font-weight: 550;
+}
+
+.expire-buttons button {
+  padding: 2px 6px;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.expire-buttons button.active {
+  background: #e3e3e3;
+  color: #000000;
+}
+
+input[type="date"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  font-size: 13px;
 }

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
-// ❌ Removed FilterPanel import
 import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
 import SendModal from "../components/SendModal";
+import FilterPanel from "../components/FilterPanel"; // ✅ New reusable filter
 import "./RepositoryPage.css";
 import { useTranslation } from "react-i18next";
 
-// Tooltip cell component with icon support
+// Tooltip cell component
 const TooltipCell = ({ text, className }) => (
   <td className={className}>
     <div className="cell-content">
@@ -20,6 +20,7 @@ const TooltipCell = ({ text, className }) => (
 
 export default function RepositoryPage() {
   const [files, setFiles] = useState([]);
+  const [filteredFiles, setFilteredFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -27,6 +28,7 @@ export default function RepositoryPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
 
   const { t } = useTranslation();
@@ -36,11 +38,13 @@ export default function RepositoryPage() {
     try {
       const res = await fetch(`http://localhost:4000/api/documents/repository?_=${Date.now()}`);
       const data = await res.json();
-      setFiles((data.files || []).map(file => ({
+      const filesData = (data.files || []).map(file => ({
         ...file,
         _id: file._id.toString(),
         folderName: file.metadata?.folderName || ""
-      })));
+      }));
+      setFiles(filesData);
+      setFilteredFiles(filesData);
     } catch (err) {
       console.error(err);
     }
@@ -69,7 +73,28 @@ export default function RepositoryPage() {
     );
   };
 
-  const filteredFiles = files.filter(file => {
+  const handleApplyFilters = (filters) => {
+    let filtered = [...files];
+
+    if (filters.folder)
+      filtered = filtered.filter(f =>
+        f.folderName?.toLowerCase().includes(filters.folder.toLowerCase())
+      );
+
+    if (filters.documentType)
+      filtered = filtered.filter(f =>
+        f.documentType?.toLowerCase().includes(filters.documentType.toLowerCase())
+      );
+
+    if (filters.counterparty)
+      filtered = filtered.filter(f =>
+        f.counterparty?.toLowerCase().includes(filters.counterparty.toLowerCase())
+      );
+
+    setFilteredFiles(filtered);
+  };
+
+  const searchFilteredFiles = filteredFiles.filter(file => {
     if (!searchText) return true;
     const lowerSearch = searchText.toLowerCase();
     return columns.some(col => {
@@ -78,10 +103,10 @@ export default function RepositoryPage() {
     });
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredFiles.length / rowsPerPage));
+  const totalPages = Math.max(1, Math.ceil(searchFilteredFiles.length / rowsPerPage));
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = filteredFiles.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = searchFilteredFiles.slice(indexOfFirstRow, indexOfLastRow);
 
   const goToPage = (pageNumber) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
@@ -89,6 +114,7 @@ export default function RepositoryPage() {
   };
 
   const handleRowClick = (file) => { setSelectedFile(file); setIsDetailsOpen(true); };
+
   const handleDeleteDocument = async (docId) => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents/delete`, {
@@ -98,13 +124,8 @@ export default function RepositoryPage() {
       });
       if (!res.ok) throw new Error("Failed to delete document");
 
-      setFiles(prev => {
-        const updated = prev.filter(file => file._id !== docId);
-        const pages = Math.ceil(updated.length / rowsPerPage) || 1;
-        if (currentPage > pages) setCurrentPage(pages);
-        return updated;
-      });
-
+      setFiles(prev => prev.filter(file => file._id !== docId));
+      setFilteredFiles(prev => prev.filter(file => file._id !== docId));
       setIsDetailsOpen(false);
       setSelectedFile(null);
     } catch (err) {
@@ -135,7 +156,7 @@ export default function RepositoryPage() {
       bannerHeight="120px"
       bannerBelowSearch
       onUploadClick={() => setIsPopupOpen(true)}
-      onFilterClick={() => alert("Filter panel will be implemented later")} // ✅ Filter button kept
+      onFilterClick={() => setIsFilterOpen(true)} // ✅ Open overlay
       columns={columns}
       visibleColumns={visibleColumns}
       onToggleColumn={handleToggleColumn}
@@ -144,8 +165,6 @@ export default function RepositoryPage() {
     >
       <div className="repository-page-wrapper">
         <div className="repository-content">
-          {/* ❌ Removed FilterPanel completely */}
-
           <div className="content-wrapper">
             <div className="table-wrapper">
               <div className="table-scroll-wrapper">
@@ -193,19 +212,8 @@ export default function RepositoryPage() {
                         )}
                       </tr>
                     ))}
-
-                    {currentRows.length < rowsPerPage &&
-                      Array.from({ length: rowsPerPage - currentRows.length }).map((_, i) => (
-                        <tr key={`empty-${i}`}>
-                          <td className="sticky-col checkbox-col">&nbsp;</td>
-                          {columns.map(col =>
-                            visibleColumns.includes(col.key) ? <td key={col.key}>&nbsp;</td> : null
-                          )}
-                        </tr>
-                      ))}
                   </tbody>
                 </table>
-
                 <div className="header-bottom-shadow"></div>
               </div>
             </div>
@@ -214,7 +222,10 @@ export default function RepositoryPage() {
 
         <div className="repository-footer">
           <div className="footer-left">
-            {files.length} {files.length === 1 ? t("repositorypage.file_singular") : t("repositorypage.files already uploaded")}
+            {files.length}{" "}
+            {files.length === 1
+              ? t("repositorypage.file_singular")
+              : t("repositorypage.files already uploaded")}
           </div>
 
           <div className="footer-right">
@@ -236,6 +247,13 @@ export default function RepositoryPage() {
         </div>
       </div>
 
+      {/* ✅ Reusable overlay filter panel */}
+      <FilterPanel
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={handleApplyFilters}
+      />
+
       <UploadPopup
         isOpen={isPopupOpen}
         onClose={() => { setIsPopupOpen(false); fetchFiles(); }}
@@ -248,6 +266,7 @@ export default function RepositoryPage() {
         onDelete={handleDeleteDocument}
         onArchive={archivedFileId => {
           setFiles(prev => prev.filter(file => file._id !== archivedFileId));
+          setFilteredFiles(prev => prev.filter(file => file._id !== archivedFileId));
           setIsDetailsOpen(false);
           setSelectedFile(null);
         }}
@@ -267,11 +286,11 @@ export default function RepositoryPage() {
       </button>
 
       {isSendModalOpen && (
-         <SendModal
-           selectedRows={selectedRows} // IDs of selected files
-           files={files}
-           onClose={() => setIsSendModalOpen(false)}  
-        />        
+        <SendModal
+          selectedRows={selectedRows}
+          files={files}
+          onClose={() => setIsSendModalOpen(false)}
+        />
       )}
     </PageLayout>
   );
