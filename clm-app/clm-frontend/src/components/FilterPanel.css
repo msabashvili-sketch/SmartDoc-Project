@@ -6,8 +6,9 @@
   overflow-y: auto;
   position: fixed;
   top: 35px;
-  left: 250;
-  z-index: 80;
+  left: 250px;
+  z-index: 90 !important;
+  padding: 22px;
 
   transform: translateX(-100%);       /* panel off-screen initially */
   opacity: 0;                          /* invisible initially */
@@ -138,25 +139,3 @@ input[type="date"] {
   height: 33px;
 }
 
-.expire-datepicker {
-  width: 100%;
-  padding: 4px 6px;
-  font-size: 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  height: 28px; /* decrease height */
-}
-
-.react-datepicker {
-  font-size: 12px; /* overall smaller calendar */
-}
-
-.react-datepicker__header {
-  background-color: #f6faf9;
-  border-bottom: 1px solid #ccc;
-}
-
-.react-datepicker__day--selected {
-  background-color: #007bff;
-  color: white;
-}
