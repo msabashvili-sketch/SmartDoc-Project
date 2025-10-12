@@ -5,15 +5,15 @@
   box-shadow: 4px 0 8px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   position: fixed;
-  top: 35px;
-  left: 250px;
+  top: 95px;
+  left: 0;
   z-index: 90 !important;
   padding: 22px;
 
   transform: translateX(-100%);       /* panel off-screen initially */
-  opacity: 0;                          /* invisible initially */
+  opacity: 1;                          /* invisible initially */
   pointer-events: none;                /* disable clicks initially */
-  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out;
 }
 
 .filter-panel.show {
@@ -45,9 +45,12 @@
 }
 
 .clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;  
   background: transparent;
   color: #545454;
-  padding: 3px 20px;
+  padding: 0 20px;
   cursor: pointer;
   border-radius: 3px;
   font-size: 13px;
@@ -55,7 +58,8 @@
 
 .filter-btn {
   display: flex;
-  align-items: center;  
+  align-items: center;
+  justify-content: center;  
   background: #ffffff;
   border: 1px solid #e0e0e0;
   color: #545454;
@@ -63,7 +67,7 @@
   cursor: pointer;
   border-radius: 3px;
   font-size: 13px;
-  gap: 4px; /* space between icon and text */
+  gap: 5px; /* space between icon and text */
 }
 
 .filter-btn-icon {

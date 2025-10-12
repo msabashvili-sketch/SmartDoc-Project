@@ -48,18 +48,6 @@ html, body {
   transition: all 0.3s ease;
 }
 
-/* Filter panel */
-.filter-panel {
-  width: 250px;
-  flex-shrink: 0;
-  background: #F6FAF9;
-  z-index: 2;
-  height: calc(100vh - var(--top-space-height));
-  margin-top: var(--top-space-height);
-  margin-left: -250px; /* hidden initially */
-  transition: margin-left 0.3s ease;
-}
-
 /* Table wrapper */
 .table-wrapper {
   flex: 1;
@@ -70,16 +58,6 @@ html, body {
   margin-top: 7px;
   padding-bottom: 143px;
 }
-
-/* Open filter */
-.repository-content.filter-open .filter-panel {
-  margin-left: 0;
-}
-
-.repository-content.filter-open .table-wrapper {
-  margin-left: 10px; /* exactly panel width */
-}
-
 
 /* Scrollable table area */
 .table-scroll-wrapper {
