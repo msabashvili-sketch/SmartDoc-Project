@@ -269,7 +269,7 @@ html {
   display: flex;
   flex-direction: column;
   height: calc(100vh - 160px); /* 100vh minus top padding/header */
-  padding-bottom: 40px; /* footer height */
+  padding-bottom: 43px !important; /* footer height */
   box-sizing: border-box;
   padding: 0 16px 10px 16px;        /* same as search area */
 }
@@ -281,6 +281,25 @@ html {
   overflow-y: scroll;       /* vertical scroll */
   background-color: #fff;
 }
+
+.table-container::-webkit-scrollbar {
+  height: 8px; /* height of horizontal scrollbar */
+  width: 8px; /* vertical scrollbar width */
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #fcfcfc; /* track color */
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #dadada; /* thumb color */
+  border-radius: 6px; /* rounded corners */
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #b3b3b3; /* thumb hover color */
+}
+
 
 .page-footer {
   position: fixed;
@@ -579,25 +598,3 @@ html {
   padding-right: 20px; /* space for arrow */
 }
 
-.empty-banner-row {
-  height: 200px; /* adjust as needed */
-}
-
-.empty-banner-row td {
-  padding: 0;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  /* Make td a flex container */
-  display: flex;
-  justify-content: center;  /* horizontal centering */
-  align-items: center;      /* vertical centering */
-}
-
-.empty-table-banner {
-  max-width: 200px;
-  width: 50%;
-  height: auto;
-  opacity: 0.9;
-  display: block; /* ensure image is treated as block inside flex */
-}
