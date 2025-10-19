@@ -1,312 +1,285 @@
 // src/routes/documents.js
 const express = require("express");
 const router = express.Router();
-const { upload, uploadAndParseFiles } = require("../uploadWithText");
-const { getBucket } = require("../gridfs");
-const { ObjectId } = require("mongodb");
+const multer = require("multer");
+const { db, bucket } = require("../firestore"); // Firestore + GCS
 
-// Upload route
-router.post("/upload", upload.array("files"), uploadAndParseFiles);
+// Firestore collections
+const filesCollection = db.collection("files");
 
-// List all import files (not in repository)
+// Multer memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// --- Upload files to GCS and metadata to Firestore ---
+router.post("/upload", upload.array("files"), async (req, res) => {
+  console.log("Headers:", req.headers);
+  console.log("Body:", req.body);
+  console.log("Files:", req.files);
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: "No files uploaded" });
+  }
+
+  try {
+    const uploadedFiles = [];
+
+    for (const file of req.files) {
+      const gcsFile = bucket.file(`${Date.now()}_${file.originalname}`);
+
+      // Upload buffer to GCS
+      await gcsFile.save(file.buffer, {
+        contentType: file.mimetype,
+        resumable: false,
+      });
+
+      // Save metadata to Firestore
+      const docRef = await filesCollection.add({
+        originalName: file.originalname,
+        gcsPath: gcsFile.name,
+        mimetype: file.mimetype,
+        size: file.size,
+        folderId: null,
+        folderName: null,
+        repository: false,
+        archived: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      uploadedFiles.push({
+        id: docRef.id,
+        originalName: file.originalname,
+        gcsPath: gcsFile.name,
+      });
+    }
+
+    res.json({ message: "Files uploaded successfully!", files: uploadedFiles });
+  } catch (err) {
+    console.error("❌ Upload error:", err);
+    res.status(500).json({ message: "Error uploading files" });
+  }
+});
+
+// --- List files by filter ---
 router.get("/", async (req, res) => {
   try {
-    const bucket = getBucket();
-    const files = await bucket
-      .find({ "metadata.repository": { $ne: true }, "metadata.archived": { $ne: true } })
-      .sort({ uploadDate: -1 })
-      .toArray();
+    const snapshot = await filesCollection
+      .where("repository", "==", false)
+      .where("archived", "==", false)
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const files = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     res.json({ files });
   } catch (err) {
     console.error("❌ Error fetching import files:", err);
-    res.status(500).send("Error fetching files");
+    res.status(500).json({ message: "Error fetching files" });
   }
 });
 
-// List all repository files
 router.get("/repository", async (req, res) => {
   try {
-    const bucket = getBucket();
-    const files = await bucket
-      .find({ "metadata.repository": true, "metadata.archived": { $ne: true } })
-      .sort({ uploadDate: -1 })
-      .toArray();
+    const snapshot = await filesCollection
+      .where("repository", "==", true)
+      .where("archived", "==", false)
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const files = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     res.json({ files });
   } catch (err) {
     console.error("❌ Error fetching repository files:", err);
-    res.status(500).send("Error fetching files");
+    res.status(500).json({ message: "Error fetching files" });
   }
 });
 
-// List all archived files
 router.get("/archive", async (req, res) => {
   try {
-    const bucket = getBucket();
-    const files = await bucket
-      .find({ "metadata.archived": true })
-      .sort({ uploadDate: -1 })
-      .toArray();
+    const snapshot = await filesCollection
+      .where("archived", "==", true)
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const files = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     res.json({ files });
   } catch (err) {
     console.error("❌ Error fetching archive files:", err);
-    res.status(500).send("Error fetching files");
+    res.status(500).json({ message: "Error fetching files" });
   }
 });
 
-// Stream file for viewing (PDFs and text)
+// --- Download/stream file from GCS ---
 router.get("/view/:id", async (req, res) => {
   try {
-    const fileId = req.params.id;
-    if (!ObjectId.isValid(fileId)) return res.status(400).send("Invalid file ID");
+    const { id } = req.params;
+    const doc = await filesCollection.doc(id).get();
 
-    const bucket = getBucket();
-    const db = bucket.s.db;
-    const _id = new ObjectId(fileId);
+    if (!doc.exists) return res.status(404).send("File not found");
 
-    // Check in GridFS
-    const files = await bucket.find({ _id }).toArray();
-    if (files.length > 0) {
-      const file = files[0];
-      console.log("Serving PDF from GridFS:", file.filename);
+    const fileData = doc.data();
+    const gcsFile = bucket.file(fileData.gcsPath);
 
-      // Only use filename*=UTF-8'' to support Georgian
-      const encodedFilename = encodeURIComponent(file.filename);
-      res.setHeader("Content-Disposition", `inline; filename*=UTF-8''${encodedFilename}`);
-      res.setHeader("Content-Type", file.contentType || "application/pdf");
-
-      const downloadStream = bucket.openDownloadStream(_id);
-      downloadStream.on("error", (err) => {
-        console.error("❌ Stream error:", err);
-        if (!res.headersSent) res.status(500).send("Error streaming file");
-      });
-
-      return downloadStream.pipe(res);
-    }
-
-    // Check in TextDocuments
-    const textCollection = db.collection("TextDocuments");
-    const textDoc = await textCollection.findOne({ _id });
-    if (!textDoc) {
-      console.log("File not found in GridFS or TextDocuments:", fileId);
-      return res.status(404).send("File not found");
-    }
-
-    console.log("Serving text document:", textDoc.filename);
-
-    // Serve text document with UTF-8 charset
     res.setHeader(
       "Content-Disposition",
-      `inline; filename*=UTF-8''${encodeURIComponent(textDoc.filename)}`
+      `inline; filename*=UTF-8''${encodeURIComponent(fileData.originalName)}`
     );
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Content-Type", fileData.mimetype || "application/octet-stream");
 
-    res.send(textDoc.text);
+    const stream = gcsFile.createReadStream();
+    stream.on("error", (err) => {
+      console.error("❌ Stream error:", err);
+      if (!res.headersSent) res.status(500).send("Error streaming file");
+    });
+
+    stream.pipe(res);
   } catch (err) {
     console.error("❌ Error fetching file:", err);
     res.status(500).send("Error fetching file");
   }
 });
 
-// --- Send selected files to repository with folder info ---
+// --- Move files between repository/archive/folder ---
+const updateFilesMetadata = async (fileIds, updateData) => {
+  await Promise.all(
+    fileIds.map(async (id) => {
+      const docRef = filesCollection.doc(id);
+      const doc = await docRef.get();
+      if (!doc.exists) return;
+      await docRef.update({ ...updateData, updatedAt: new Date() });
+    })
+  );
+};
+
 router.post("/send-to-repository", async (req, res) => {
+  const { files } = req.body;
+  if (!files || !Array.isArray(files) || files.length === 0) {
+    return res.status(400).json({ message: "No files provided" });
+  }
   try {
-    const { files } = req.body; // Expecting [{ id, folderId, folderName }]
-    if (!files || !Array.isArray(files) || files.length === 0) {
-      return res.status(400).json({ message: "No files provided" });
-    }
-
-    const bucket = getBucket();
-    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
-
     await Promise.all(
-      files.map(async ({ id, folderId, folderName }) => {
-        if (!ObjectId.isValid(id)) return;
-        const _id = new ObjectId(id);
-
-        await filesCollection.updateOne(
-          { _id },
-          {
-            $set: {
-              "metadata.repository": true,
-              "metadata.archived": false,
-              "metadata.folderId": folderId || null,
-              "metadata.folderName": folderName || null,
-            },
-          }
-        );
-      })
+      files.map(({ id, folderId, folderName }) =>
+        filesCollection.doc(id).update({
+          repository: true,
+          archived: false,
+          folderId: folderId || null,
+          folderName: folderName || null,
+          updatedAt: new Date(),
+        })
+      )
     );
-
     res.json({ message: "Files sent to repository successfully!" });
   } catch (err) {
-    console.error("❌ Send to repository error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// --- Send selected files to archive ---
 router.post("/send-to-archive", async (req, res) => {
+  const { fileIds } = req.body;
+  if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+    return res.status(400).json({ message: "No file IDs provided" });
+  }
   try {
-    const { fileIds } = req.body; // Expecting [id, id, id]
-    if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
-      return res.status(400).json({ message: "No file IDs provided" });
-    }
-
-    const bucket = getBucket();
-    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
-
-    await Promise.all(
-      fileIds.map(async (id) => {
-        if (!ObjectId.isValid(id)) return;
-        const _id = new ObjectId(id);
-
-        await filesCollection.updateOne(
-          { _id },
-          {
-            $set: {
-              "metadata.archived": true,
-              "metadata.repository": false,
-            },
-          }
-        );
-      })
-    );
-
+    await updateFilesMetadata(fileIds, { archived: true, repository: false });
     res.json({ message: "Files sent to archive successfully!" });
   } catch (err) {
-    console.error("❌ Send to archive error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// --- Restore files from archive to repository ---
 router.post("/restore-from-archive", async (req, res) => {
+  const { fileIds } = req.body;
+  if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+    return res.status(400).json({ message: "No file IDs provided" });
+  }
   try {
-    const { fileIds } = req.body; // Expecting [id, id, id]
-    if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
-      return res.status(400).json({ message: "No file IDs provided" });
-    }
-
-    const bucket = getBucket();
-    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
-
-    await Promise.all(
-      fileIds.map(async (id) => {
-        if (!ObjectId.isValid(id)) return;
-        const _id = new ObjectId(id);
-
-        await filesCollection.updateOne(
-          { _id },
-          {
-            $set: {
-              "metadata.archived": false,
-              "metadata.repository": true,
-            },
-          }
-        );
-      })
-    );
-
+    await updateFilesMetadata(fileIds, { archived: false, repository: true });
     res.json({ message: "Files restored from archive successfully!" });
   } catch (err) {
-    console.error("❌ Restore from archive error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// --- Delete selected files ---
+// --- Delete files from GCS + Firestore ---
 router.post("/delete", async (req, res) => {
+  const { fileIds } = req.body;
+  if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+    return res.status(400).json({ message: "No file IDs provided" });
+  }
   try {
-    const { fileIds } = req.body;
-    if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
-      return res.status(400).json({ message: "No file IDs provided" });
-    }
-
-    const bucket = getBucket();
-    const db = bucket.s.db;
-    const textCollection = db.collection("TextDocuments");
-
     await Promise.all(
       fileIds.map(async (id) => {
-        if (!ObjectId.isValid(id)) return;
-        const _id = new ObjectId(id);
+        const docRef = filesCollection.doc(id);
+        const doc = await docRef.get();
+        if (!doc.exists) return;
+
+        const fileData = doc.data();
+        const gcsFile = bucket.file(fileData.gcsPath);
 
         try {
-          await bucket.delete(_id);
+          await gcsFile.delete();
         } catch (err) {
-          console.log(`GridFS delete error for ${id}:`, err.message);
+          console.warn(`GCS delete error for ${fileData.gcsPath}:`, err.message);
         }
 
-        try {
-          await textCollection.deleteOne({ _id });
-        } catch (err) {
-          console.log(`TextDocuments delete error for ${id}:`, err.message);
-        }
+        await docRef.delete();
       })
     );
-
     res.json({ message: "Files deleted successfully!" });
   } catch (err) {
-    console.error("❌ Delete files error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// --- Get documents by folderId with page filter (repository or archive) ---
+// --- Get documents by folder ---
 router.get("/by-folder/:folderId", async (req, res) => {
   try {
     const { folderId } = req.params;
-    const page = req.query.page || "repository"; // default to repository
-    const bucket = getBucket();
+    const page = req.query.page || "repository";
 
-    let filter = { "metadata.folderId": folderId };
+    let query = filesCollection.where("folderId", "==", folderId);
 
     if (page === "repository") {
-      filter["metadata.repository"] = true;
-      filter["metadata.archived"] = { $ne: true };
+      query = query.where("repository", "==", true).where("archived", "==", false);
     } else if (page === "archive") {
-      filter["metadata.archived"] = true;
+      query = query.where("archived", "==", true);
     }
 
-    const files = await bucket.find(filter).sort({ uploadDate: -1 }).toArray();
+    // Fetch without orderBy first (to verify data shows)
+    const snapshot = await query.get();
+
+    const files = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
     res.json({ files });
   } catch (err) {
-    console.error("❌ Error fetching folder documents:", err);
+    console.error("🔥 Error fetching files by folder:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// --- Move file(s) to another folder (folder only, no repo/archive changes) ---
+// --- Move files to another folder (folder only) ---
 router.post("/move-folder", async (req, res) => {
+  const { files } = req.body;
+  if (!files || !Array.isArray(files) || files.length === 0) {
+    return res.status(400).json({ message: "No files provided" });
+  }
+
   try {
-    const { files } = req.body; // Expecting [{ id, folderId, folderName }]
-    if (!files || !Array.isArray(files) || files.length === 0) {
-      return res.status(400).json({ message: "No files provided" });
-    }
-
-    const bucket = getBucket();
-    const filesCollection = bucket.s.db.collection(`${bucket.s.options.bucketName}.files`);
-
     await Promise.all(
-      files.map(async ({ id, folderId, folderName }) => {
-        if (!ObjectId.isValid(id)) return;
-        const _id = new ObjectId(id);
-
-        await filesCollection.updateOne(
-          { _id },
-          {
-            $set: {
-              "metadata.folderId": folderId || null,
-              "metadata.folderName": folderName || null,
-            },
-          }
-        );
-      })
+      files.map(({ id, folderId, folderName }) =>
+        filesCollection.doc(id).update({ folderId: folderId || null, folderName: folderName || null, updatedAt: new Date() })
+      )
     );
-
     res.json({ message: "Files moved to folder successfully!" });
   } catch (err) {
-    console.error("❌ Move folder error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });

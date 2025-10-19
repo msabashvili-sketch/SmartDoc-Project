@@ -44,26 +44,23 @@ export default function ImportPage() {
     );
   };
 
-  const normalizeFiles = (raw = []) =>
-    raw.map((f, idx) => {
-      let id = f?._id ? f._id.toString() : `row-${idx}`;
-      const filename =
-        (f?.metadata?.filename?.trim()) ||
-        (f?.filename?.trim()) ||
-        "(Untitled)";
-      return {
-        id,
-        filename,
-        contentType: f?.contentType || "",
-        uploadDate: f?.uploadDate ? String(f.uploadDate) : "",
-        selectedFolder: f?.folderId || "",
-        documentType: f?.documentType || "",
-        counterparty: f?.counterparty || "",
-        agreementDate: f?.agreementDate || "",
-        expiryDate: f?.expiryDate || "",
-        signatureName: f?.signatureName || "",
-      };
-    });
+ const normalizeFiles = (raw = []) =>
+  raw.map((f, idx) => {
+    const id = f?.id || `row-${idx}`;
+    const filename = f?.originalName || "(Untitled)";
+    return {
+      id,
+      filename,
+      contentType: f?.mimetype || "",
+      uploadDate: f?.createdAt ? new Date(f.createdAt).toLocaleString() : "",
+      selectedFolder: f?.folderId || "",
+      documentType: f?.documentType || "",
+      counterparty: f?.counterparty || "",
+      agreementDate: f?.agreementDate || "",
+      expiryDate: f?.expiryDate || "",
+      signatureName: f?.signatureName || "",
+    };
+  });
 
   const fetchFiles = useCallback(async () => {
     try {

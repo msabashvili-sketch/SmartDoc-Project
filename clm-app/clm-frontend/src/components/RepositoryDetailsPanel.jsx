@@ -70,13 +70,13 @@ export default function RepositoryDetailsPanel({
       const res = await fetch("http://localhost:4000/api/documents/send-to-archive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileIds: [file._id] }),
+        body: JSON.stringify({ fileIds: [file.id] }),
       });
 
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       await res.json();
 
-      if (onArchive) onArchive(file._id);
+      if (onArchive) onArchive(file.id);
       alert(t("detailspanel.archiveSuccess") || "File sent to archive successfully!");
       onClose();
     } catch (err) {
@@ -178,7 +178,7 @@ export default function RepositoryDetailsPanel({
                 <button
                   className="confirm-delete"
                   onClick={() => {
-                    onDelete(file._id);
+                    onDelete(file.id);
                     setShowDeleteConfirm(false);
                     onClose();
                   }}

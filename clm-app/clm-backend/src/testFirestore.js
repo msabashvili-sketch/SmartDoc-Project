@@ -1,27 +1,64 @@
-// src/testFirestore.js
-require("dotenv").config();
-const { Firestore } = require("@google-cloud/firestore");
+import admin from "firebase-admin";
+import { readFileSync } from "fs";
+import path from "path";
 
-// Initialize Firestore
-const firestore = new Firestore({
-  projectId: process.env.GOOGLE_PROJECT_ID,          // Your project ID
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to service account JSON
-  databaseId: "smartdocproject",                    // Explicitly set your database ID
-});
+// ---------------------------
+// 🔹 FIREBASE ADMIN SETUP
+// ---------------------------
+console.log("🔹 Initializing Firebase Admin SDK...");
 
-async function testFirestore() {
-  try {
-    const docRef = firestore.collection("testCollection").doc(); // Test collection
-    const data = {
-      testField: "Hello Firestore!",
-      timestamp: new Date(),
-    };
+const serviceAccountPath = path.resolve("src/keys/service-account-new.json");
+console.log("🔹 Using service account file:", serviceAccountPath);
 
-    await docRef.set(data);
-    console.log(`✅ Document saved successfully with ID: ${docRef.id}`);
-  } catch (error) {
-    console.error("❌ Firestore write failed:", error);
-  }
+const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, "utf8"));
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: "smartdoc-project-474917", // ✅ explicitly set
+    storageBucket: "smartdocprojectdata-777",
+  });
 }
 
-testFirestore();
+const firestore = admin.firestore();
+firestore.settings({
+  ignoreUndefinedProperties: true,
+  databaseId: "smartdocproject", // ✅ important fix
+});
+
+const bucket = admin.storage().bucket();
+
+console.log("📁 Firebase Project ID:", serviceAccount.project_id);
+
+// ---------------------------
+// 🔹 TEST FIRESTORE CONNECTION
+// ---------------------------
+(async () => {
+  try {
+    console.log("⏳ Testing Firestore connection...");
+
+    const testRef = firestore.collection("connection_test").doc("ping");
+    await testRef.set({ timestamp: new Date().toISOString() });
+
+    const doc = await testRef.get();
+
+    if (doc.exists) {
+      console.log("✅ Firestore write/read test successful:", doc.data());
+    } else {
+      console.error("❌ Firestore test document not found!");
+    }
+
+    // ---------------------------
+    // 🔹 TEST STORAGE CONNECTION
+    // ---------------------------
+    console.log("⏳ Testing GCS bucket connection...");
+
+    const [files] = await bucket.getFiles({ maxResults: 1 });
+    console.log("✅ Connected to GCS bucket:", bucket.name);
+    console.log("📂 Found", files.length, "files (showing 1 if available):", files[0]?.name || "none");
+
+    console.log("🔸 Firebase initialization complete.");
+  } catch (error) {
+    console.error("❌ Firestore test failed:", error.message);
+  }
+})();

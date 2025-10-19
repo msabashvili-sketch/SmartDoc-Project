@@ -1,33 +1,37 @@
 // src/routes/folders.js
 const express = require("express");
-const Folder = require("../models/Folder");
-const { getBucket } = require("../gridfs");
-const { ObjectId } = require("mongodb");
-
+const { db, bucket } = require("../firestore"); // Firestore + GCS
 const router = express.Router();
+
+// Firestore collections
+const foldersCollection = db.collection("folders");
+const filesCollection = db.collection("files"); // metadata of uploaded files
 
 // --- Get all folders with file count ---
 router.get("/", async (req, res) => {
   try {
-    const bucket = getBucket();
+    const snapshot = await foldersCollection.orderBy("createdAt", "desc").get();
+    const folders = [];
 
-    // Fetch all folders
-    const folders = await Folder.find().sort({ createdAt: -1 });
+    for (const doc of snapshot.docs) {
+      const folderData = doc.data();
+      const folderId = doc.id;
 
-    // Count files for each folder
-    const foldersWithCount = await Promise.all(
-      folders.map(async (folder) => {
-        const count = await bucket
-          .find({ "metadata.folderId": folder._id.toString() })
-          .count();
-        return {
-          ...folder.toObject(), // keep _id, name, timestamps
-          fileCount: count,     // add fileCount
-        };
-      })
-    );
+      // Count files in this folder
+      const filesSnapshot = await filesCollection
+        .where("folderId", "==", folderId)
+        .get();
 
-    res.json(foldersWithCount);
+      folders.push({
+        id: folderId,
+        name: folderData.name,
+        createdAt: folderData.createdAt.toDate(),
+        updatedAt: folderData.updatedAt?.toDate() || null,
+        fileCount: filesSnapshot.size,
+      });
+    }
+
+    res.json(folders);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch folders" });
@@ -42,9 +46,20 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Folder name is required" });
     }
 
-    const folder = new Folder({ name: name.trim() });
-    await folder.save();
-    res.status(201).json(folder);
+    const now = new Date();
+    const docRef = await foldersCollection.add({
+      name: name.trim(),
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    res.status(201).json({
+      id: docRef.id,
+      name: name.trim(),
+      createdAt: now,
+      updatedAt: now,
+      fileCount: 0,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to create folder" });
@@ -55,19 +70,21 @@ router.post("/", async (req, res) => {
 router.get("/:folderId/documents", async (req, res) => {
   try {
     const { folderId } = req.params;
-    if (!ObjectId.isValid(folderId)) {
-      return res.status(400).send("Invalid folder ID");
-    }
 
-    const bucket = getBucket();
-    const files = await bucket
-      .find({ "metadata.folderId": folderId })
-      .sort({ uploadDate: -1 })
-      .toArray();
+    // Query Firestore files with this folderId
+    const snapshot = await filesCollection
+      .where("folderId", "==", folderId)
+      .orderBy("createdAt", "desc")
+      .get();
+
+    const files = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     res.json({ files });
   } catch (err) {
-    console.error("Error fetching folder documents:", err);
+    console.error(err);
     res.status(500).send("Server error");
   }
 });
@@ -76,32 +93,30 @@ router.get("/:folderId/documents", async (req, res) => {
 router.delete("/:folderId", async (req, res) => {
   try {
     const { folderId } = req.params;
-    if (!ObjectId.isValid(folderId)) {
-      return res.status(400).json({ error: "Invalid folder ID" });
-    }
-
-    const bucket = getBucket();
 
     // Check if folder has files
-    const fileCount = await bucket
-      .find({ "metadata.folderId": folderId })
-      .count();
+    const filesSnapshot = await filesCollection
+      .where("folderId", "==", folderId)
+      .get();
 
-    if (fileCount > 0) {
+    if (!filesSnapshot.empty) {
       return res
         .status(400)
         .json({ error: "Cannot delete folder: it still contains files." });
     }
 
     // Delete folder
-    const deleted = await Folder.findByIdAndDelete(folderId);
-    if (!deleted) {
+    const folderDoc = foldersCollection.doc(folderId);
+    const folderSnapshot = await folderDoc.get();
+    if (!folderSnapshot.exists) {
       return res.status(404).json({ error: "Folder not found" });
     }
 
+    await folderDoc.delete();
+
     res.json({ message: "Folder deleted successfully", folderId });
   } catch (err) {
-    console.error("Error deleting folder:", err);
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 });

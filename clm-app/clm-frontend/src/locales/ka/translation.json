@@ -194,6 +194,7 @@
     "cancel": "გაუქმება",
     "deleteFailed": "ფაილის წაშლა ვერ მოხერხდა. გთხოვთ, სცადეთ ხელახლა.",
     "noDocuments": "",
+    "loading": "",
     "folderDocuments": "საქაღალდის დოკუმენტები",
     "selectFolder": "აირჩიეთ საქაღალდე",
     "repository": "საცავი",

@@ -80,7 +80,7 @@ export default function FoldersPage() {
       setTotalDocuments(totalDocs);
 
       if (paramFolderId) {
-        const folder = foldersData.find((f) => f._id === paramFolderId);
+        const folder = foldersData.find((f) => f.id === paramFolderId);
         if (folder) {
           setSelectedFolder(folder);
           setViewMode("folderContents");
@@ -120,7 +120,7 @@ export default function FoldersPage() {
   const handleFolderClick = (folder) => {
     setSelectedFolder(folder);
     setViewMode("folderContents");
-    navigate(`/folders/${folder._id}`);
+    navigate(`/folders/${folder.id}`);
     setPreviewDocument(null);
   };
 
@@ -149,7 +149,7 @@ export default function FoldersPage() {
   };
 
   const selectedHasNonEmpty = selectedForDelete.some(
-    (id) => folders.find((f) => f._id === id)?.fileCount > 0
+    (id) => folders.find((f) => f.id === id)?.fileCount > 0
   );
 
   // --- Move folders logic ---
@@ -261,7 +261,7 @@ export default function FoldersPage() {
               ) : (
                 <div className="folders-grid">
                   {folders.map((folder) => (
-                    <div className="folder-item" key={folder._id}>
+                    <div className="folder-item" key={folder.id}>
                       <div className="folder-icon-wrapper">
                         <img
                           src="/assets/folder-big-icon10.png"
@@ -276,10 +276,10 @@ export default function FoldersPage() {
                         <input
                           type="checkbox"
                           className="folder-delete-checkbox"
-                          checked={selectedForDelete.includes(folder._id)}
+                          checked={selectedForDelete.includes(folder.id)}
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) =>
-                            handleToggleSelect(folder._id, e.target.checked)
+                            handleToggleSelect(folder.id, e.target.checked)
                           }
                         />
                       </div>
@@ -290,7 +290,7 @@ export default function FoldersPage() {
               )
             ) : selectedFolder ? (
               <FolderDetailsPage
-                folderId={selectedFolder._id}
+                folderId={selectedFolder.id}
                 onBack={handleBackClick}
                 onDocumentClick={handleDocumentClick}
               />
@@ -315,7 +315,7 @@ export default function FoldersPage() {
           )}
           {previewDocument && (
             <iframe
-              src={`http://localhost:4000/api/documents/view/${previewDocument._id}`}
+              src={`http://localhost:4000/api/documents/view/${previewDocument.id}`}
               title={previewDocument.filename}
               style={{ width: "100%", height: "100%", border: "none" }}
             />
@@ -369,7 +369,7 @@ export default function FoldersPage() {
         </div>
       )}
 
-      {/* Move Popup (using same style as FolderDetailsPage) */}
+      {/* Move Popup */}
       {isMovePopupOpen && (
         <div className="confirm-overlay" onClick={() => setIsMovePopupOpen(false)}>
           <div
@@ -384,9 +384,9 @@ export default function FoldersPage() {
             >
               <option value="">{t("folderspage.selectTargetFolder")}</option>
               {folders
-                .filter((f) => !selectedForDelete.includes(f._id))
+                .filter((f) => !selectedForDelete.includes(f.id))
                 .map((f) => (
-                  <option key={f._id} value={f._id}>
+                  <option key={f.id} value={f.id}>
                     {f.name}
                   </option>
                 ))}
@@ -428,7 +428,7 @@ export default function FoldersPage() {
                   try {
                     await Promise.all(
                       foldersToConfirmDelete.map(async (folderId) => {
-                        const folder = folders.find((f) => f._id === folderId);
+                        const folder = folders.find((f) => f.id === folderId);
                         if (folder && (folder.fileCount ?? 0) === 0) {
                           await axios.delete(`http://localhost:4000/api/folders/${folderId}`);
                         }

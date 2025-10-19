@@ -1,76 +1,55 @@
 // src/firestore.js
-const { Firestore } = require("@google-cloud/firestore");
+const admin = require("firebase-admin");
+const fs = require("fs");
+const path = require("path");
 
-// Initialize Firestore
-const firestore = new Firestore({
-  projectId: process.env.GCLOUD_PROJECT_ID,
-  keyFilename: process.env.GCLOUD_KEY_FILE, // path to your service account JSON
+console.log("🔹 Initializing Firebase Admin SDK...");
+
+// Path to service account
+const serviceAccountPath = path.resolve("src/keys/service-account-new.json");
+console.log("🔹 Using service account file:", serviceAccountPath);
+
+// Load service account JSON
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
+
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: "smartdoc-project-474917", // explicitly set
+    storageBucket: "smartdocprojectdata-777", // GCS bucket
+  });
+}
+
+const firestore = admin.firestore();
+firestore.settings({
+  ignoreUndefinedProperties: true,
+  databaseId: "smartdocproject", // important to fix Firestore database ID
 });
 
-// Firestore collection
-const COLLECTION_NAME = "documents";
+const bucket = admin.storage().bucket();
 
-/**
- * Save a document to Firestore.
- * - If scannedDocId exists, update the document.
- * - If not, create a new document with a unique Firestore ID.
- */
-async function saveDocument(doc) {
+console.log("📁 Firebase Project ID:", serviceAccount.project_id);
+
+// Optional: test Firestore & GCS connections
+(async () => {
   try {
-    // Use existing scannedDocId or generate a new Firestore doc ID
-    const docRef = doc.scannedDocId
-      ? firestore.collection(COLLECTION_NAME).doc(doc.scannedDocId)
-      : firestore.collection(COLLECTION_NAME).doc(); // Auto-generated unique ID
+    console.log("⏳ Testing Firestore connection...");
+    const testRef = firestore.collection("connection_test").doc("ping");
+    await testRef.set({ timestamp: new Date().toISOString() });
+    const doc = await testRef.get();
+    if (doc.exists) {
+      console.log("✅ Firestore write/read test successful");
+    }
 
-    // Always store the ID inside the document for frontend reference
-    const data = {
-      ...doc,
-      scannedDocId: docRef.id, // Frontend can use this to identify the file
-      createdAt: doc.createdAt || new Date().toISOString(),
-    };
+    console.log("⏳ Testing GCS bucket connection...");
+    await bucket.getMetadata(); // just check if bucket exists
+    console.log("✅ Connected to GCS bucket:", bucket.name);
 
-    await docRef.set(data, { merge: true }); // Merge ensures update if ID exists
-    console.log("✅ Firestore saveDocument successful:", data.filename);
-
-    return data; // Return the saved document with scannedDocId
-  } catch (err) {
-    console.error("❌ Firestore saveDocument error:", err);
-    throw err;
+    console.log("🔸 Firebase initialization complete.");
+  } catch (error) {
+    console.error("❌ Firestore/GCS test failed:", error.message);
   }
-}
+})();
 
-/**
- * Get all documents from Firestore
- */
-async function getAllDocuments() {
-  try {
-    const snapshot = await firestore.collection(COLLECTION_NAME).get();
-    const docs = snapshot.docs.map(d => d.data());
-    return docs;
-  } catch (err) {
-    console.error("❌ Firestore getAllDocuments error:", err);
-    return [];
-  }
-}
-
-/**
- * Optional: get document by ID
- */
-async function getDocumentById(id) {
-  try {
-    const docRef = firestore.collection(COLLECTION_NAME).doc(id);
-    const doc = await docRef.get();
-    if (!doc.exists) return null;
-    return doc.data();
-  } catch (err) {
-    console.error("❌ Firestore getDocumentById error:", err);
-    return null;
-  }
-}
-
-module.exports = {
-  firestore,
-  saveDocument,
-  getAllDocuments,
-  getDocumentById,
-};
+module.exports = { db: firestore, bucket };

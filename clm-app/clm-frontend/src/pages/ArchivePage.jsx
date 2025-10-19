@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PageLayout from "../components/PageLayout";
 import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
-import FilterPanel from "../components/FilterPanel"; // ✅ import your filter panel
+import FilterPanel from "../components/FilterPanel";
 import { useTranslation } from "react-i18next";
 import "./ArchivePage.css";
 
@@ -22,7 +22,7 @@ export default function ArchivePage() {
   // Filter panel state
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Columns and toggling
+  // Columns
   const columns = [
     { key: "documentTitle", label: t("archivepage.document title") },
     { key: "folder", label: t("archivepage.folder") },
@@ -37,16 +37,23 @@ export default function ArchivePage() {
   // Search
   const [searchText, setSearchText] = useState("");
 
-  // Fetch archived files
+  // Fetch archived files from Firestore
   useEffect(() => {
     fetch("http://localhost:4000/api/documents/archive")
       .then(res => res.json())
       .then(data => {
-        setFiles((data.files || []).map(f => ({
-          ...f,
-          _id: f._id.toString(),
-          folderName: f.metadata?.folderName || ""
-        })));
+        const mappedFiles = (data.files || []).map(f => ({
+          id: f.id || f._id,
+          filename: f.originalName || "Untitled",
+          folderName: f.folderName || "",
+          counterparty: f.counterparty || "",
+          documentType: f.documentType || "",
+          agreementDate: f.agreementDate || "",
+          expiryDate: f.expiryDate || "",
+          signatureName: f.signatureName || "",
+          metadata: f.metadata || {},
+        }));
+        setFiles(mappedFiles);
       })
       .catch(err => console.error("Error fetching archived files:", err));
   }, []);
@@ -63,8 +70,8 @@ export default function ArchivePage() {
     columns.some(col => {
       const value = col.key === "documentTitle" ? file.filename
                     : col.key === "folder" ? file.folderName
-                    : file.metadata?.[col.key];
-      return value?.toString().toLowerCase().includes(searchText.toLowerCase());
+                    : file[col.key] || "";
+      return value.toString().toLowerCase().includes(searchText.toLowerCase());
     })
   );
 
@@ -92,10 +99,10 @@ export default function ArchivePage() {
     );
   };
 
-  const areAllSelected = filesOnPage.length > 0 && filesOnPage.every(f => selectedFiles.includes(f._id));
+  const areAllSelected = filesOnPage.length > 0 && filesOnPage.every(f => selectedFiles.includes(f.id));
   const toggleSelectAll = () => {
     if (areAllSelected) setSelectedFiles([]);
-    else setSelectedFiles([...new Set([...selectedFiles, ...filesOnPage.map(f => f._id)])]);
+    else setSelectedFiles([...new Set([...selectedFiles, ...filesOnPage.map(f => f.id)])]);
   };
 
   return (
@@ -110,7 +117,7 @@ export default function ArchivePage() {
         showBanner={true}
         bannerImage="/assets/archive-page-banner.jpg"
         bannerHeight="120px"
-        onFilterClick={() => setIsFilterOpen(prev => !prev)} // ✅ toggle filter panel
+        onFilterClick={() => setIsFilterOpen(prev => !prev)}
       >
         {/* Archive Table */}
         <div className="archive-table-wrapper">
@@ -137,24 +144,24 @@ export default function ArchivePage() {
 
               <tbody>
                 {filesOnPage.map((file, idx) => {
-                  const isSelected = selectedFiles.includes(file._id);
-                  const isHighlighted = highlightedRowId === file._id;
+                  const isSelected = selectedFiles.includes(file.id);
+                  const isHighlighted = highlightedRowId === file.id;
 
                   return (
                     <tr
-                      key={file._id || idx}
+                      key={file.id || idx}
                       className={`${isSelected ? "selected-row" : ""} ${isHighlighted ? "highlighted-row" : ""}`}
                       onDoubleClick={() => {
                         setSelectedFile(file);
                         setIsDetailsOpen(true);
-                        setHighlightedRowId(file._id);
+                        setHighlightedRowId(file.id);
                       }}
                     >
                       <td className="checkbox-col sticky">
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => toggleRow(file._id)}
+                          onChange={() => toggleRow(file.id)}
                         />
                       </td>
 
@@ -176,7 +183,7 @@ export default function ArchivePage() {
                               ) : col.key === "folder" ? (
                                 file.folderName
                               ) : (
-                                file.metadata?.[col.key] || ""
+                                file[col.key] || ""
                               )}
                             </td>
                           );
@@ -253,7 +260,7 @@ export default function ArchivePage() {
               setHighlightedRowId(null);
             }}
             onDelete={(fileId) => {
-              setFiles(prev => prev.filter(f => f._id !== fileId));
+              setFiles(prev => prev.filter(f => f.id !== fileId));
               setIsDetailsOpen(false);
               setHighlightedRowId(null);
             }}

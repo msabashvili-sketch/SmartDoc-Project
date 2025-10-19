@@ -3,11 +3,10 @@ import PageLayout from "../components/PageLayout";
 import RepositoryDetailsPanel from "../components/RepositoryDetailsPanel";
 import UploadPopup from "../components/uploadPopup/UploadPopup";
 import SendModal from "../components/SendModal";
-import FilterPanel from "../components/FilterPanel"; // ✅ New reusable filter
+import FilterPanel from "../components/FilterPanel";
 import "./RepositoryPage.css";
 import { useTranslation } from "react-i18next";
 
-// Tooltip cell component
 const TooltipCell = ({ text, className }) => (
   <td className={className}>
     <div className="cell-content">
@@ -19,6 +18,8 @@ const TooltipCell = ({ text, className }) => (
 );
 
 export default function RepositoryPage() {
+  const { t } = useTranslation();
+
   const [files, setFiles] = useState([]);
   const [filteredFiles, setFilteredFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,26 +32,40 @@ export default function RepositoryPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  const { t } = useTranslation();
-
-  // Fetch files from backend
+  // ✅ Fetch repository files from Firestore backend
   const fetchFiles = async () => {
     try {
       const res = await fetch(`http://localhost:4000/api/documents/repository?_=${Date.now()}`);
       const data = await res.json();
-      const filesData = (data.files || []).map(file => ({
-        ...file,
-        _id: file._id.toString(),
-        folderName: file.metadata?.folderName || ""
+
+      const filesData = (data.files || []).map((file) => ({
+        id: file._id || file.id,
+        filename: file.originalName || file.filename || "(Untitled)",
+        folderName: file.folderName || "",
+        uploadDateTime: file.createdAt
+          ? new Date(file.createdAt._seconds ? file.createdAt._seconds * 1000 : file.createdAt).toLocaleString()
+          : "",
+        documentType: file.documentType || "",
+        counterparty: file.counterparty || "",
+        expiryDate: file.expiryDate || "",
+        agreementDate: file.agreementDate || "",
+        signatureName: file.signatureName || "",
+        autoRenew: file.autoRenew || "",
+        breachNotification: file.breachNotification || "",
+        archived: file.archived || false,
+        repository: file.repository || false,
       }));
+
       setFiles(filesData);
       setFilteredFiles(filesData);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching repository files:", err);
     }
   };
 
-  useEffect(() => { fetchFiles(); }, []);
+  useEffect(() => {
+    fetchFiles();
+  }, []);
 
   const columns = [
     { key: "filename", label: t("repositorypage.document title") },
@@ -65,55 +80,56 @@ export default function RepositoryPage() {
     { key: "signatureName", label: t("repositorypage.signature name") },
   ];
 
-  const [visibleColumns, setVisibleColumns] = useState(columns.map(col => col.key));
+  const [visibleColumns, setVisibleColumns] = useState(columns.map((c) => c.key));
 
   const handleToggleColumn = (key) => {
-    setVisibleColumns(prev =>
-      prev.includes(key) ? prev.filter(c => c !== key) : [...prev, key]
+    setVisibleColumns((prev) =>
+      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
     );
   };
 
+  // ✅ Apply filters (folder, document type, etc.)
   const handleApplyFilters = (filters) => {
     let filtered = [...files];
 
     if (filters.folder)
-      filtered = filtered.filter(f =>
+      filtered = filtered.filter((f) =>
         f.folderName?.toLowerCase().includes(filters.folder.toLowerCase())
       );
 
     if (filters.documentType)
-      filtered = filtered.filter(f =>
+      filtered = filtered.filter((f) =>
         f.documentType?.toLowerCase().includes(filters.documentType.toLowerCase())
       );
 
     if (filters.counterparty)
-      filtered = filtered.filter(f =>
+      filtered = filtered.filter((f) =>
         f.counterparty?.toLowerCase().includes(filters.counterparty.toLowerCase())
       );
 
     setFilteredFiles(filtered);
   };
 
-  const searchFilteredFiles = filteredFiles.filter(file => {
+  // ✅ Search
+  const searchFilteredFiles = filteredFiles.filter((file) => {
     if (!searchText) return true;
-    const lowerSearch = searchText.toLowerCase();
-    return columns.some(col => {
-      const value = file[col.key] || file.metadata?.[col.key] || "";
-      return value.toString().toLowerCase().includes(lowerSearch);
+    const lower = searchText.toLowerCase();
+    return columns.some((col) => {
+      const value = file[col.key] || "";
+      return value.toString().toLowerCase().includes(lower);
     });
   });
 
+  // ✅ Pagination
   const totalPages = Math.max(1, Math.ceil(searchFilteredFiles.length / rowsPerPage));
   const indexOfLastRow = currentPage * rowsPerPage;
-  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
-  const currentRows = searchFilteredFiles.slice(indexOfFirstRow, indexOfLastRow);
+  const currentRows = searchFilteredFiles.slice(indexOfLastRow - rowsPerPage, indexOfLastRow);
 
-  const goToPage = (pageNumber) => {
-    if (pageNumber < 1 || pageNumber > totalPages) return;
-    setCurrentPage(pageNumber);
+  // ✅ Handlers
+  const handleRowClick = (file) => {
+    setSelectedFile(file);
+    setIsDetailsOpen(true);
   };
-
-  const handleRowClick = (file) => { setSelectedFile(file); setIsDetailsOpen(true); };
 
   const handleDeleteDocument = async (docId) => {
     try {
@@ -124,8 +140,8 @@ export default function RepositoryPage() {
       });
       if (!res.ok) throw new Error("Failed to delete document");
 
-      setFiles(prev => prev.filter(file => file._id !== docId));
-      setFilteredFiles(prev => prev.filter(file => file._id !== docId));
+      setFiles((prev) => prev.filter((f) => f.id !== docId));
+      setFilteredFiles((prev) => prev.filter((f) => f.id !== docId));
       setIsDetailsOpen(false);
       setSelectedFile(null);
     } catch (err) {
@@ -135,28 +151,28 @@ export default function RepositoryPage() {
   };
 
   const toggleRowSelection = (fileId) => {
-    setSelectedRows(prev =>
-      prev.includes(fileId) ? prev.filter(id => id !== fileId) : [...prev, fileId]
+    setSelectedRows((prev) =>
+      prev.includes(fileId) ? prev.filter((id) => id !== fileId) : [...prev, fileId]
     );
   };
 
   const toggleSelectAll = () => {
     if (selectedRows.length === currentRows.length) setSelectedRows([]);
-    else setSelectedRows(currentRows.map(file => file._id));
+    else setSelectedRows(currentRows.map((file) => file.id));
   };
 
-  const selectedDocs = files.filter(file => selectedRows.includes(file._id));
+  const selectedDocs = files.filter((file) => selectedRows.includes(file.id));
 
   return (
     <PageLayout
       title={t("repositorypage.repository")}
       showUploadButton
-      showBanner={true}
+      showBanner
       bannerImage="/assets/repository-page-banner.jpg"
       bannerHeight="120px"
       bannerBelowSearch
       onUploadClick={() => setIsPopupOpen(true)}
-      onFilterClick={() => setIsFilterOpen(true)} // ✅ Open overlay
+      onFilterClick={() => setIsFilterOpen(true)}
       columns={columns}
       visibleColumns={visibleColumns}
       onToggleColumn={handleToggleColumn}
@@ -165,57 +181,62 @@ export default function RepositoryPage() {
     >
       <div className="repository-page-wrapper">
         <div className="repository-content">
-          <div className="content-wrapper">
-            <div className="table-wrapper">
-              <div className="table-scroll-wrapper">
-                <table className="repository-table">
-                  <thead>
-                    <tr>
-                      <th className="sticky-col checkbox-col">
-                        <input
-                          type="checkbox"
-                          onChange={toggleSelectAll}
-                          checked={selectedRows.length === currentRows.length && currentRows.length > 0}
-                        />
-                      </th>
-                      {columns.map(col =>
-                        visibleColumns.includes(col.key) ? (
-                          <th key={col.key} className={col.key === "filename" ? "sticky-col title-col" : ""}>
+          <div className="table-wrapper">
+            <div className="table-scroll-wrapper">
+              <table className="repository-table">
+                <thead>
+                  <tr>
+                    <th className="sticky-col checkbox-col">
+                      <input
+                        type="checkbox"
+                        onChange={toggleSelectAll}
+                        checked={
+                          selectedRows.length === currentRows.length && currentRows.length > 0
+                        }
+                      />
+                    </th>
+                    {columns.map(
+                      (col) =>
+                        visibleColumns.includes(col.key) && (
+                          <th
+                            key={col.key}
+                            className={col.key === "filename" ? "sticky-col title-col" : ""}
+                          >
                             {col.label}
                           </th>
-                        ) : null
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentRows.map(file => (
-                      <tr
-                        key={file._id}
-                        onDoubleClick={() => handleRowClick(file)}
-                        className={selectedRows.includes(file._id) ? "selected" : ""}
-                      >
-                        <td className="sticky-col checkbox-col" onClick={e => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={selectedRows.includes(file._id)}
-                            onChange={() => toggleRowSelection(file._id)}
-                          />
-                        </td>
-                        {columns.map(col =>
-                          visibleColumns.includes(col.key) ? (
+                        )
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentRows.map((file) => (
+                    <tr
+                      key={file.id}
+                      onDoubleClick={() => handleRowClick(file)}
+                      className={selectedRows.includes(file.id) ? "selected" : ""}
+                    >
+                      <td className="sticky-col checkbox-col" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(file.id)}
+                          onChange={() => toggleRowSelection(file.id)}
+                        />
+                      </td>
+                      {columns.map(
+                        (col) =>
+                          visibleColumns.includes(col.key) && (
                             <TooltipCell
                               key={col.key}
                               className={col.key === "filename" ? "sticky-col title-col" : ""}
-                              text={file[col.key] || file.metadata?.[col.key]}
+                              text={file[col.key]}
                             />
-                          ) : null
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="header-bottom-shadow"></div>
-              </div>
+                          )
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="header-bottom-shadow"></div>
             </div>
           </div>
         </div>
@@ -231,23 +252,41 @@ export default function RepositoryPage() {
           <div className="footer-right">
             <label>
               {t("repositorypage.rows per page")}:
-              <select value={rowsPerPage} onChange={e => setRowsPerPage(Number(e.target.value))}>
-                {[25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+              <select
+                value={rowsPerPage}
+                onChange={(e) => setRowsPerPage(Number(e.target.value))}
+              >
+                {[25, 50, 100].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
               </select>
             </label>
 
             <div className="pagination-buttons">
-              <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>{"<"}</button>
+              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}>
+                {"<"}
+              </button>
               {Array.from({ length: totalPages }).map((_, i) => (
-                <button key={i} className={currentPage === i + 1 ? "active" : ""} onClick={() => goToPage(i + 1)}>{i + 1}</button>
+                <button
+                  key={i}
+                  className={currentPage === i + 1 ? "active" : ""}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
               ))}
-              <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>{">"}</button>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              >
+                {">"}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ✅ Reusable overlay filter panel */}
       <FilterPanel
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
@@ -256,7 +295,10 @@ export default function RepositoryPage() {
 
       <UploadPopup
         isOpen={isPopupOpen}
-        onClose={() => { setIsPopupOpen(false); fetchFiles(); }}
+        onClose={() => {
+          setIsPopupOpen(false);
+          fetchFiles(); // ✅ refresh list after upload
+        }}
       />
 
       <RepositoryDetailsPanel
@@ -264,9 +306,9 @@ export default function RepositoryPage() {
         file={selectedFile}
         onClose={() => setIsDetailsOpen(false)}
         onDelete={handleDeleteDocument}
-        onArchive={archivedFileId => {
-          setFiles(prev => prev.filter(file => file._id !== archivedFileId));
-          setFilteredFiles(prev => prev.filter(file => file._id !== archivedFileId));
+        onArchive={(archivedFileId) => {
+          setFiles((prev) => prev.filter((f) => f.id !== archivedFileId));
+          setFilteredFiles((prev) => prev.filter((f) => f.id !== archivedFileId));
           setIsDetailsOpen(false);
           setSelectedFile(null);
         }}
