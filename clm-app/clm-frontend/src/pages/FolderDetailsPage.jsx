@@ -23,51 +23,51 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
   // ---- Normalizers ----
   const normalizeFolders = (raw = []) =>
     raw.map((f) => ({
-      // make sure each folder object has a stable `id` we can use in UI and pass to backend
-      id: f.firestoreId || f.id || f._id || null,
-      rawId: f._id || f.id || f.firestoreId || null,
+      id: f.id || f.firestoreId || null,
+      rawId: f.id || f.firestoreId || null,
       name: f.name || f.folderName || "(Untitled)",
       fileCount: f.fileCount ?? 0,
-      // keep original object in case you need other fields
       __raw: f,
     }));
 
   const normalizeDocuments = (raw = []) =>
-    raw.map((d, idx) => ({
-      id: d.id || d._id || d.firestoreId || `doc-${idx}`,
-      originalName: d.originalName || d.filename || d.name || "(Untitled)",
-      createdAt: d.createdAt || d.uploadDate || d.createdAt?.toDate?.() || null,
-      // keep raw for debug / viewing
-      __raw: d,
-      // other fields you may use
-      size: d.size || 0,
-      folderId: d.folderId || null,
-      repository: !!d.repository,
-      archived: !!d.archived,
-    }));
+    raw.map((d, idx) => {
+      let date = "", time = "";
+      if (d.createdAt) {
+        const dt = d.createdAt._seconds ? new Date(d.createdAt._seconds * 1000) : new Date(d.createdAt);
+        date = dt.toLocaleDateString();
+        time = dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+      return {
+        id: d.id || d._id || d.firestoreId || `doc-${idx}`,
+        originalName: d.originalName || d.filename || d.name || "(Untitled)",
+        folderId: d.folderId || null,
+        repository: !!d.repository,
+        archived: !!d.archived,
+        date,
+        time,
+        __raw: d,
+      };
+    });
 
-  // ---- Fetch folders (used to get folderName and options for move popup) ----
+  // ---- Fetch folders ----
   const fetchFolders = useCallback(async () => {
     try {
       const res = await axios.get("http://localhost:4000/api/folders");
-      // backend may return array or {folders: [...]}
       const list = Array.isArray(res.data) ? res.data : res.data.folders || [];
       const normalized = normalizeFolders(list);
       setFolders(normalized);
 
-      // try to set folder name using best match
       if (folderId) {
         const match = normalized.find((f) => f.id === folderId || f.rawId === folderId);
         setFolderName(match ? match.name : t("detailspanel.folderDocuments"));
       }
-      // helpful debug
-      // console.log("fetchFolders -> normalized:", normalized);
     } catch (err) {
       console.error("Error fetching folders:", err);
     }
   }, [folderId, t]);
 
-  // ---- Fetch documents for this folder and filter (repository/archive) ----
+  // ---- Fetch documents ----
   const fetchDocuments = useCallback(async () => {
     if (!folderId) {
       setDocuments([]);
@@ -75,18 +75,12 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
     }
     setLoading(true);
     try {
-      // use your existing route exactly
       const res = await axios.get(
         `http://localhost:4000/api/documents/by-folder/${encodeURIComponent(folderId)}?page=${encodeURIComponent(filterType)}`
       );
-
-      // backend may return { files: [...] } or array directly
       const list = res.data.files || res.data || [];
       const normalized = normalizeDocuments(list);
       setDocuments(normalized);
-
-      // debug: log raw response so we can inspect field names if still empty
-      console.debug("[FolderDetailsPage] fetchDocuments response:", { folderId, filterType, raw: res.data, normalized });
     } catch (err) {
       console.error("Error fetching documents:", err);
       setDocuments([]);
@@ -95,24 +89,13 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
     }
   }, [folderId, filterType]);
 
-  // Run both on mount / when folderId or filterType changes
   useEffect(() => {
     if (!folderId) return;
     fetchFolders();
     fetchDocuments();
   }, [folderId, filterType, fetchFolders, fetchDocuments]);
 
-  const formatDateTime = (dateLike) => {
-    if (!dateLike) return { date: "", time: "" };
-    // If Firestore Timestamp object, convert:
-    const date = typeof dateLike.toDate === "function" ? dateLike.toDate() : new Date(dateLike);
-    return {
-      date: isNaN(date.getTime()) ? "" : date.toLocaleDateString(),
-      time: isNaN(date.getTime()) ? "" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
-  };
-
-  // Delete document
+  // ---- Delete document ----
   const handleDeleteClick = (docId) => {
     setDeleteDocId(docId);
     setShowDeleteConfirm(true);
@@ -126,14 +109,14 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
       await fetchDocuments();
     } catch (err) {
       console.error("Delete failed:", err);
-      alert(t("detailspananel.deleteFailed") || "Delete failed");
+      alert(t("detailspanel.deleteFailed") || "Delete failed");
     } finally {
       setShowDeleteConfirm(false);
       setDeleteDocId(null);
     }
   };
 
-  // Move document
+  // ---- Move document ----
   const handleMoveClick = (docId) => {
     setMoveDocId(docId);
     setTargetFolderId("");
@@ -144,7 +127,6 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
   const handleConfirmMove = async () => {
     if (!targetFolderId) return;
     try {
-      // your backend accepts files: [{ id, folderId, folderName }]
       await axios.post("http://localhost:4000/api/documents/move-folder", {
         files: [
           {
@@ -180,15 +162,13 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
         </button>
 
         <div className="folder-title-container">
-  <img
-    src="/assets/folder-big-icon5.png"
-    alt="Folder Icon"
-    className="folder-header-icon"
-  />
-  <h2 className="folder-title">
-  {folderName && folderName.trim() !== "" ? folderName : ""}
-</h2>
-</div>
+          <img
+            src="/assets/folder-big-icon5.png"
+            alt="Folder Icon"
+            className="folder-header-icon"
+          />
+          <h2 className="folder-title">{folderName || ""}</h2>
+        </div>
 
         <div className="folder-header-buttons">
           <button
@@ -226,65 +206,77 @@ export default function FolderDetailsPage({ folderId, onBack, onDocumentClick })
             </tr>
           </thead>
           <tbody>
-            {documents.map((doc) => {
-              const { date, time } = formatDateTime(doc.createdAt);
-              return (
-                <tr
-                  key={doc.id}
-                  className={selectedDocId === doc.id ? "selected-row" : ""}
-                  onClick={() => {
-                    setSelectedDocId(doc.id);
-                    if (onDocumentClick) onDocumentClick(doc);
-                  }}
-                >
-                  <td className="td-filename">
-                    <span className="filename-text">{doc.originalName}</span>
-                  </td>
-                  <td className="td-uploaded">
-                    <div className="date">{date}</div>
-                    <div className="time">{time}</div>
-                  </td>
-                  <td className="td-actions">
-                    <div className="actions-container">
-                      <button
-                        className="action-button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(`http://localhost:4000/api/documents/view/${encodeURIComponent(doc.id)}`, "_blank");
-                        }}
-                      >
-                        <img src="/assets/view-icon4.png" alt={t("folderdetailspanel.view") || "View"} className="action-icon" />
-                      </button>
+            {documents.map((doc) => (
+              <tr
+                key={doc.id}
+                className={selectedDocId === doc.id ? "selected-row" : ""}
+                onClick={() => {
+                  setSelectedDocId(doc.id);
+                  if (onDocumentClick) onDocumentClick(doc);
+                }}
+              >
+                <td className="td-filename">
+                  <span className="filename-text">{doc.originalName}</span>
+                </td>
+                <td className="td-uploaded">
+                  <div className="date">{doc.date}</div>
+                  <div className="time">{doc.time}</div>
+                </td>
+                <td className="td-actions">
+                  <div className="actions-container">
+                    <button
+                      className="action-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(
+                          `http://localhost:4000/api/documents/view/${encodeURIComponent(doc.id)}`,
+                          "_blank"
+                        );
+                      }}
+                    >
+                      <img
+                        src="/assets/view-icon4.png"
+                        alt={t("folderdetailspanel.view") || "View"}
+                        className="action-icon"
+                      />
+                    </button>
 
-                      <button
-                        className="action-button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMoveClick(doc.id);
-                        }}
-                      >
-                        <img src="/assets/folder-big-icon7.png" alt={t("folderdetailspanel.move") || "Move"} className="action-icon" />
-                      </button>
+                    <button
+                      className="action-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveClick(doc.id);
+                      }}
+                    >
+                      <img
+                        src="/assets/folder-big-icon7.png"
+                        alt={t("folderdetailspanel.move") || "Move"}
+                        className="action-icon"
+                      />
+                    </button>
 
-                      <button
-                        className="action-button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteClick(doc.id);
-                        }}
-                      >
-                        <img src="/assets/delete-icon.png" alt={t("folderdetailspanel.delete") || "Delete"} className="action-icon" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    <button
+                      className="action-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(doc.id);
+                      }}
+                    >
+                      <img
+                        src="/assets/delete-icon.png"
+                        alt={t("folderdetailspanel.delete") || "Delete"}
+                        className="action-icon"
+                      />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}
 
-      {/* Delete Confirmation Popup */}
+      {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <div className="confirm-overlay">
           <div className="confirm-box">

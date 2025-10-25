@@ -37,7 +37,7 @@ html, body {
   box-sizing: border-box;  
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 164px);
+  height: calc(100vh - 169px);
 }
 
 /* Container for filter + table */
@@ -46,6 +46,8 @@ html, body {
   flex: 1;
   overflow: hidden;
   transition: all 0.3s ease;
+  padding-left: 7px;   /* increase as needed */
+  padding-right: 7px;  /* increase as needed */
 }
 
 /* Table wrapper */
@@ -343,7 +345,7 @@ td:hover .cell-tooltip {
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  z-index: 100;
+  z-index: 1220;
 }
 
 /* Center pagination */

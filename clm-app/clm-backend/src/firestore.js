@@ -1,12 +1,11 @@
-// src/firestore.js
 const admin = require("firebase-admin");
 const fs = require("fs");
 const path = require("path");
 
 console.log("🔹 Initializing Firebase Admin SDK...");
 
-// Path to service account
-const serviceAccountPath = path.resolve("src/keys/service-account-new.json");
+// Path to service account relative to this file
+const serviceAccountPath = path.join(__dirname, "keys/service-account-new.json");
 console.log("🔹 Using service account file:", serviceAccountPath);
 
 // Load service account JSON
@@ -16,15 +15,15 @@ const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    projectId: "smartdoc-project-474917", // explicitly set
-    storageBucket: "smartdocprojectdata-777", // GCS bucket
+    projectId: "smartdoc-project-474917",
+    storageBucket: "smartdocprojectdata-777",
   });
 }
 
 const firestore = admin.firestore();
 firestore.settings({
   ignoreUndefinedProperties: true,
-  databaseId: "smartdocproject", // important to fix Firestore database ID
+  databaseId: "smartdocproject",
 });
 
 const bucket = admin.storage().bucket();
@@ -43,7 +42,7 @@ console.log("📁 Firebase Project ID:", serviceAccount.project_id);
     }
 
     console.log("⏳ Testing GCS bucket connection...");
-    await bucket.getMetadata(); // just check if bucket exists
+    await bucket.getMetadata();
     console.log("✅ Connected to GCS bucket:", bucket.name);
 
     console.log("🔸 Firebase initialization complete.");

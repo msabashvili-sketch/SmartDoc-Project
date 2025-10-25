@@ -8,11 +8,11 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [isDragging, setIsDragging] = useState(false); // Drag state for upload effect
+  const [isDragging, setIsDragging] = useState(false);
 
   if (!isOpen) return null;
 
-  // Helper: pick icon depending on file type
+  // --- Helpers ---
   const getFileIcon = (file) => {
     if (file.type.includes("pdf")) return "/assets/pdf-icon.png";
     if (file.type.includes("image")) return "/assets/image-icon.png";
@@ -20,7 +20,6 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
     return "/assets/file-icon.png";
   };
 
-  // Drag & drop handlers
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFiles = Array.from(event.dataTransfer.files);
@@ -43,38 +42,36 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
     setIsDragging(false);
   };
 
-  // Upload function
+  // --- Upload function ---
   const handleUploadFiles = async () => {
     if (!files.length) return alert(t("uploadfilespopup.select_files_first"));
 
     setIsUploading(true);
     setUploadProgress(0);
 
+    // Simulate progress
     const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        const next = prev + Math.random() * 5;
-        return next >= 95 ? 95 : next;
-      });
+      setUploadProgress((prev) => Math.min(prev + Math.random() * 5, 95));
     }, 100);
 
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
-
-    // <-- Send isSmartImport flag to backend
-    formData.append("isSmartImport", isSmartImport);
+    formData.append("isSmartImport", isSmartImport); // Send flag to backend
 
     try {
       const res = await fetch("http://localhost:4000/api/documents/upload", {
         method: "POST",
         body: formData,
       });
+
       const data = await res.json();
       console.log("Uploaded files:", data.files);
 
       clearInterval(interval);
       setUploadProgress(100);
-      setUploadedFiles(files);
+      setUploadedFiles([...files]); // Mark all as uploaded
 
+      // Reset after 2 seconds
       setTimeout(() => {
         setFiles([]);
         setUploadedFiles([]);
@@ -113,7 +110,6 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
         >
-          {/* Drop area header */}
           <div className="drop-area-header">
             <span className="file-count">
               {files.length === 0
@@ -131,7 +127,6 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
             </label>
           </div>
 
-          {/* Drop area content */}
           {files.length === 0 ? (
             <div className="drop-area-placeholder">
               {isDragging ? (
@@ -140,7 +135,6 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
                     src="/assets/upload-icon.png"
                     alt="Upload"
                     style={{ width: "200px", height: "200px" }}
-                    className="upload-icon"
                   />
                 </div>
               ) : (
@@ -265,7 +259,11 @@ export default function UploadFilesPopup({ isOpen, onCancel, onBack, isSmartImpo
           <button className="back-btn" onClick={onBack}>
             {t("uploadfilespopup.back")}
           </button>
-          <button className="import-btn" onClick={handleUploadFiles}>
+          <button
+            className="import-btn"
+            onClick={handleUploadFiles}
+            disabled={isUploading}
+          >
             {t("uploadfilespopup.import")}
           </button>
         </div>

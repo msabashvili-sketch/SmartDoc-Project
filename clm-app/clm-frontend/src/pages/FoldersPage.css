@@ -263,7 +263,7 @@ html, body {
   flex: 0 0 auto;  /* do not grow / do not shrink */
   margin: 0;
   padding-left: 8px;
-  text-align: left;
+  text-align: left !important;
   font-weight: 500;
   font-size: 14px;
   color: #333;

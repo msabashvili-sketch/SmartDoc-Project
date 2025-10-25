@@ -94,7 +94,7 @@
   background-size: var(--banner-bg-size);
   background-position: var(--banner-bg-position);
   border-radius: var(--banner-radius);
-  margin: 3px auto;
+  margin: 8px auto 3px auto; 
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
