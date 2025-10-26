@@ -298,6 +298,7 @@ td:hover .cell-tooltip {
 .repository-table td:not(.sticky-col) {
   min-width: 300px;
   width: 300px;
+  font-weight: 500;
 }
 
 /* Short vertical "border" inside table cells + headers */

@@ -15,7 +15,9 @@ const upload = multer({ storage });
 // ---- Document AI CONFIG ----
 const projectId = process.env.GOOGLE_PROJECT_ID;
 const location = process.env.GOOGLE_PROCESSOR_LOCATION; // e.g. "eu"
-const processorId = process.env.GOOGLE_PROCESSOR_ID;
+const ocrProcessorId = process.env.GOOGLE_PROCESSOR_OCR;
+const formProcessorId = process.env.GOOGLE_PROCESSOR_FORM;
+const layoutProcessorId = process.env.GOOGLE_PROCESSOR_LAYOUT;
 
 const client = new DocumentProcessorServiceClient({
   keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
@@ -23,7 +25,7 @@ const client = new DocumentProcessorServiceClient({
 });
 
 // --- Helper: Process file with Document AI ---
-async function processWithDocumentAI(fileBuffer, mimeType, fileName) {
+async function processWithDocumentAI(fileBuffer, mimeType, processorId, fileName) {
   try {
     const name = `projects/${projectId}/locations/${location}/processors/${processorId}`;
     console.log("📄 Processing file with Document AI:", fileName);
@@ -39,14 +41,15 @@ async function processWithDocumentAI(fileBuffer, mimeType, fileName) {
 
     const [result] = await client.processDocument(request);
     const text = result.document?.text || "";
+    const entities = result.document?.entities || [];
+    const pages = result.document?.pages || [];
 
-    console.log(`✅ OCR extracted ${text.length} characters from ${fileName}`);
-    if (!text) console.warn("⚠️ OCR returned empty text!");
-    return text;
+    console.log(`✅ Processed ${fileName}: text ${text.length} chars, ${entities.length} entities, ${pages.length} pages`);
+    return { text, entities, pages };
   } catch (err) {
-    console.error(`❌ Document AI OCR error for ${fileName}:`, err.message);
+    console.error(`❌ Document AI error for ${fileName}:`, err.message);
     if (err.details) console.error("Details:", err.details);
-    return null;
+    return { text: null, entities: [], pages: [] };
   }
 }
 
@@ -76,14 +79,26 @@ router.post("/upload", upload.array("files"), async (req, res) => {
         });
         console.log("☁️ File uploaded to GCS:", gcsFileName);
 
-        // Optional OCR
+        // Optional Smart Processing (OCR + Form + Layout)
         let ocrText = null;
+        let formEntities = [];
+        let layoutPages = [];
         if (isSmart) {
-          console.log("🧠 Running OCR for file:", file.originalname);
-          ocrText = await processWithDocumentAI(file.buffer, file.mimetype, file.originalname);
-          console.log("📝 OCR result length:", ocrText?.length);
+          console.log("🧠 Running OCR processor for file:", file.originalname);
+          const ocrResult = await processWithDocumentAI(file.buffer, file.mimetype, ocrProcessorId, file.originalname);
+          ocrText = ocrResult.text;
+
+          console.log("🧠 Running Form parser for file:", file.originalname);
+          const formResult = await processWithDocumentAI(file.buffer, file.mimetype, formProcessorId, file.originalname);
+          formEntities = formResult.entities;
+
+          console.log("🧠 Running Layout parser for file:", file.originalname);
+          const layoutResult = await processWithDocumentAI(file.buffer, file.mimetype, layoutProcessorId, file.originalname);
+          layoutPages = layoutResult.pages;
+
+          console.log(`📝 OCR text length: ${ocrText?.length}, Form entities: ${formEntities.length}, Layout pages: ${layoutPages.length}`);
         } else {
-          console.log("❌ OCR skipped for this file");
+          console.log("❌ Smart processors skipped for this file");
         }
 
         // Save metadata to Firestore
@@ -99,12 +114,16 @@ router.post("/upload", upload.array("files"), async (req, res) => {
           createdAt: new Date(),
           updatedAt: new Date(),
           textDoc: ocrText,
+          formEntities,
+          layoutPages,
         };
 
         console.log("💾 Saving file metadata to Firestore:", {
           originalName: docData.originalName,
           gcsPath: docData.gcsPath,
           textDocLength: ocrText?.length || 0,
+          formEntitiesCount: formEntities.length,
+          layoutPagesCount: layoutPages.length,
         });
 
         const docRef = await filesCollection.add(docData);
@@ -114,6 +133,8 @@ router.post("/upload", upload.array("files"), async (req, res) => {
           originalName: file.originalname,
           gcsPath: gcsFileName,
           ocrText,
+          formEntities,
+          layoutPages,
         });
       })
     );
@@ -211,7 +232,12 @@ router.get("/text/:id", async (req, res) => {
 
     const fileData = doc.data();
     console.log(`📄 Fetching OCR text for file: ${fileData.originalName}`);
-    res.json({ id: doc.id, text: fileData.textDoc || "" });
+    res.json({
+      id: doc.id,
+      text: fileData.textDoc || "",
+      formEntities: fileData.formEntities || [],
+      layoutPages: fileData.layoutPages || [],
+    });
   } catch (err) {
     console.error("❌ Fetch text error:", err);
     res.status(500).json({ message: "Error fetching document text" });
