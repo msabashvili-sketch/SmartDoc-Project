@@ -14,7 +14,7 @@ const upload = multer({ storage });
 
 // ---- Document AI CONFIG ----
 const projectId = process.env.GOOGLE_PROJECT_ID;
-const location = process.env.GOOGLE_PROCESSOR_LOCATION; // e.g. "eu"
+const location = process.env.GOOGLE_PROCESSOR_LOCATION;
 const ocrProcessorId = process.env.GOOGLE_PROCESSOR_OCR;
 const formProcessorId = process.env.GOOGLE_PROCESSOR_FORM;
 const layoutProcessorId = process.env.GOOGLE_PROCESSOR_LAYOUT;
