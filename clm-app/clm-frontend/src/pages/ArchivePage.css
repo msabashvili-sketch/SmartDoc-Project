@@ -34,8 +34,8 @@
   word-break: break-word;
   overflow: hidden;
   text-overflow: ellipsis;
-  height: 60px; /* fixed height for rows */
-  max-height: 60px;
+  height: 55px; /* fixed height for rows */
+  max-height: 55px;
   z-index: 1;
 }
 

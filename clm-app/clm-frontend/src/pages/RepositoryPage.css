@@ -234,7 +234,7 @@ td:hover .cell-tooltip {
   display: flex;
   justify-content: center; /* center horizontally */
   align-items: center;     /* center vertically */
-  height: 60px;            /* match row height */
+  height: 55px;            /* match row height */
   box-sizing: border-box;
   will-change: transform;
   transform: translateZ(0); /* GPU layer */
@@ -346,7 +346,7 @@ td:hover .cell-tooltip {
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  z-index: 1220;
+  z-index: 900;
 }
 
 /* Center pagination */

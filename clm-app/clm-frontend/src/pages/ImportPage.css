@@ -340,7 +340,7 @@ html {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 300px;
-  height: 60px; /* fixed height for rows */
+  height: 55px; /* fixed height for rows */
   max-height: 60px;
   z-index: 1;     
 }

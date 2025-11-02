@@ -10,6 +10,8 @@ export default function TextViewer({ file, onClose }) {
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [layoutPages, setLayoutPages] = useState([]);
+  const [hasLayout, setHasLayout] = useState(false);
 
   const containerRef = useRef(null);
   const matchRefs = useRef([]);
@@ -39,7 +41,16 @@ export default function TextViewer({ file, onClose }) {
     setLoadingText(true);
     fetch(`http://localhost:4000/api/documents/text/${fileId}`)
       .then((res) => res.json())
-      .then((data) => setText(data.text || ""))
+      .then((data) => {
+  setText(data.text || "");
+  if (data.layoutPages && data.layoutPages.length > 0) {
+    setLayoutPages(data.layoutPages);
+    setHasLayout(true);
+  } else {
+    setLayoutPages([]);
+    setHasLayout(false);
+  }
+})
       .catch(() => setText(""))
       .finally(() => setLoadingText(false));
 
